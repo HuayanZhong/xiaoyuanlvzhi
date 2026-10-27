@@ -28,6 +28,7 @@
     "react/react-in-jsx-scope": "off",
     "react/rules-of-hooks": "error",
     "react/exhaustive-deps": "warn",
+    "typescript/no-extraneous-class": ["warn", { "allowWithDecorator": true }],
     "import/no-unassigned-import": ["warn", { "allow": ["**/*.css"] }]
   },
   "env": {

@@ -1,0 +1,28 @@
+{
+  "name": "bff",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "nest start --watch",
+    "build": "nest build",
+    "start": "node dist/main",
+    "lint": "oxlint --deny-warnings",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nestjs/common": "12.2.0",
+    "@nestjs/core": "12.2.0",
+    "@nestjs/platform-express": "12.2.0",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "12.0.10",
+    "@repo/typescript-config": "workspace:*",
+    "@types/express": "5.0.6",
+    "@types/node": "26.6.5",
+    "typescript": "6.0.3"
+  }
+}
