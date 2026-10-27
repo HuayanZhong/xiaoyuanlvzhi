@@ -3,6 +3,7 @@ packages:
   - "packages/*"
 allowBuilds:
   esbuild: true
+# pnpm 12 内置 minimumReleaseAge（1440 分钟）；以下条目豁免近期发布的固定版本
 minimumReleaseAgeExclude:
   - '@oxfmt/binding-android-arm-eabi@0.75.0'
   - '@oxfmt/binding-android-arm64@0.75.0'

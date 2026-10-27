@@ -2,13 +2,11 @@
   "printWidth": 80,
   "sortPackageJson": false,
   "ignorePatterns": [
-    "**/.next/**",
     "**/.nuxt/**",
     "**/.output/**",
     "**/.vite/**",
     "**/.data/**",
     "**/dist/**",
-    "**/next-env.d.ts",
     "pnpm-workspace.yaml"
   ]
 }

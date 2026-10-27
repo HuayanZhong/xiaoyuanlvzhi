@@ -11,8 +11,8 @@ Turborepo + pnpm 多应用工作区。
 
 ## 共享配置
 
-- `packages/typescript-config`: 共享 `tsconfig` 预设（base / nextjs / react-library / react-app）
-- `.oxlintrc.json`: Oxlint 规则配置（React + Vue 插件）
+- `packages/typescript-config`: 共享 `tsconfig` 预设（base / react-app）
+- `.oxlintrc.json`: Oxlint 规则配置（React / Vue / TypeScript 等插件）
 - `.oxfmtrc.json`: Oxfmt 格式化配置
 - `turbo.json`: 任务编排（build / lint / check-types / dev）
 
@@ -40,6 +40,7 @@ pnpm --filter web dev
 
 - [Turborepo](https://turborepo.dev) 2.11
 - [pnpm](https://pnpm.io) 12
+- [Node.js](https://nodejs.org/) >= 26.12.1（见 `.nvmrc`）
 - [TypeScript](https://www.typescriptlang.org/) 6.0
 - [Oxlint](https://oxc.rs/) 规则检查
 - [Oxfmt](https://oxc.rs/) 代码格式化
