@@ -29,7 +29,10 @@
     "react/rules-of-hooks": "error",
     "react/exhaustive-deps": "warn",
     "typescript/no-extraneous-class": ["warn", { "allowWithDecorator": true }],
-    "import/no-unassigned-import": ["warn", { "allow": ["**/*.css"] }]
+    "import/no-unassigned-import": [
+      "warn",
+      { "allow": ["**/*.css", "@testing-library/jest-dom/vitest"] }
+    ]
   },
   "env": {
     "browser": true,
