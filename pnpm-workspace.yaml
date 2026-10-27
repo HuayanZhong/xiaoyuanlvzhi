@@ -1,6 +1,8 @@
 packages:
   - "apps/*"
   - "packages/*"
+allowBuilds:
+  esbuild: true
 minimumReleaseAgeExclude:
   - '@oxfmt/binding-android-arm-eabi@0.75.0'
   - '@oxfmt/binding-android-arm64@0.75.0'
@@ -42,3 +44,9 @@ minimumReleaseAgeExclude:
   - '@oxlint/binding-win32-x64-msvc@1.90.0'
   - oxfmt@0.75.0
   - oxlint@1.90.0
+  - '@nuxt/kit@4.6.3'
+  - '@nuxt/nitro-server@4.6.3'
+  - '@nuxt/schema@4.6.3'
+  - '@nuxt/vite-builder@4.6.3'
+  - '@nuxt/vite-server@4.6.3'
+  - nuxt@4.6.3

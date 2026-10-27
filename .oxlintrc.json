@@ -2,7 +2,7 @@
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": [
     "react",
-    "nextjs",
+    "vue",
     "import",
     "jsx-a11y",
     "typescript",
@@ -35,10 +35,26 @@
     "node": true,
     "es2024": true
   },
+  "overrides": [
+    {
+      "files": ["apps/web/**"],
+      "rules": {
+        "no-undef": "off"
+      }
+    }
+  ],
   "settings": {
     "react": {
       "version": "19.2"
     }
   },
-  "ignorePatterns": ["**/.next/**", "**/dist/**", "**/next-env.d.ts"]
+  "ignorePatterns": [
+    "**/.next/**",
+    "**/.nuxt/**",
+    "**/.output/**",
+    "**/.vite/**",
+    "**/.data/**",
+    "**/dist/**",
+    "**/next-env.d.ts"
+  ]
 }
