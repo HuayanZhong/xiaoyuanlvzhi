@@ -1,32 +1,63 @@
 schema: spec-driven
 
-# Project context (optional)
-# Add only constraints that should guide OpenSpec artifacts and workflows.
-# Include constraints an agent cannot infer by reading the code.
-# Keep general project documentation and discoverable codebase facts out.
-# Example:
-#   context: |
-#     Designs and tasks must cover Windows, macOS, and Linux
-#     Write all artifacts in Spanish
+# Constraints for OpenSpec artifacts. These are injected into planning and are
+# not copied into the generated proposal, specs, design, or tasks.
+context: |
+  Product: campus green-plant adoption and environmental incentive system.
+  The repository is a pnpm + Turborepo frontend workspace with three apps:
+  admin (React 19 + Vite 8, port 3000), web (Nuxt 4 + Vue 3, port 4000), and
+  bff (NestJS 12 HTTP API, port 5000, overridable with PORT).
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always state what is out of scope
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  The BFF is the intended boundary for server-side behavior. The admin and web
+  apps do not call it yet, and the BFF currently exposes only GET / and
+  GET /health. Do not assume an existing authentication, database, or domain API
+  unless the proposal explicitly adds it.
 
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+  There is no shared runtime or UI package. Cross-app code must be introduced as
+  a new workspace package instead of importing another app's files. Shared
+  packages currently exist only for TypeScript and Vitest configuration.
+
+  Tooling constraints: TypeScript 6, Vitest 5, and Oxc (oxlint/oxfmt). Do not add
+  ESLint, Prettier, or a second formatter. Keep versions aligned with the rest of
+  the workspace and follow pnpm's minimum-release-age policy when adding pinned
+  dependencies.
+
+  Verification runs from the repository root through pnpm/Turbo. Tests live in
+  each app's tests directory and are type-checked. Coverage include paths and
+  Turbo task inputs must be updated when source locations or shared config
+  changes.
+
+rules:
+  proposal:
+    - "Name the affected app or package and state whether a BFF endpoint changes"
+    - "State when the change has no API, auth, persistence, or shared-package impact"
+    - "Mark breaking changes to ports, routes, package boundaries, or tooling"
+    - "Keep implementation details out of the proposal"
+  specs:
+    - "Describe externally observable behavior, not framework or class choices"
+    - "For BFF behavior, specify method, path, status, response body, and error cases"
+    - "Name capabilities for durable domain behavior, not for a one-off change"
+    - "Do not invent backend, auth, or persistence requirements that the proposal excludes"
+  design:
+    - "Show how data flows between admin, web, and bff, including when no integration exists"
+    - "Do not import across apps; introduce a workspace package for shared runtime code"
+    - "Call out changes to tsconfig, Vitest config, coverage include paths, and Turbo inputs"
+    - "Keep Oxc as the only lint and format toolchain"
+  tasks:
+    - "Group tracked tasks by app or package and include the tests and config work each group needs"
+    - "Put the verification command or observable check in the task description"
+    - "Use pnpm --filter <app> lint, check-types, and test for single-app work"
+    - "Use root pnpm lint, check-types, and test when multiple packages or shared config change"
+    - "Do not edit generated .nuxt files or .nuxtrc; regenerate them with nuxt prepare"
+
+operations:
+  apply:
+    guidance:
+      - "Run targeted app checks while iterating and the root lint, type, and test commands before finishing"
+      - "If BFF routes or modules change, run both the unit and e2e suites"
+      - "Do not reformat unrelated files or replace the Oxc toolchain"
+  archive:
+    guidance:
+      - "Name the affected specs and apps in the archive summary"
+      - "Include the verification commands and their results"
+      - "Do not archive while lint, type checks, or tests are failing"
