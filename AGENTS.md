@@ -13,17 +13,18 @@ This block is written and re-added by `turbo` before repository-scoped commands 
 
 ## Repository at a glance
 
-pnpm + Turborepo workspace with three apps and two config-only packages:
+pnpm + Turborepo workspace with three apps and three workspace packages:
 
-| Package                   | Stack                            | Port | Role                   |
-| ------------------------- | -------------------------------- | ---- | ---------------------- |
-| `admin`                   | React 19 + Vite 8 + TypeScript 6 | 3000 | Admin SPA              |
-| `web`                     | Nuxt 4 + Vue 3 + TypeScript 6    | 4000 | User-facing app        |
-| `bff`                     | NestJS 12 + Express              | 5000 | HTTP BFF skeleton      |
-| `@repo/typescript-config` | Shared tsconfig presets          | —    | `base`, `react-app`    |
-| `@repo/vitest-config`     | Shared Vitest defaults           | —    | Test/coverage defaults |
+| Package                   | Stack                            | Port | Role                    |
+| ------------------------- | -------------------------------- | ---- | ----------------------- |
+| `admin`                   | React 19 + Vite 8 + TypeScript 6 | 3000 | Admin SPA               |
+| `web`                     | Nuxt 4 + Vue 3 + TypeScript 6    | 4000 | User-facing app         |
+| `bff`                     | NestJS 12 + Express              | 5000 | HTTP BFF skeleton       |
+| `@repo/http-client`       | ky 2 + TypeScript 6              | —    | Shared HTTP client      |
+| `@repo/typescript-config` | Shared tsconfig presets          | —    | `base`, `react-app`, `library` |
+| `@repo/vitest-config`     | Shared Vitest defaults           | —    | Test/coverage defaults  |
 
-The apps are currently minimal skeletons. There is no shared runtime or UI package, no authentication, no persistence, and the admin/web apps do not call the BFF yet. The BFF only exposes `GET /` and `GET /health`.
+The apps are currently minimal skeletons. `@repo/http-client` is the only shared runtime package; there is no shared UI package, authentication, or persistence. The admin dev server proxies `/api/*` to the BFF, but no domain API call exists yet. The BFF only exposes `GET /` and `GET /health`.
 
 ## Commands
 
@@ -55,12 +56,14 @@ Run a single test file or a single test by name:
 
 ```sh
 pnpm --filter admin exec vitest run tests/unit/App.test.tsx
-pnpm --filter admin exec vitest run tests/unit/App.test.tsx -t "renders the admin heading"
+pnpm --filter admin exec vitest run tests/unit/App.test.tsx -t "renders the primary button"
+pnpm --filter admin exec vitest run tests/unit/http.test.ts
+pnpm --filter @repo/http-client exec vitest run tests/client.test.ts
 pnpm --filter web exec vitest run tests/nuxt/App.test.ts
 pnpm --filter bff exec vitest run tests/e2e/app.e2e.test.ts
 ```
 
-Build outputs are `apps/admin/dist`, `apps/web/.output`, and `apps/bff/dist`. Coverage reports are written to `apps/<app>/coverage/` and ignored by Git.
+Build outputs are `apps/admin/dist`, `apps/web/.output`, and `apps/bff/dist`. Coverage reports are written to `apps/<app>/coverage/` and `packages/http-client/coverage/`, both ignored by Git.
 
 ## How the workspace is wired
 
@@ -72,18 +75,21 @@ Build outputs are `apps/admin/dist`, `apps/web/.output`, and `apps/bff/dist`. Co
 - `lint` and `check-types` run workspace dependencies first.
 - `format` is uncached; `format:check` is cached.
 - `test` includes `packages/vitest-config/**` as an input, so shared test config changes invalidate test caches.
+- `test:coverage` runs with Turbo concurrency 1 from the root script because parallel V8 coverage workers can exhaust memory; `test` remains parallel.
 - `test:coverage` also caches `coverage/**`.
 - `dev` is persistent and uncached.
 
 When a root-level config file affects a task, add it to that task's `inputs` (the existing lint/format/test tasks already reference the root Oxc, Oxfmt, and Vitest configs).
 
-Only `admin`, `web`, `bff`, and the config packages participate. Package names, not folder paths, are used with `--filter` in the documented commands.
+Only `admin`, `web`, `bff`, `@repo/http-client`, and the config packages participate. Package names, not folder paths, are used with `--filter` in the documented commands.
 
 ### `apps/admin`
 
-React SPA with the entry point `src/main.tsx` rendering `src/App.tsx`. There is no router, state manager, or API layer yet.
+React SPA with the entry point `src/main.tsx` rendering `src/App.tsx`. There is no router or state manager. `src/lib/http.ts` is the environment adapter: it resolves `VITE_API_BASE_URL`, falls back to `/api/`, and creates the shared ky client.
 
-`vite.config.ts` owns both Vite and Vitest configuration: React plugin, port 3000, jsdom environment, `tests/**/*.test.{ts,tsx}`, and `tests/setup.ts`. The setup file registers `@testing-library/jest-dom/vitest` and calls Testing Library `cleanup` after each test. The app tsconfig extends `@repo/typescript-config/react-app.json` and includes `tests` and `vite.config.ts`.
+`vite.config.ts` owns both Vite and Vitest configuration: React plugin, port 3000, `/api` proxy to `http://localhost:5000` with the prefix stripped, jsdom environment, `tests/**/*.test.{ts,tsx}`, and `tests/setup.ts`. The setup file registers `@testing-library/jest-dom/vitest` and calls Testing Library `cleanup` after each test. The app tsconfig extends `@repo/typescript-config/react-app.json` and includes `tests` and `vite.config.ts`.
+
+Only `src/lib/http.ts` reads `import.meta.env`; keep future environment access in that adapter so the root environment module can replace it without touching the shared package.
 
 ### `apps/web`
 
@@ -106,20 +112,21 @@ The runtime is CommonJS and uses Nest decorator metadata:
 
 Tests are split into `tests/unit` (direct controller construction) and `tests/e2e` (create a Nest application with `@nestjs/testing` and call it through Supertest). E2E tests do not require a separately running server.
 
-### Shared config packages
+### Shared packages
 
-- `@repo/typescript-config`: `base.json` is strict `NodeNext`/ES2022; `react-app.json` switches to bundler resolution, `react-jsx`, and `vite/client` types. The BFF and config packages extend `base.json`.
-- `@repo/vitest-config`: exports `baseTestConfig` from `src/base.ts`. App configs spread it into their own `test` block and override `environment`, `include`, `setupFiles`, or `environmentOptions`. The shared coverage `include` currently covers `src`, `app`, and `shared`; update it if source moves.
+- `@repo/http-client`: exports `createHttpClient`, default timeout/retry constants, and ky's HTTP/network/timeout errors plus guards from `src/index.ts`. It is source-exported with no build step and never reads environment variables.
+- `@repo/typescript-config`: `base.json` is strict `NodeNext`/ES2022; `react-app.json` switches to bundler resolution, `react-jsx`, and `vite/client` types; `library.json` is the bundler/no-emit preset for non-React runtime packages. The BFF and config packages extend `base.json`.
+- `@repo/vitest-config`: exports `baseTestConfig` from `src/base.ts`. App and package configs spread it into their own `test` block and override `environment`, `include`, `setupFiles`, or `environmentOptions`. The shared coverage `include` covers `src`, `app`, and `shared`; update it if source moves.
 
-These packages export source files directly; there is no build step for workspace config packages.
+These packages export source files directly; there is no build step for workspace config packages or `@repo/http-client`.
 
 ## Testing conventions
 
-- All apps use Vitest 5 with the V8 coverage provider.
+- All apps and the shared HTTP client use Vitest 5 with the V8 coverage provider.
 - `test` is the normal run; `test:coverage` enables coverage with `text`, `html`, and `lcov` reporters.
-- Admin tests use jsdom + Testing Library. Web tests use the Nuxt runtime. BFF tests use Nest testing utilities and Supertest.
-- Test files are type-checked as part of each app's normal type checking, except that the BFF uses the dedicated `tsconfig.test.json`.
-- Keep test files in the app's configured `tests` directory; changing the directory requires updating both the Vitest `include` pattern and the relevant tsconfig/Nuxt setup.
+- Admin tests use jsdom + Testing Library. Web tests use the Nuxt runtime. BFF tests use Nest testing utilities and Supertest. `@repo/http-client` tests use the Node environment with an injected fetch.
+- Test files are type-checked as part of each app's or package's normal type checking, except that the BFF uses the dedicated `tsconfig.test.json`.
+- Keep test files in the app/package configured `tests` directory; changing the directory requires updating both the Vitest `include` pattern and the relevant tsconfig/Nuxt setup.
 
 ## Toolchain and conventions
 

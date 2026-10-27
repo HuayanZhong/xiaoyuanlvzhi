@@ -1,63 +1,66 @@
 schema: spec-driven
 
-# Constraints for OpenSpec artifacts. These are injected into planning and are
-# not copied into the generated proposal, specs, design, or tasks.
+# OpenSpec 工件约束。这些内容会注入规划阶段，
+# 不会复制到生成的 proposal、specs、design 或 tasks 中。
 context: |
-  Product: campus green-plant adoption and environmental incentive system.
-  The repository is a pnpm + Turborepo frontend workspace with three apps:
-  admin (React 19 + Vite 8, port 3000), web (Nuxt 4 + Vue 3, port 4000), and
-  bff (NestJS 12 HTTP API, port 5000, overridable with PORT).
+  产品：校园绿植领养与环保激励系统。
+  本仓库是 pnpm + Turborepo 前端工作区，包含三个应用：
+  admin（React 19 + Vite 8，端口 3000）、web（Nuxt 4 + Vue 3，端口 4000）、
+  bff（NestJS 12 HTTP API，端口 5000，可通过 PORT 覆盖）。
 
-  The BFF is the intended boundary for server-side behavior. The admin and web
-  apps do not call it yet, and the BFF currently exposes only GET / and
-  GET /health. Do not assume an existing authentication, database, or domain API
-  unless the proposal explicitly adds it.
+  BFF 是服务端行为的边界。当前只暴露 GET / 和 GET /health。admin 开发服务器
+  正在配置 /api/* 到 BFF 的代理，但尚未存在领域 API 调用。除提案明确新增外，
+  不要假设已有认证、数据库或领域 API。
 
-  There is no shared runtime or UI package. Cross-app code must be introduced as
-  a new workspace package instead of importing another app's files. Shared
-  packages currently exist only for TypeScript and Vitest configuration.
+  共享 HTTP 客户端包 @repo/http-client 基于 ky，供 admin 使用。跨应用运行时
+  代码必须放在工作区包中，不能直接引用另一个应用的文件。
 
-  Tooling constraints: TypeScript 6, Vitest 5, and Oxc (oxlint/oxfmt). Do not add
-  ESLint, Prettier, or a second formatter. Keep versions aligned with the rest of
-  the workspace and follow pnpm's minimum-release-age policy when adding pinned
-  dependencies.
+  环境配置未来会迁移到根目录模块，供 admin、web、bff 共用。在该模块落地前，
+  共享包必须保持环境无关，只接收普通配置值；只有应用级适配层可以读取
+  VITE_*、NUXT_* 或 process.env。除提案明确包含外，不要创建或修改根目录
+  环境模块。当前为 HTTP 客户端预留的逻辑配置键是 apiBaseUrl；admin 通过
+  VITE_API_BASE_URL 提供，未配置时回退到 /api/。
 
-  Verification runs from the repository root through pnpm/Turbo. Tests live in
-  each app's tests directory and are type-checked. Coverage include paths and
-  Turbo task inputs must be updated when source locations or shared config
-  changes.
+  工具链约束：TypeScript 6、Vitest 5、Oxc（oxlint/oxfmt）。不要添加 ESLint、
+  Prettier 或第二套格式化工具。保持版本与工作区一致，并在新增固定版本依赖时
+  遵守 pnpm 的 minimum-release-age 策略。
+
+  验证从仓库根目录通过 pnpm/Turbo 执行。测试位于各应用的 tests 目录，并参与
+  类型检查。源码位置或共享配置变化时，必须同步更新覆盖率 include 路径和
+  Turbo 任务输入。
 
 rules:
   proposal:
-    - "Name the affected app or package and state whether a BFF endpoint changes"
-    - "State when the change has no API, auth, persistence, or shared-package impact"
-    - "Mark breaking changes to ports, routes, package boundaries, or tooling"
-    - "Keep implementation details out of the proposal"
+    - "写明受影响的 app 或 package，并说明是否修改 BFF 接口"
+    - "若变更不涉及 API、认证、持久化或共享包，需要明确说明"
+    - "将端口、路由、包边界或工具链的破坏性变更标记为 BREAKING"
+    - "提案中不要写实现细节"
   specs:
-    - "Describe externally observable behavior, not framework or class choices"
-    - "For BFF behavior, specify method, path, status, response body, and error cases"
-    - "Name capabilities for durable domain behavior, not for a one-off change"
-    - "Do not invent backend, auth, or persistence requirements that the proposal excludes"
+    - "描述外部可观察行为，而不是框架或类的选择"
+    - "BFF 行为要写明方法、路径、状态码、响应体和错误场景"
+    - "能力名称应描述长期领域行为，而不是一次性变更"
+    - "不要凭空添加提案明确排除的后端、认证或持久化需求"
   design:
-    - "Show how data flows between admin, web, and bff, including when no integration exists"
-    - "Do not import across apps; introduce a workspace package for shared runtime code"
-    - "Call out changes to tsconfig, Vitest config, coverage include paths, and Turbo inputs"
-    - "Keep Oxc as the only lint and format toolchain"
+    - "说明 admin、web、bff 之间的数据流，包括尚未集成的情况"
+    - "禁止跨应用导入；共享运行时代码应新增工作区包"
+    - "说明 tsconfig、Vitest 配置、覆盖率 include 路径和 Turbo 输入的变化"
+    - "保持 Oxc 是唯一的 lint 和 format 工具链"
+    - "共享包不得直接访问环境变量；由应用传入普通配置值"
   tasks:
-    - "Group tracked tasks by app or package and include the tests and config work each group needs"
-    - "Put the verification command or observable check in the task description"
-    - "Use pnpm --filter <app> lint, check-types, and test for single-app work"
-    - "Use root pnpm lint, check-types, and test when multiple packages or shared config change"
-    - "Do not edit generated .nuxt files or .nuxtrc; regenerate them with nuxt prepare"
+    - "按 app 或 package 分组，并包含各组需要的测试和配置工作"
+    - "在任务描述中写明验证命令或可观察检查"
+    - "单应用工作使用 pnpm --filter <app> lint、check-types 和 test"
+    - "多个包或共享配置变更时使用根目录 pnpm lint、check-types 和 test"
+    - "不要编辑生成的 .nuxt 文件或 .nuxtrc；用 nuxt prepare 重新生成"
 
 operations:
   apply:
     guidance:
-      - "Run targeted app checks while iterating and the root lint, type, and test commands before finishing"
-      - "If BFF routes or modules change, run both the unit and e2e suites"
-      - "Do not reformat unrelated files or replace the Oxc toolchain"
+      - "迭代时运行目标应用检查，完成前运行根目录 lint、类型检查和测试命令"
+      - "若修改 BFF 路由或模块，同时运行单元和 e2e 测试"
+      - "不要格式化无关文件，也不要替换 Oxc 工具链"
   archive:
     guidance:
-      - "Name the affected specs and apps in the archive summary"
-      - "Include the verification commands and their results"
-      - "Do not archive while lint, type checks, or tests are failing"
+      - "在归档摘要中写明受影响的 specs 和应用"
+      - "包含验证命令及其结果"
+      - "lint、类型检查或测试失败时不要归档"
