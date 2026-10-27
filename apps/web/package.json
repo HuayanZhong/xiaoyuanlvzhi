@@ -7,6 +7,7 @@
     "dev": "next dev --port 3000",
     "build": "next build",
     "start": "next start",
+    "lint": "oxlint --deny-warnings",
     "check-types": "next typegen && tsc --noEmit"
   },
   "dependencies": {
