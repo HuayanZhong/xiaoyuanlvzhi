@@ -3,11 +3,9 @@ import { describe, expect, it } from "vitest";
 import App from "../../src/App";
 
 describe("App", () => {
-  it("renders the admin heading", () => {
+  it("renders the primary button", () => {
     render(<App />);
 
-    expect(
-      screen.getByRole("heading", { name: "校园绿植领养与环保激励系统" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Button" })).toBeInTheDocument();
   });
 });

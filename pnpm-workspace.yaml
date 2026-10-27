@@ -6,6 +6,7 @@ allowBuilds:
   esbuild: true
 # pnpm 12 内置 minimumReleaseAge（1440 分钟）；以下条目豁免近期发布的固定版本
 minimumReleaseAgeExclude:
+  - '@ant-design/cli@6.6.8'
   - '@oxfmt/binding-android-arm-eabi@0.75.0'
   - '@oxfmt/binding-android-arm64@0.75.0'
   - '@oxfmt/binding-darwin-arm64@0.75.0'

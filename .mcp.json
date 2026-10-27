@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "antd": {
+      "command": "node",
+      "args": [
+        "apps/admin/node_modules/@ant-design/cli/dist/index.js",
+        "mcp"
+      ]
+    }
+  }
+}
