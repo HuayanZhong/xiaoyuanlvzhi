@@ -13,6 +13,8 @@ Turborepo + pnpm 多应用工作区。
 ## 共享配置
 
 - `packages/typescript-config`: 共享 `tsconfig` 预设（base / react-app）
+- `.editorconfig`: 编辑器基础规范（UTF-8 / LF / 2 空格缩进）
+- `.gitattributes`: Git 行尾与文本文件规范化
 - `.oxlintrc.json`: Oxlint 规则配置（React / Vue / TypeScript 等插件）
 - `.oxfmtrc.json`: Oxfmt 格式化配置
 - `turbo.json`: 任务编排（build / lint / format / format:check / check-types / dev）
