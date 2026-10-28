@@ -58,6 +58,7 @@ pnpm format:check # 检查各应用格式
 pnpm check-types  # 类型检查
 pnpm test         # 运行全部测试
 pnpm test:coverage # 运行全部测试并生成覆盖率
+pnpm verify       # lint、format:check、类型检查和测试（pre-push 使用）
 ```
 
 只启动单个应用：
@@ -67,6 +68,48 @@ pnpm --filter admin dev
 pnpm --filter web dev
 pnpm --filter bff dev
 ```
+
+## Git 钩子
+
+首次在仓库根目录执行 `pnpm install` 会自动注册 husky 钩子；需要重新初始化时运行 `pnpm run prepare`。钩子脚本位于 `.husky/`。
+
+### pre-commit
+
+- 只检查本次暂存的文件，未暂存的改动不会影响检查结果。
+- 对暂存文件运行 `oxlint --fix --deny-warnings` 和 `oxfmt`；可自动修复的格式或 lint 问题会被修复并重新暂存。
+- 修复后仍有错误或警告时，提交会被拒绝。
+
+### commit-msg
+
+- 提交信息遵循 conventional commits：`<type>(<scope>): <subject>` 或 `<type>: <subject>`。
+- 允许的 type：`feat`、`fix`、`docs`、`style`、`refactor`、`perf`、`test`、`build`、`ci`、`chore`、`revert`。
+- `scope` 可为空，也可使用中文或英文；`subject` 可为中文；header 不超过 100 个字符。
+- `Merge`、`Revert`、`fixup!` 等自动生成的提交会跳过校验。
+- 一次提交只表达一件事；规则只影响新提交，历史提交不会被重新检查。
+
+示例：`feat(pnpm): 添加构建支持`
+
+### pre-push
+
+- 推送前运行 `pnpm verify`：lint、format:check、类型检查和测试；不包含覆盖率。
+- 任一检查失败都会阻止推送。
+- 使用 `git push --no-verify` 会跳过这些检查。
+
+### 绕过与 CI
+
+- `git commit --no-verify` 跳过 `pre-commit` 和 `commit-msg`。
+- `git push --no-verify` 跳过 `pre-push` 的完整校验。
+- 无 `.git` 的 CI/Docker 环境用 `HUSKY=0 pnpm install` 跳过钩子安装。
+- 钩子只是本地门禁；绕过或 GUI 客户端未执行钩子时，问题不会被自动发现，仍需依赖 `pnpm verify` 或后续 CI。
+
+### Windows 排障
+
+- 钩子通过 Git Bash 执行，需要 `sh` 可用（Git for Windows 自带）。
+- GUI Git 客户端没有继承 pnpm 的 PATH 时会报 `pnpm: command not found`。可改在终端提交，或把钩子命令改为 `node_modules/.bin/` 下的本地二进制：
+  - `.husky/pre-commit`：`node_modules/.bin/lint-staged`
+  - `.husky/commit-msg`：`node_modules/.bin/commitlint --edit "$1"`
+  - `.husky/pre-push`：`node_modules/.bin/turbo run lint format:check check-types test --ui=stream`
+- 若钩子脚本出现 CRLF 或不可执行：确认 `.gitattributes` 生效，并在提交时使用 `git add --chmod=+x`。
 
 ## 工具链
 

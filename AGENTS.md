@@ -165,3 +165,4 @@ These packages export source files directly; there is no build step for workspac
 - Oxc is the only lint/format toolchain; ESLint and Prettier are intentionally disabled. Root configs are `.oxlintrc.json` and `.oxfmtrc.json`; package scripts run `oxlint`/`oxfmt`.
 - Formatting defaults: UTF-8, LF, 2 spaces, 80-column print width. Do not add conflicting formatter configs.
 - OpenSpec is initialized for spec-driven changes; specs/changes live under `openspec/` and the workflow skills are under `.agents/skills/`.
+- Git hooks are managed by husky through the root `prepare` script. See `README.md` → "Git 钩子" for hook behavior, bypass rules, and Windows troubleshooting.

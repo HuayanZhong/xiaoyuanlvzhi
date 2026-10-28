@@ -6,16 +6,31 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "lint:fix": "oxlint --fix",
+    "prepare": "husky",
     "format": "turbo run format",
     "format:check": "turbo run format:check",
     "check-types": "turbo run check-types",
     "test": "turbo run test",
-    "test:coverage": "turbo run test:coverage --concurrency=1"
+    "test:coverage": "turbo run test:coverage --concurrency=1",
+    "verify": "turbo run lint format:check check-types test --ui=stream"
   },
   "devDependencies": {
+    "@commitlint/cli": "21.2.4",
+    "@commitlint/config-conventional": "21.2.4",
+    "husky": "9.1.7",
+    "lint-staged": "17.6.0",
     "oxfmt": "0.75.0",
     "oxlint": "1.90.0",
     "turbo": "^2.11.10"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,vue}": [
+      "oxlint --fix --deny-warnings",
+      "oxfmt"
+    ],
+    "**/*.{json,jsonc,css,md}": [
+      "oxfmt"
+    ]
   },
   "packageManager": "pnpm@12.14.0",
   "engines": {
