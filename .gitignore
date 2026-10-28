@@ -4,11 +4,10 @@
 node_modules
 
 # Local env files
+# 只提交 .env.example；其余环境文件都可能承载密钥，一律只存在于本地。
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
 
 # Testing
 coverage

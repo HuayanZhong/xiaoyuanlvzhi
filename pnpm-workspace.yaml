@@ -1,6 +1,10 @@
 packages:
   - "apps/*"
   - "packages/*"
+# 全树锁定 TypeScript 主版本：构建工具对 typescript 的 peer 约束上界敞开，
+# 不加这条会被传递依赖带进 TS 7，导致类型检查静默失效。
+overrides:
+  typescript: 6.0.3
 allowBuilds:
   '@swc/core': true
   esbuild: true

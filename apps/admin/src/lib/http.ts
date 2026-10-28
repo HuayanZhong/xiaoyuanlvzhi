@@ -8,7 +8,7 @@ export function resolveApiBaseUrl(value: string | undefined): string {
 /**
  * admin 的唯一 HTTP 客户端。
  *
- * 环境读取只发生在这里，未来根目录环境模块落地后替换这一处即可。
+ * 环境读取只发生在这里，环境文件由脚本里的 dotenv-cli 注入。
  */
 export const http = createHttpClient({
   baseUrl: resolveApiBaseUrl(import.meta.env.VITE_API_BASE_URL),

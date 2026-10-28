@@ -15,11 +15,14 @@ context: |
   共享 HTTP 客户端包 @repo/http-client 基于 ky，供 admin 使用。跨应用运行时
   代码必须放在工作区包中，不能直接引用另一个应用的文件。
 
-  环境配置未来会迁移到根目录模块，供 admin、web、bff 共用。在该模块落地前，
-  共享包必须保持环境无关，只接收普通配置值；只有应用级适配层可以读取
-  VITE_*、NUXT_* 或 process.env。除提案明确包含外，不要创建或修改根目录
-  环境模块。当前为 HTTP 客户端预留的逻辑配置键是 apiBaseUrl；admin 通过
-  VITE_API_BASE_URL 提供，未配置时回退到 /api/。
+  环境配置已落到仓库根目录：`.env` 提供跨环境默认值，`.env.development` 与
+  `.env.production` 提供覆盖值，由各应用脚本的 `dotenv -c <mode> -e ../../.env`
+  级联加载（`.env.<mode>.local` → `.env.local` → `.env.<mode>` → `.env`，先加载者
+  优先，进程环境最高）。共享包 @repo/env 只提供 parseEnv 与 zod 构造器，不读文件、
+  不读 process.env；只有应用级适配层可以读取 VITE_*、NUXT_* 或 process.env。
+  当前为 HTTP 客户端预留的逻辑配置键是 apiBaseUrl；admin 通过 VITE_API_BASE_URL
+  提供，未配置时回退到 /api/。`NODE_ENV` 在前后端不对称：admin/web 是构建期输入，
+  BFF 是运行期输入，`start` 脚本也会加载 `.env.production`。
 
   工具链约束：TypeScript 6、Vitest 5、Oxc（oxlint/oxfmt）。不要添加 ESLint、
   Prettier 或第二套格式化工具。保持版本与工作区一致，并在新增固定版本依赖时

@@ -2,6 +2,10 @@ import react from "@vitejs/plugin-react";
 import { baseTestConfig } from "@repo/vitest-config/base";
 import { defineConfig } from "vitest/config";
 import tailwindcss from "@tailwindcss/vite";
+import { env } from "./src/config/env";
+
+// 环境变量由 dotenv-cli 注入 process.env；校验通过后转成 Vite 的暴露前缀。
+process.env.VITE_API_BASE_URL = env.API_BASE_URL ?? "";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -11,17 +15,17 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    port: env.ADMIN_PORT,
     proxy: {
       "/api": {
-        target: "http://localhost:5000",
+        target: `http://localhost:${env.PORT}`,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
   },
   preview: {
-    port: 3000,
+    port: env.ADMIN_PORT,
   },
   test: {
     ...baseTestConfig,
