@@ -10,6 +10,15 @@ Turborepo + pnpm 多应用工作区。
 | `apps/web`   | Nuxt 4 + Vue 3 + TypeScript    | 4000 | 面向使用者的应用   |
 | `apps/bff`   | NestJS 12 + TypeScript         | 5000 | BFF 接口层（骨架） |
 
+## admin 页面
+
+- `/login`：左右分屏的静态登录页；账号/密码校验通过后进入 dashboard，不发起真实登录请求、不保存 token、不做路由守卫；管理端不提供注册、忘记密码或记住我入口。
+- `/dashboard`：工作台占位页，包含待处理空状态、静态统计卡片和后续模块入口。
+- `/` 和未知路径都会重定向到 `/login`。
+- 右上角支持亮/暗主题切换，选择会持久化；宽屏使用全宽分栏，登录抽屉贴住视口右边。
+
+当前 `/dashboard` 可直接访问；真实认证、BFF 登录接口和路由守卫留到后续变更。
+
 ## 共享配置
 
 - `packages/typescript-config`: 共享 `tsconfig` 预设（base / react-app）

@@ -3,11 +3,11 @@ import { describe, expect, it } from "vitest";
 import App from "../../src/App";
 
 describe("App", () => {
-  it("renders the home route", () => {
+  it("redirects the root route to the login page", async () => {
     render(<App />);
 
     expect(
-      screen.getByRole("heading", { name: "管理后台" }),
+      await screen.findByRole("heading", { name: "登录管理后台" }),
     ).toBeInTheDocument();
   });
 });
