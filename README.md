@@ -100,7 +100,7 @@ pnpm --filter bff dev
 - `git commit --no-verify` 跳过 `pre-commit` 和 `commit-msg`。
 - `git push --no-verify` 跳过 `pre-push` 的完整校验。
 - 无 `.git` 的 CI/Docker 环境用 `HUSKY=0 pnpm install` 跳过钩子安装。
-- 钩子只是本地门禁；绕过或 GUI 客户端未执行钩子时，问题不会被自动发现，仍需依赖 `pnpm verify` 或后续 CI。
+- 钩子只是本地门禁；绕过或 GUI 客户端未执行钩子时，问题不会被自动发现，仍需依赖 `pnpm verify` 或 GitHub CI。
 
 ### Windows 排障
 
@@ -110,6 +110,41 @@ pnpm --filter bff dev
   - `.husky/commit-msg`：`node_modules/.bin/commitlint --edit "$1"`
   - `.husky/pre-push`：`node_modules/.bin/turbo run lint format:check check-types test --ui=stream`
 - 若钩子脚本出现 CRLF 或不可执行：确认 `.gitattributes` 生效，并在提交时使用 `git add --chmod=+x`。
+
+## GitHub CI
+
+CI 定义在 `.github/workflows/ci.yml`，在推送到 `main`、针对 `main` 的 pull request 和手动触发时运行。四个 job 并行执行：
+
+| Job      | 命令                              | 检查名称      |
+| -------- | --------------------------------- | ------------- |
+| `static` | `pnpm lint` + `pnpm format:check` | `CI / static` |
+| `types`  | `pnpm check-types`                | `CI / types`  |
+| `test`   | `pnpm test`                       | `CI / test`   |
+| `build`  | `pnpm build`                      | `CI / build`  |
+
+- 每个 job 使用 `.nvmrc` 的 Node、`packageManager` 的 pnpm，以 `pnpm install --frozen-lockfile` 安装，并设置 `HUSKY=0`。
+- CI 只读取仓库内容（`permissions: contents: read`），不需要 secrets；构建使用各应用的 schema 默认值。
+- 在 GitHub Settings → Branches/Rulesets 中启用分支保护，要求上述四个检查全部通过后才能合并到 `main`。
+- 本地没有 Git remote 时 workflow 不会运行；推送到 GitHub 后生效。
+
+## GitHub 依赖更新
+
+Dependabot 配置在 `.github/dependabot.yml`，每周一检查 npm 依赖和 GitHub Actions：
+
+- npm 更新等待 3 天，GitHub Actions 更新等待 7 天，避开 pnpm 的 24 小时 `minimumReleaseAge`。
+- minor 和 patch 更新合并为一个 PR；major 更新单独提出。
+- TypeScript 的 major 更新被忽略，因为工作区通过 override 锁定 6.0.3。
+- 每个更新 PR 都会经过同一套 CI；如果 Dependabot 无法处理 pnpm 12 的 lockfile，再考虑迁移到 Renovate。
+
+## Pull request 模板
+
+`.github/PULL_REQUEST_TEMPLATE.md` 会在新建 PR 时自动填入，提醒填写：
+
+- 变更内容与影响范围（admin / web / bff / 共享包 / 工具链）
+- 验证命令（`pnpm verify`、`pnpm build`、相关测试）
+- 关联的 OpenSpec change
+
+模板只做提醒，不替代 CI；PR 标题或 commitlint 的自动门禁留到后续。
 
 ## 工具链
 

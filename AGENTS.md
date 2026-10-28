@@ -166,3 +166,6 @@ These packages export source files directly; there is no build step for workspac
 - Formatting defaults: UTF-8, LF, 2 spaces, 80-column print width. Do not add conflicting formatter configs.
 - OpenSpec is initialized for spec-driven changes; specs/changes live under `openspec/` and the workflow skills are under `.agents/skills/`.
 - Git hooks are managed by husky through the root `prepare` script. See `README.md` → "Git 钩子" for hook behavior, bypass rules, and Windows troubleshooting.
+- GitHub Actions CI is defined in `.github/workflows/ci.yml`; it runs four jobs (`static`, `types`, `test`, `build`) on push/PR to `main`. See `README.md` → "GitHub CI" for check names and branch protection setup.
+- Dependabot updates npm dependencies and GitHub Actions weekly with cooldowns. See `README.md` → "GitHub 依赖更新" for the release-age and grouping rules.
+- Pull requests use `.github/PULL_REQUEST_TEMPLATE.md`; fill in affected areas, verification commands, and the related OpenSpec change. See `README.md` → "Pull request 模板".
