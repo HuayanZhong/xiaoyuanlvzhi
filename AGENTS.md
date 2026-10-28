@@ -111,7 +111,7 @@ Only `admin`, `web`, `bff`, `@repo/http-client`, and the config packages partici
 
 ### `apps/admin`
 
-React SPA with the entry point `src/main.tsx` rendering `src/App.tsx`. There is no router or state manager. `src/lib/http.ts` is the environment adapter: it resolves `VITE_API_BASE_URL`, falls back to `/api/`, and creates the shared ky client.
+React SPA with the entry point `src/main.tsx` rendering `src/App.tsx`. `src/router/index.tsx` defines a React Router v8 browser router with a single home route; `src/pages/HomePage.tsx` is the placeholder page. `src/stores/app.ts` is the Zustand UI store skeleton (`sidebarCollapsed` + `toggleSidebar`); it is not wired into a layout yet. `src/lib/http.ts` is the environment adapter: it resolves `VITE_API_BASE_URL`, falls back to `/api/`, and creates the shared ky client.
 
 `src/config/env.ts` parses `ADMIN_PORT` (default 3000), `PORT` (default 5000) and optional `API_BASE_URL`. `vite.config.ts` reads that object and writes `process.env.VITE_API_BASE_URL`; Vite then merges `VITE_*` into `import.meta.env`, so `http.ts` is unchanged and `@repo/env` never enters the browser bundle. The dev server port and the `/api` proxy target both come from the env file, so the scripts must not pass `--port`.
 

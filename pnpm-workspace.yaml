@@ -57,3 +57,4 @@ minimumReleaseAgeExclude:
   - '@nuxt/vite-builder@4.6.3'
   - '@nuxt/vite-server@4.6.3'
   - nuxt@4.6.3
+  - react-router@8.5.1
