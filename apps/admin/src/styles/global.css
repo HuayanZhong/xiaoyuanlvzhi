@@ -7,7 +7,6 @@
   --color-surface: var(--app-color-surface);
   --color-ink: var(--app-color-ink);
   --color-line: var(--app-color-line);
-  --color-accent: var(--app-color-accent);
   --color-primary: var(--app-color-primary);
   --color-muted: var(--app-color-muted);
 }

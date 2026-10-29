@@ -10,7 +10,6 @@ const variables = [
   "--app-color-line",
   "--app-color-muted",
   "--app-color-primary",
-  "--app-color-accent",
 ];
 
 function readVariables() {
@@ -40,7 +39,6 @@ describe("ThemeTokenBridge", () => {
       "--app-color-canvas": "#f5f5f5",
       "--app-color-surface": "#ffffff",
       "--app-color-line": "#f0f0f0",
-      "--app-color-accent": "#b7791f",
     });
   });
 

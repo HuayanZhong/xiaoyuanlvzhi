@@ -25,7 +25,7 @@ pnpm + Turborepo workspace with three apps and three workspace packages:
 | `@repo/typescript-config` | Shared tsconfig presets          | —    | `base`, `react-app`, `library` |
 | `@repo/vitest-config`     | Shared Vitest defaults           | —    | Test/coverage defaults         |
 
-The apps are currently minimal skeletons. `@repo/http-client` is the only shared runtime package; `@repo/env` is build/startup-time only. There is no shared UI package, authentication, or persistence. The admin dev server proxies `/api/*` to the BFF, but no domain API call exists yet. The BFF only exposes `GET /` and `GET /health`.
+The apps are still early skeletons: `admin` has a login page and an admin shell with placeholder module routes, but there is no authentication, domain API call, or persistence. `@repo/http-client` is the only shared runtime package; `@repo/env` is build/startup-time only. There is no shared UI package. The admin dev server proxies `/api/*` to the BFF, but no domain API call exists yet. The BFF only exposes `GET /` and `GET /health`.
 
 ## Commands
 
@@ -111,7 +111,32 @@ Only `admin`, `web`, `bff`, `@repo/http-client`, and the config packages partici
 
 ### `apps/admin`
 
-React SPA with the entry point `src/main.tsx` rendering `src/App.tsx`, which wraps the router in antd `ConfigProvider` (zh_CN, green primary) and `AntdApp`. `src/router/index.tsx` exposes four routes: `/` redirects to `/login`, `/login` is the static login page, `/dashboard` is the workbench placeholder, and unknown paths redirect to `/login`. There is no authentication, token, persistence, or route guard yet; login only validates and navigates. Pages live under domain folders: `src/pages/auth/LoginPage.tsx` and `src/pages/dashboard/DashboardPage.tsx`; tests mirror them under `tests/unit/pages/`. Auth UI components live under `src/components/auth/` (`AuthLayout`, `AuthBrandPanel`, `LoginForm`). Design tokens live in `src/styles/global.css`; color tokens are `@theme inline` aliases of the `--app-color-*` variables that `src/components/ThemeTokenBridge.tsx` derives from antd tokens at runtime. Components must use semantic token classes, not raw hex or arbitrary pixel values. `src/config/theme.ts` holds the green brand seed and the accent color; antd `defaultAlgorithm`/`darkAlgorithm` derive the palette, and `.dark` in `global.css` only sets `color-scheme`. Theme mode persists in the Zustand store and the auth shell is full-bleed, with the login drawer flush to the viewport's right edge. `src/components/BrandMark.tsx` is the shared inline-SVG brand mark. `src/stores/app.ts` holds the Zustand UI store: `sidebarCollapsed` (not wired into a layout yet) and persisted `themeMode` (`toggleTheme`). `src/lib/http.ts` is the environment adapter: it resolves `VITE_API_BASE_URL`, falls back to `/api/`, and creates the shared ky client.
+React SPA with the entry point `src/main.tsx` rendering `src/App.tsx`, which wraps the router in antd `ConfigProvider` (`zh_CN`, antd default theme) and `AntdApp`; the light/dark `algorithm` follows the persisted `themeMode`.
+
+Routing (`src/router/index.tsx`):
+
+- `/login` renders `LoginPage` without the admin shell; `/` and unknown paths redirect to `/login`.
+- `AdminShell` is the layout route for `/dashboard` and 12 module routes (`/adoptions`, `/care-reviews`, `/tasks`, `/feedback`, `/plants/species`, `/plants/instances`, `/points/rules`, `/points/rewards`, `/points/orders`, `/students`, `/articles`, `/statistics`).
+- Module routes render `PlaceholderPage`; `/dashboard` renders the minimal workbench placeholder. There is no authentication, token, or route guard yet; login only validates and navigates.
+
+Admin shell (`src/layouts/AdminShell.tsx`):
+
+- `Layout.Header` holds the collapse/drawer button, `BrandMark`, `HeaderNav` (5 groups) and `HeaderActions` (theme toggle + account menu).
+- `Layout.Sider` (208px, 64px collapsed, light theme) shows `SideNav` for the active group. Below 992px the header nav and sider collapse into `MobileNavDrawer`; no horizontal scrolling is allowed.
+- `HeaderButton` wraps antd `Button type="dashed"` in a local `darkAlgorithm` because the header stays dark in both themes. Keep the dark algorithm scoped to buttons so portals such as `Dropdown` keep the global theme.
+- `src/config/navigation.ts` is the single source of nav groups, paths, icons and breadcrumbs; `src/hooks/usePageMeta.ts` derives the active group, item and breadcrumb from the URL. Add a page by adding its item there and its route in the router.
+
+Styling:
+
+- Use antd default colors only. There is no `src/config/theme.ts` and no custom brand seed or accent.
+- Color tokens in `src/styles/global.css` are `@theme inline` aliases of the `--app-color-*` variables that `src/components/ThemeTokenBridge.tsx` writes from antd tokens at runtime. Components must use semantic token classes, not raw hex or arbitrary pixel values.
+- `src/components/BrandMark.tsx` is a text wordmark (product name plus a compact subtitle), not an icon.
+- `Layout.Content` uses `padding: 24`; page cards fill the content area with no fixed max-width, so all four gutters stay 24px.
+- `.dark` in `global.css` only sets `color-scheme`. The auth shell is full-bleed, with the login drawer flush to the viewport's right edge.
+
+State: `src/stores/app.ts` holds `sidebarCollapsed` (wired into the desktop `Sider`) and persisted `themeMode` (`toggleTheme`).
+
+Pages live under domain folders (`src/pages/auth/LoginPage.tsx`, `src/pages/dashboard/DashboardPage.tsx`, `src/pages/placeholder/PlaceholderPage.tsx`); tests mirror them under `tests/unit/pages/`. Auth UI components live under `src/components/auth/` (`AuthLayout`, `AuthBrandPanel`, `LoginForm`). `src/lib/http.ts` is the environment adapter: it resolves `VITE_API_BASE_URL`, falls back to `/api/`, and creates the shared ky client.
 
 `src/config/env.ts` parses `ADMIN_PORT` (default 3000), `PORT` (default 5000) and optional `API_BASE_URL`. `vite.config.ts` reads that object and writes `process.env.VITE_API_BASE_URL`; Vite then merges `VITE_*` into `import.meta.env`, so `http.ts` is unchanged and `@repo/env` never enters the browser bundle. The dev server port and the `/api` proxy target both come from the env file, so the scripts must not pass `--port`.
 

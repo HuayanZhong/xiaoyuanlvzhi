@@ -16,6 +16,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@ant-design/icons": "6.3.4",
     "@repo/env": "workspace:*",
     "@repo/http-client": "workspace:*",
     "@tailwindcss/vite": "^4.3.3",

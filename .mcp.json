@@ -2,10 +2,13 @@
   "mcpServers": {
     "antd": {
       "command": "node",
-      "args": [
-        "apps/admin/node_modules/@ant-design/cli/dist/index.js",
-        "mcp"
-      ]
+      "args": ["apps/admin/node_modules/@ant-design/cli/dist/index.js", "mcp"]
+    },
+    "chrome-devtools": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest"],
+      "env": {}
     }
   }
 }

@@ -34,13 +34,6 @@ export default function AuthLayout({
 
           <div className="flex flex-1 items-center justify-center px-5 py-10 sm:px-8 lg:px-10">
             <div className="w-full max-w-form rounded-surface border border-line bg-surface p-5 sm:p-8 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0">
-              <div className="mb-7 flex items-center gap-3">
-                <span aria-hidden="true" className="h-px w-6 bg-accent" />
-                <span className="text-label font-medium tracking-label text-muted">
-                  管理员入口
-                </span>
-              </div>
-
               <h1 className="text-title font-semibold text-ink">{title}</h1>
               <p className="mt-2 text-body leading-7 text-muted">
                 {description}

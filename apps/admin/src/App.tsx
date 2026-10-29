@@ -3,7 +3,6 @@ import zhCN from "antd/locale/zh_CN";
 import { useLayoutEffect } from "react";
 import { RouterProvider } from "react-router/dom";
 import ThemeTokenBridge from "@/components/ThemeTokenBridge";
-import { adminTheme } from "@/config/theme";
 import { router } from "@/router";
 import { useAppStore } from "@/stores/app";
 
@@ -14,13 +13,15 @@ export default function App() {
     document.documentElement.classList.toggle("dark", isDark);
   }, [isDark]);
 
-  const themeConfig = {
-    ...adminTheme,
-    algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
-  };
-
   return (
-    <ConfigProvider locale={zhCN} theme={themeConfig}>
+    <ConfigProvider
+      locale={zhCN}
+      theme={{
+        algorithm: isDark
+          ? antdTheme.darkAlgorithm
+          : antdTheme.defaultAlgorithm,
+      }}
+    >
       <AntdApp>
         <ThemeTokenBridge />
         <RouterProvider router={router} />

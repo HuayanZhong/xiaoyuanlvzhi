@@ -9,7 +9,7 @@ export default function AuthBrandPanel() {
         <BrandMark />
 
         <div>
-          <div className="mb-6 h-px w-10 bg-accent" />
+          <div className="mb-6 h-px w-10 bg-primary" />
           <p className="text-xs font-medium tracking-label text-muted">
             校园绿植领养与环保激励系统
           </p>
