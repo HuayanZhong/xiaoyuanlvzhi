@@ -42,8 +42,7 @@
       "env": [
         "ADMIN_PORT",
         "API_BASE_URL",
-        "NUXT_PORT",
-        "PORT",
+        "SPRING_API_ORIGIN",
         "WEB_PORT",
         "NODE_ENV"
       ]

@@ -5,8 +5,11 @@ import { RouterProvider } from "react-router/dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import AdminShell from "../../../src/layouts/AdminShell";
 import { useAppStore } from "../../../src/stores/app";
+import { useAuthStore } from "../../../src/stores/auth";
 
 const originalMatchMedia = window.matchMedia;
+const originalLogout = useAuthStore.getState().logout;
+const logoutMock = vi.fn().mockResolvedValue({ revokeFailed: false });
 
 function renderShell(path = "/dashboard") {
   const router = createMemoryRouter(
@@ -59,10 +62,20 @@ function useMobileMatchMedia() {
 
 beforeEach(() => {
   useAppStore.setState({ sidebarCollapsed: false, themeMode: "light" });
+  useAuthStore.setState({
+    status: "authenticated",
+    account: null,
+    logout: logoutMock,
+  });
 });
 
 afterEach(() => {
   window.matchMedia = originalMatchMedia;
+  useAuthStore.setState({
+    status: "checking",
+    account: null,
+    logout: originalLogout,
+  });
 });
 
 describe("AdminShell", () => {
@@ -163,6 +176,6 @@ describe("AdminShell", () => {
     fireEvent.click(screen.getByRole("button", { name: "账号菜单" }));
     fireEvent.click(await screen.findByText("退出登录"));
 
-    expect(await screen.findByTestId("page")).toHaveTextContent("登录页");
+    expect(await screen.findByText("登录页")).toBeInTheDocument();
   });
 });

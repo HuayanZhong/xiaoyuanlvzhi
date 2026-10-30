@@ -4,21 +4,20 @@ Turborepo + pnpm 多应用工作区。
 
 ## 应用
 
-| 应用         | 技术栈                         | 端口 | 说明               |
-| ------------ | ------------------------------ | ---- | ------------------ |
-| `apps/admin` | React 19 + Vite 8 + TypeScript | 3000 | 后台管理系统       |
-| `apps/web`   | Nuxt 4 + Vue 3 + TypeScript    | 4000 | 面向使用者的应用   |
-| `apps/bff`   | NestJS 12 + TypeScript         | 5000 | BFF 接口层（骨架） |
+| 应用         | 技术栈                         | 端口 | 说明             |
+| ------------ | ------------------------------ | ---- | ---------------- |
+| `apps/admin` | React 19 + Vite 8 + TypeScript | 3000 | 后台管理系统     |
+| `apps/web`   | Nuxt 4 + Vue 3 + TypeScript    | 4000 | 面向使用者的应用 |
 
 ## admin 页面
 
-- `/login`：左右分屏的静态登录页；账号/密码校验通过后进入 `/dashboard`，不发起真实登录请求、不保存 token、不做路由守卫；管理端不提供注册、忘记密码或记住我入口。
+- `/login`：左右分屏的真实登录页，调用 Spring `POST /api/v1/auth/login`；登录成功后把 accessToken 保存到 localStorage，并进入 `/dashboard` 或登录前的回跳路径。
 - 登录后的业务页面共用后台壳：顶部一级分组（运营 / 资源 / 积分 / 用户 / 数据）+ 左侧二级菜单 + 内容区；视口小于 992px 时收起为抽屉导航。
 - `/dashboard` 和 12 个业务模块路由（领养管理、养护审核、环保任务、问题反馈、品种档案、单株库存、积分规则与流水、奖励商品、兑换订单、学生管理、资讯管理、数据统计）当前渲染占位页；工作台不展示待办或统计内容。
 - `/` 和未知路径都会重定向到 `/login`。
 - 使用 antd 默认主题色，不注入自定义品牌色；右上角支持亮/暗主题切换，选择会持久化；宽屏登录页使用全宽分栏，登录抽屉贴住视口右边。
 
-当前 `/dashboard` 可直接访问；真实认证、BFF 登录接口和路由守卫留到后续变更。
+业务路由受路由守卫保护，未登录访问会回到 `/login?returnTo=...`；账号菜单提供退出登录。Spring 是最终认证和角色边界，管理端只接受 `role` 为 `ADMIN` 的账号。
 
 ## 共享配置
 
@@ -36,15 +35,12 @@ Turborepo + pnpm 多应用工作区。
 
 - `apps/admin/tests/unit`: jsdom + Testing Library 组件测试
 - `apps/web/tests/nuxt`: `@nuxt/test-utils` Nuxt 运行时测试
-- `apps/bff/tests/unit`: Nest 单元测试
-- `apps/bff/tests/e2e`: `@nestjs/testing` + Supertest HTTP 测试
 
 ```sh
 pnpm test                # turbo run test（执行全部应用）
 pnpm test:coverage       # V8 覆盖率，报告写入各应用 coverage/
 pnpm --filter admin test # 只跑后台测试
 pnpm --filter web test   # 只跑用户端测试
-pnpm --filter bff test   # 只跑 BFF 测试
 pnpm --filter admin test:watch
 pnpm --filter admin test:coverage
 ```
@@ -59,7 +55,7 @@ pnpm --filter admin test:coverage
 
 ```sh
 pnpm install      # 安装依赖
-pnpm dev          # 同时启动 admin(3000)、web(4000) 和 bff(5000)
+pnpm dev          # 同时启动 admin(3000) 和 web(4000)
 pnpm build        # 构建所有应用
 pnpm lint         # turbo run lint（各包执行 oxlint）
 pnpm lint:fix     # 自动修复 lint 问题
@@ -76,7 +72,6 @@ pnpm verify       # lint、format:check、类型检查和测试（pre-push 使�
 ```sh
 pnpm --filter admin dev
 pnpm --filter web dev
-pnpm --filter bff dev
 ```
 
 ## Git 钩子
@@ -150,7 +145,7 @@ Dependabot 配置在 `.github/dependabot.yml`，每周一检查 npm 依赖和 Gi
 
 `.github/PULL_REQUEST_TEMPLATE.md` 会在新建 PR 时自动填入，提醒填写：
 
-- 变更内容与影响范围（admin / web / bff / 共享包 / 工具链）
+- 变更内容与影响范围（admin / web / 共享包 / 工具链）
 - 验证命令（`pnpm verify`、`pnpm build`、相关测试）
 - 关联的 OpenSpec change
 
@@ -162,7 +157,6 @@ Dependabot 配置在 `.github/dependabot.yml`，每周一检查 npm 依赖和 Gi
 - [pnpm](https://pnpm.io) 12
 - [Node.js](https://nodejs.org/) >= 26.12.1（见 `.nvmrc`）
 - [TypeScript](https://www.typescriptlang.org/) 6.0
-- [NestJS](https://nestjs.com/) 12
 - [Vitest](https://vitest.dev/) 5
 - [Oxlint](https://oxc.rs/) 规则检查
 - [Oxfmt](https://oxc.rs/) 代码格式化

@@ -1,4 +1,7 @@
 import { createBrowserRouter, Navigate, type RouteObject } from "react-router";
+import RequireAdmin, {
+  RedirectIfAuthenticated,
+} from "@/components/auth/RequireAdmin";
 import AdminShell from "@/layouts/AdminShell";
 import DashboardPage from "@/pages/dashboard/DashboardPage";
 import LoginPage from "@/pages/auth/LoginPage";
@@ -21,9 +24,20 @@ const moduleRoutes: RouteObject[] = [
 
 export const routes: RouteObject[] = [
   { path: "/", element: <Navigate replace to="/login" /> },
-  { path: "/login", element: <LoginPage /> },
   {
-    element: <AdminShell />,
+    path: "/login",
+    element: (
+      <RedirectIfAuthenticated>
+        <LoginPage />
+      </RedirectIfAuthenticated>
+    ),
+  },
+  {
+    element: (
+      <RequireAdmin>
+        <AdminShell />
+      </RequireAdmin>
+    ),
     children: [
       { path: "dashboard", element: <DashboardPage /> },
       ...moduleRoutes,

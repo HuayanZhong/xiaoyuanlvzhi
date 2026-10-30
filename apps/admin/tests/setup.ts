@@ -4,6 +4,7 @@ import { afterEach } from "vitest";
 
 afterEach(() => {
   cleanup();
+  document.querySelector('[data-testid="toast-list"]')?.remove();
 });
 
 if (!window.matchMedia) {

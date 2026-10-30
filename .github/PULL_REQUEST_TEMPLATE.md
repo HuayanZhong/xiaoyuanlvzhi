@@ -6,7 +6,6 @@
 
 - [ ] admin
 - [ ] web
-- [ ] bff
 - [ ] 共享包
 - [ ] 工具链 / 文档 / OpenSpec
 

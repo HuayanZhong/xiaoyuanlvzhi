@@ -1,9 +1,15 @@
-import { envIntString, envOptionalString, parseEnv, z } from "@repo/env";
+import {
+  envIntString,
+  envOptionalString,
+  envUrlString,
+  parseEnv,
+  z,
+} from "@repo/env";
 
 const EnvSchema = z.object({
   ADMIN_PORT: envIntString().default(3000),
   API_BASE_URL: envOptionalString(),
-  PORT: envIntString().default(5000),
+  SPRING_API_ORIGIN: envUrlString().default("http://localhost:8080"),
 });
 
 /** 校验后的 admin 环境变量；vite.config.ts 加载时校验失败会直接中断。 */

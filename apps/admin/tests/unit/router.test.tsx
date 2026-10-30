@@ -2,8 +2,21 @@ import { render, screen } from "@testing-library/react";
 import { App as AntdApp } from "antd";
 import { createMemoryRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { routes } from "../../src/router";
+import { useAuthStore } from "../../src/stores/auth";
+
+const account = {
+  id: 1,
+  email: "admin@campus.local",
+  role: "ADMIN",
+  status: "ACTIVE",
+  fullName: "管理员",
+  studentNumber: null,
+  department: null,
+  className: null,
+  phone: null,
+};
 
 function renderPath(path: string) {
   const router = createMemoryRouter(routes, { initialEntries: [path] });
@@ -15,8 +28,14 @@ function renderPath(path: string) {
   );
 }
 
+afterEach(() => {
+  useAuthStore.setState({ status: "checking", account: null });
+});
+
 describe("admin routes", () => {
   it("redirects the root path to login", async () => {
+    useAuthStore.setState({ status: "anonymous", account: null });
+
     renderPath("/");
 
     expect(
@@ -27,7 +46,22 @@ describe("admin routes", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders the shell and workbench at /dashboard", async () => {
+  it("redirects an unauthenticated dashboard visit to login", async () => {
+    useAuthStore.setState({ status: "anonymous", account: null });
+
+    renderPath("/dashboard");
+
+    expect(
+      await screen.findByRole("heading", { name: "登录管理后台" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "工作台" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders the shell and workbench for an authenticated admin", async () => {
+    useAuthStore.setState({ status: "authenticated", account });
+
     renderPath("/dashboard");
 
     expect(
@@ -36,7 +70,9 @@ describe("admin routes", () => {
     expect(screen.getByRole("heading", { name: "工作台" })).toBeInTheDocument();
   });
 
-  it("renders the shell and placeholder at /adoptions", async () => {
+  it("renders a module placeholder for an authenticated admin", async () => {
+    useAuthStore.setState({ status: "authenticated", account });
+
     renderPath("/adoptions");
 
     expect(
@@ -45,7 +81,22 @@ describe("admin routes", () => {
     expect(screen.getByRole("menuitem", { name: /运营/ })).toBeInTheDocument();
   });
 
-  it("redirects unknown paths to login", async () => {
+  it("redirects an authenticated admin away from the login page", async () => {
+    useAuthStore.setState({ status: "authenticated", account });
+
+    renderPath("/login");
+
+    expect(
+      await screen.findByRole("heading", { name: "工作台" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "登录管理后台" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("redirects unknown paths to login for anonymous users", async () => {
+    useAuthStore.setState({ status: "anonymous", account: null });
+
     renderPath("/unknown");
 
     expect(

@@ -6,7 +6,6 @@ packages:
 overrides:
   typescript: 6.0.3
 allowBuilds:
-  '@swc/core': true
   esbuild: true
 # pnpm 12 内置 minimumReleaseAge（1440 分钟）；以下条目豁免近期发布的固定版本
 minimumReleaseAgeExclude:

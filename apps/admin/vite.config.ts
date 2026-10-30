@@ -18,9 +18,8 @@ export default defineConfig({
     port: env.ADMIN_PORT,
     proxy: {
       "/api": {
-        target: `http://localhost:${env.PORT}`,
+        target: env.SPRING_API_ORIGIN,
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
   },

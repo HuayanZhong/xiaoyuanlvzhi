@@ -2,6 +2,8 @@ import { App as AntdApp, ConfigProvider, theme as antdTheme } from "antd";
 import zhCN from "antd/locale/zh_CN";
 import { useLayoutEffect } from "react";
 import { RouterProvider } from "react-router/dom";
+import SessionGate from "@/components/auth/SessionGate";
+import ToastBridge from "@/components/auth/ToastBridge";
 import ThemeTokenBridge from "@/components/ThemeTokenBridge";
 import { router } from "@/router";
 import { useAppStore } from "@/stores/app";
@@ -24,7 +26,10 @@ export default function App() {
     >
       <AntdApp>
         <ThemeTokenBridge />
-        <RouterProvider router={router} />
+        <ToastBridge />
+        <SessionGate>
+          <RouterProvider router={router} />
+        </SessionGate>
       </AntdApp>
     </ConfigProvider>
   );

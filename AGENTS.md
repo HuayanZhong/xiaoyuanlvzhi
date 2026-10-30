@@ -13,19 +13,18 @@ This block is written and re-added by `turbo` before repository-scoped commands 
 
 ## Repository at a glance
 
-pnpm + Turborepo workspace with three apps and three workspace packages:
+pnpm + Turborepo workspace with two apps and four workspace packages:
 
 | Package                   | Stack                            | Port | Role                           |
 | ------------------------- | -------------------------------- | ---- | ------------------------------ |
 | `admin`                   | React 19 + Vite 8 + TypeScript 6 | 3000 | Admin SPA                      |
 | `web`                     | Nuxt 4 + Vue 3 + TypeScript 6    | 4000 | User-facing app                |
-| `bff`                     | NestJS 12 + Express              | 5000 | HTTP BFF skeleton              |
 | `@repo/http-client`       | ky 2 + TypeScript 6              | —    | Shared HTTP client             |
 | `@repo/env`               | zod 4 + TypeScript 6             | —    | Shared env validation          |
 | `@repo/typescript-config` | Shared tsconfig presets          | —    | `base`, `react-app`, `library` |
 | `@repo/vitest-config`     | Shared Vitest defaults           | —    | Test/coverage defaults         |
 
-The apps are still early skeletons: `admin` has a login page and an admin shell with placeholder module routes, but there is no authentication, domain API call, or persistence. `@repo/http-client` is the only shared runtime package; `@repo/env` is build/startup-time only. There is no shared UI package. The admin dev server proxies `/api/*` to the BFF, but no domain API call exists yet. The BFF only exposes `GET /` and `GET /health`.
+The apps are still early skeletons: `admin` has a real login flow, session restore, route guard, and an admin shell with placeholder module routes, but no domain API calls yet. `@repo/http-client` is the only shared runtime package; `@repo/env` is build/startup-time only. There is no shared UI package. The admin dev server proxies `/api/*` to the Spring backend at `http://localhost:8080`; Spring remains the authentication and role boundary.
 
 ## Commands
 
@@ -33,7 +32,7 @@ Run all commands from the repository root. Root scripts delegate to `turbo`; the
 
 ```sh
 pnpm install        # install workspace dependencies
-pnpm dev            # start admin(3000), web(4000), and bff(5000) together
+pnpm dev            # start admin(3000) and web(4000) together
 pnpm build          # build all apps
 pnpm lint           # oxlint --deny-warnings in every package
 pnpm lint:fix       # root oxlint --fix (not routed through Turbo)
@@ -49,7 +48,7 @@ Work on one app with a pnpm filter:
 ```sh
 pnpm --filter admin dev
 pnpm --filter web build
-pnpm --filter bff check-types
+pnpm --filter admin check-types
 pnpm --filter admin test:watch
 ```
 
@@ -61,16 +60,15 @@ pnpm --filter admin exec vitest run tests/unit/App.test.tsx -t "renders the prim
 pnpm --filter admin exec vitest run tests/unit/http.test.ts
 pnpm --filter @repo/http-client exec vitest run tests/client.test.ts
 pnpm --filter web exec vitest run tests/nuxt/App.test.ts
-pnpm --filter bff exec vitest run tests/e2e/app.e2e.test.ts
 ```
 
-Build outputs are `apps/admin/dist`, `apps/web/.output`, and `apps/bff/dist`. Coverage reports are written to `apps/<app>/coverage/` and `packages/http-client/coverage/`, both ignored by Git.
+Build outputs are `apps/admin/dist` and `apps/web/.output`. Coverage reports are written to `apps/<app>/coverage/` and `packages/http-client/coverage/`, both ignored by Git.
 
 ## How the workspace is wired
 
 ### Environment configuration
 
-Environment files live in the repository root and are shared by all three apps:
+Environment files live in the repository root and are shared by both apps:
 
 | File                | Committed | Role                             |
 | ------------------- | --------- | -------------------------------- |
@@ -87,11 +85,11 @@ Every app script injects them with `dotenv -c <mode> -e ../../.env -- <command>`
 
 `@repo/env` exports `parseEnv(schema, env?, options?)`, `EnvError`, a re-exported `z`, and zod builders (`envString`, `envOptionalString`, `envUrlString`, `envIntString`, `envBoolString`). Each app declares its own schema in `src|config/config/env.ts`; `parseEnv` throws with every invalid key listed. The shared package knows no business variable names.
 
-`NODE_ENV` is asymmetric: admin and web bake their values in at build time (`.env.production`), while the BFF reads `PORT` and `NODE_ENV` at runtime. `apps/bff`'s `start` script therefore also runs through `dotenv -c production`, and `dotenv-cli` is a runtime dependency there rather than a dev dependency.
+`NODE_ENV` is asymmetric: admin and web bake their values in at build time (`.env.production`); the workspace no longer has a runtime Node service that reads `NODE_ENV` from the environment.
 
-Nuxt resolves its port as `--port → NUXT_PORT → NITRO_PORT → PORT`, falling back to `devServer.port` only when none is set. Because `PORT` belongs to the BFF, a local env file sets `NUXT_PORT=${WEB_PORT}`; without any env file, `devServer.port` keeps the web dev server on 4000.
+Nuxt resolves its port as `--port → NUXT_PORT → NITRO_PORT → PORT`, falling back to `devServer.port`. No root env file sets `PORT` or `NUXT_PORT`; `nuxt.config.ts` keeps the web dev server on 4000.
 
-On Windows Git Bash, a shell override whose value looks like a POSIX absolute path (for example `API_BASE_URL=/api/ pnpm dev`) is rewritten into a Windows path by MSYS path conversion. Set such values in the env files, or prefix the command with `MSYS_NO_PATHCONV=1`.
+On Windows Git Bash, a shell override whose value looks like a POSIX absolute path (for example `API_BASE_URL=/api/v1/ pnpm dev`) is rewritten into a Windows path by MSYS path conversion. Set such values in the env files, or prefix the command with `MSYS_NO_PATHCONV=1`.
 
 ### Turborepo
 
@@ -103,11 +101,11 @@ On Windows Git Bash, a shell override whose value looks like a POSIX absolute pa
 - `test` includes `packages/vitest-config/**` and `packages/env/**` as inputs, so shared test config or shared env changes invalidate test caches.
 - `test:coverage` runs with Turbo concurrency 1 from the root script because parallel V8 coverage workers can exhaust memory; `test` remains parallel.
 - `test:coverage` also caches `coverage/**`.
-- `dev` is persistent, uncached, and declares `PORT` and `NODE_ENV`. Turbo 2.11 defaults to `envMode: "strict"`; an undeclared variable is stripped from the task process, so `PORT=4321 pnpm dev` would otherwise reach the BFF as `undefined`.
+- `dev` is persistent, uncached, and declares `SPRING_API_ORIGIN` and `NODE_ENV`. Turbo 2.11 defaults to `envMode: "strict"`; an undeclared variable is stripped from the task process, so `SPRING_API_ORIGIN=http://localhost:8080 pnpm dev` would otherwise reach Vite as `undefined`.
 
 When a root-level config file affects a task, add it to that task's `inputs` (the existing lint/format/test tasks already reference the root Oxc, Oxfmt, and Vitest configs).
 
-Only `admin`, `web`, `bff`, `@repo/http-client`, and the config packages participate. Package names, not folder paths, are used with `--filter` in the documented commands.
+Only `admin`, `web`, `@repo/http-client`, and the config packages participate. Package names, not folder paths, are used with `--filter` in the documented commands.
 
 ### `apps/admin`
 
@@ -115,9 +113,9 @@ React SPA with the entry point `src/main.tsx` rendering `src/App.tsx`, which wra
 
 Routing (`src/router/index.tsx`):
 
-- `/login` renders `LoginPage` without the admin shell; `/` and unknown paths redirect to `/login`.
+- `/login` renders `LoginPage` without the admin shell; `/` and unknown paths redirect to `/login`. The shell routes are wrapped in `RequireAdmin`; unauthenticated visits redirect to `/login?returnTo=...`.
 - `AdminShell` is the layout route for `/dashboard` and 12 module routes (`/adoptions`, `/care-reviews`, `/tasks`, `/feedback`, `/plants/species`, `/plants/instances`, `/points/rules`, `/points/rewards`, `/points/orders`, `/students`, `/articles`, `/statistics`).
-- Module routes render `PlaceholderPage`; `/dashboard` renders the minimal workbench placeholder. There is no authentication, token, or route guard yet; login only validates and navigates.
+- Module routes render `PlaceholderPage`; `/dashboard` renders the minimal workbench placeholder. Login calls Spring `POST /api/v1/auth/login`; startup restores the session through `GET /api/v1/auth/me`; accessToken lives in localStorage under the admin auth key.
 
 Admin shell (`src/layouts/AdminShell.tsx`):
 
@@ -136,11 +134,11 @@ Styling:
 
 State: `src/stores/app.ts` holds `sidebarCollapsed` (wired into the desktop `Sider`) and persisted `themeMode` (`toggleTheme`).
 
-Pages live under domain folders (`src/pages/auth/LoginPage.tsx`, `src/pages/dashboard/DashboardPage.tsx`, `src/pages/placeholder/PlaceholderPage.tsx`); tests mirror them under `tests/unit/pages/`. Auth UI components live under `src/components/auth/` (`AuthLayout`, `AuthBrandPanel`, `LoginForm`). `src/lib/http.ts` is the environment adapter: it resolves `VITE_API_BASE_URL`, falls back to `/api/`, and creates the shared ky client.
+Pages live under domain folders (`src/pages/auth/LoginPage.tsx`, `src/pages/dashboard/DashboardPage.tsx`, `src/pages/placeholder/PlaceholderPage.tsx`); tests mirror them under `tests/unit/pages/`. Auth UI components live under `src/components/auth/` (`AuthLayout`, `AuthBrandPanel`, `LoginForm`); `src/lib/http.ts` is the environment adapter: it resolves `VITE_API_BASE_URL`, falls back to `/api/v1/`, and creates the shared ky client with Bearer injection and 401 handling.
 
-`src/config/env.ts` parses `ADMIN_PORT` (default 3000), `PORT` (default 5000) and optional `API_BASE_URL`. `vite.config.ts` reads that object and writes `process.env.VITE_API_BASE_URL`; Vite then merges `VITE_*` into `import.meta.env`, so `http.ts` is unchanged and `@repo/env` never enters the browser bundle. The dev server port and the `/api` proxy target both come from the env file, so the scripts must not pass `--port`.
+`src/config/env.ts` parses `ADMIN_PORT` (default 3000), `SPRING_API_ORIGIN` (default `http://localhost:8080`) and optional `API_BASE_URL`. `vite.config.ts` reads that object and writes `process.env.VITE_API_BASE_URL`; Vite then merges `VITE_*` into `import.meta.env`, so `http.ts` is unchanged and `@repo/env` never enters the browser bundle. The dev server port and the `/api` proxy target come from the env file, so the scripts must not pass `--port`.
 
-`vite.config.ts` owns both Vite and Vitest configuration: React plugin, `/api` proxy to the BFF with the prefix stripped, jsdom environment, `tests/**/*.test.{ts,tsx}`, and `tests/setup.ts`. The setup file registers `@testing-library/jest-dom/vitest` and calls Testing Library `cleanup` after each test. The app tsconfig extends `@repo/typescript-config/react-app.json` and includes `tests` and `vite.config.ts`.
+`vite.config.ts` owns both Vite and Vitest configuration: React plugin, `/api` proxy to Spring with the prefix preserved, jsdom environment, `tests/**/*.test.{ts,tsx}`, and `tests/setup.ts`. The setup file registers `@testing-library/jest-dom/vitest` and calls Testing Library `cleanup` after each test. The app tsconfig extends `@repo/typescript-config/react-app.json` and includes `tests` and `vite.config.ts`.
 
 Only `src/lib/http.ts` reads `import.meta.env`; keep future environment access in that adapter so the root environment module can replace it without touching the shared package.
 
@@ -152,24 +150,11 @@ Nuxt 4 application. The root component is `app/app.vue`; `config/env.ts` parses 
 
 `vitest.config.ts` uses `defineVitestConfig` from `@nuxt/test-utils/config`, the `nuxt` environment with jsdom, and `tests/nuxt/**/*.test.ts`. `apps/web/.nuxtrc` is generated by Nuxt/test-utils and should not be hand-edited.
 
-### `apps/bff`
-
-NestJS HTTP BFF. `src/main.ts` bootstraps `AppModule`; `AppModule` wires `AppController`, which serves `GET /` and `GET /health`. `src/config/env.ts` parses `PORT` (default 5000) and `main.ts` listens on that value. The `start` script runs `dotenv -c production -e ../../.env -- node dist/main`, so the built artifact reads the root env files at runtime.
-
-The runtime is CommonJS and uses Nest decorator metadata:
-
-- `tsconfig.json` compiles `src` with `experimentalDecorators` and `emitDecoratorMetadata`.
-- `tsconfig.build.json` excludes tests and the Vitest config from the Nest build.
-- `tsconfig.test.json` includes `src`, `tests`, and `vitest.config.mts` with `rootDir: "."`; `check-types` uses this config.
-- `vitest.config.mts` uses `unplugin-swc` because the default esbuild transform does not emit decorator metadata. Keep the `.mts` extension to avoid Vite's CJS/ESM loader warning.
-
-Tests are split into `tests/unit` (direct controller construction) and `tests/e2e` (create a Nest application with `@nestjs/testing` and call it through Supertest). E2E tests do not require a separately running server.
-
 ### Shared packages
 
 - `@repo/http-client`: exports `createHttpClient`, default timeout/retry constants, and ky's HTTP/network/timeout errors plus guards from `src/index.ts`. It is source-exported with no build step and never reads environment variables.
 - `@repo/env`: exports `parseEnv`, `EnvError`, `z`, and the zod builders from `src/index.ts`, source-exported with no build step. It performs no file loading; callers pass a plain record (normally `process.env`) and declare their own schema.
-- `@repo/typescript-config`: `base.json` is strict `NodeNext`/ES2022; `react-app.json` switches to bundler resolution, `react-jsx`, and `vite/client` types; `library.json` is the bundler/no-emit preset for non-React runtime packages. The BFF and config packages extend `base.json`.
+- `@repo/typescript-config`: `base.json` is strict `NodeNext`/ES2022; `react-app.json` switches to bundler resolution, `react-jsx`, and `vite/client` types; `library.json` is the bundler/no-emit preset for non-React runtime packages. The config packages extend `base.json`.
 - `@repo/vitest-config`: exports `baseTestConfig` from `src/base.ts`. App and package configs spread it into their own `test` block and override `environment`, `include`, `setupFiles`, or `environmentOptions`. The shared coverage `include` covers `src`, `app`, and `shared`; update it if source moves.
 
 These packages export source files directly; there is no build step for workspace config packages or `@repo/http-client`.
@@ -178,15 +163,15 @@ These packages export source files directly; there is no build step for workspac
 
 - All apps and the shared HTTP client use Vitest 5 with the V8 coverage provider.
 - `test` is the normal run; `test:coverage` enables coverage with `text`, `html`, and `lcov` reporters.
-- Admin tests use jsdom + Testing Library. Web tests use the Nuxt runtime. BFF tests use Nest testing utilities and Supertest. `@repo/http-client` tests use the Node environment with an injected fetch.
-- Test files are type-checked as part of each app's or package's normal type checking, except that the BFF uses the dedicated `tsconfig.test.json`.
+- Admin tests use jsdom + Testing Library. Web tests use the Nuxt runtime. `@repo/http-client` tests use the Node environment with an injected fetch.
+- Test files are type-checked as part of each app's or package's normal type checking.
 - Keep test files in the app/package configured `tests` directory; changing the directory requires updating both the Vitest `include` pattern and the relevant tsconfig/Nuxt setup.
 
 ## Toolchain and conventions
 
 - Node.js version is pinned in `.nvmrc` (`26.12.1`); the root `engines` field requires `>=26.12.1`.
 - pnpm 12.14.0. Most app/tool versions are exact pins; keep Vite, Vitest, and TypeScript versions aligned across apps when upgrading.
-- pnpm 12 enforces a 24-hour `minimumReleaseAge`. A newly released pinned version must be added to `minimumReleaseAgeExclude` in `pnpm-workspace.yaml`. Native install scripts must be allowed under `allowBuilds` (currently `esbuild` and `@swc/core`).
+- pnpm 12 enforces a 24-hour `minimumReleaseAge`. A newly released pinned version must be added to `minimumReleaseAgeExclude` in `pnpm-workspace.yaml`. Native install scripts must be allowed under `allowBuilds` (currently `esbuild`).
 - Oxc is the only lint/format toolchain; ESLint and Prettier are intentionally disabled. Root configs are `.oxlintrc.json` and `.oxfmtrc.json`; package scripts run `oxlint`/`oxfmt`.
 - Formatting defaults: UTF-8, LF, 2 spaces, 80-column print width. Do not add conflicting formatter configs.
 - OpenSpec is initialized for spec-driven changes; specs/changes live under `openspec/` and the workflow skills are under `.agents/skills/`.

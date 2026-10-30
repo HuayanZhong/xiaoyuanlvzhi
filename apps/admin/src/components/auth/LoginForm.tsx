@@ -1,20 +1,44 @@
 import { Button, Form, Input } from "antd";
+import { useState } from "react";
+import { emitToast } from "@/lib/toast-events";
 
-type LoginValues = {
+export type LoginValues = {
   username: string;
   password: string;
 };
 
 type LoginFormProps = {
-  onSuccess: () => void;
+  onSubmit: (values: LoginValues) => Promise<void>;
 };
 
-export default function LoginForm({ onSuccess }: LoginFormProps) {
+/** 登录表单负责交互状态；认证与跳转由页面传入。 */
+export default function LoginForm({ onSubmit }: LoginFormProps) {
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleFinish = async (values: LoginValues) => {
+    if (submitting) {
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      await onSubmit(values);
+    } catch (reason) {
+      emitToast(
+        "error",
+        reason instanceof Error ? reason.message : "登录失败，请稍后重试",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <Form<LoginValues>
       autoComplete="on"
       layout="vertical"
-      onFinish={() => onSuccess()}
+      onFinish={handleFinish}
       requiredMark={false}
       size="large"
     >
@@ -34,7 +58,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         name="password"
         rules={[
           { required: true, message: "请输入密码" },
-          { min: 6, message: "密码至少 6 位" },
+          { whitespace: true, message: "密码不能为空白" },
         ]}
       >
         <Input.Password
@@ -43,7 +67,14 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         />
       </Form.Item>
 
-      <Button block htmlType="submit" size="large" type="primary">
+      <Button
+        block
+        disabled={submitting}
+        htmlType="submit"
+        loading={submitting}
+        size="large"
+        type="primary"
+      >
         登录
       </Button>
     </Form>

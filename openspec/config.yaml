@@ -4,13 +4,13 @@ schema: spec-driven
 # 不会复制到生成的 proposal、specs、design 或 tasks 中。
 context: |
   产品：校园绿植领养与环保激励系统。
-  本仓库是 pnpm + Turborepo 前端工作区，包含三个应用：
-  admin（React 19 + Vite 8，端口 3000）、web（Nuxt 4 + Vue 3，端口 4000）、
-  bff（NestJS 12 HTTP API，端口 5000，可通过 PORT 覆盖）。
+  本仓库是 pnpm + Turborepo 前端工作区，包含两个应用：
+  admin（React 19 + Vite 8，端口 3000）与 web（Nuxt 4 + Vue 3，端口 4000）。
 
-  BFF 是服务端行为的边界。当前只暴露 GET / 和 GET /health。admin 开发服务器
-  正在配置 /api/* 到 BFF 的代理，但尚未存在领域 API 调用。除提案明确新增外，
-  不要假设已有认证、数据库或领域 API。
+  Spring 后端是服务端行为的边界，API 根路径为 /api/v1。admin 开发服务器把
+  /api/* 原样代理到 http://localhost:8080，生产环境假定同源反向代理。admin 已
+  实现真实登录、启动会话恢复和路由守卫；Spring 仍是最终认证与角色边界，管理端
+  只在浏览器保存 accessToken。除提案明确新增外，不要假设已有领域 API。
 
   共享 HTTP 客户端包 @repo/http-client 基于 ky，供 admin 使用。跨应用运行时
   代码必须放在工作区包中，不能直接引用另一个应用的文件。
@@ -20,9 +20,8 @@ context: |
   级联加载（`.env.<mode>.local` → `.env.local` → `.env.<mode>` → `.env`，先加载者
   优先，进程环境最高）。共享包 @repo/env 只提供 parseEnv 与 zod 构造器，不读文件、
   不读 process.env；只有应用级适配层可以读取 VITE_*、NUXT_* 或 process.env。
-  当前为 HTTP 客户端预留的逻辑配置键是 apiBaseUrl；admin 通过 VITE_API_BASE_URL
-  提供，未配置时回退到 /api/。`NODE_ENV` 在前后端不对称：admin/web 是构建期输入，
-  BFF 是运行期输入，`start` 脚本也会加载 `.env.production`。
+  admin 通过 VITE_API_BASE_URL 取得 API 基地址，未配置时回退到 /api/v1/；
+  SPRING_API_ORIGIN 只用于 Vite 开发代理。
 
   工具链约束：TypeScript 6、Vitest 5、Oxc（oxlint/oxfmt）。不要添加 ESLint、
   Prettier 或第二套格式化工具。保持版本与工作区一致，并在新增固定版本依赖时
@@ -34,17 +33,17 @@ context: |
 
 rules:
   proposal:
-    - "写明受影响的 app 或 package，并说明是否修改 BFF 接口"
+    - "写明受影响的 app 或 package，并说明是否修改 Spring 接口"
     - "若变更不涉及 API、认证、持久化或共享包，需要明确说明"
     - "将端口、路由、包边界或工具链的破坏性变更标记为 BREAKING"
     - "提案中不要写实现细节"
   specs:
     - "描述外部可观察行为，而不是框架或类的选择"
-    - "BFF 行为要写明方法、路径、状态码、响应体和错误场景"
+    - "Spring 接口行为要写明方法、路径、状态码、响应体和错误场景"
     - "能力名称应描述长期领域行为，而不是一次性变更"
     - "不要凭空添加提案明确排除的后端、认证或持久化需求"
   design:
-    - "说明 admin、web、bff 之间的数据流，包括尚未集成的情况"
+    - "说明 admin、web 与 Spring 之间的数据流，包括尚未集成的情况"
     - "禁止跨应用导入；共享运行时代码应新增工作区包"
     - "说明 tsconfig、Vitest 配置、覆盖率 include 路径和 Turbo 输入的变化"
     - "保持 Oxc 是唯一的 lint 和 format 工具链"
@@ -60,7 +59,7 @@ operations:
   apply:
     guidance:
       - "迭代时运行目标应用检查，完成前运行根目录 lint、类型检查和测试命令"
-      - "若修改 BFF 路由或模块，同时运行单元和 e2e 测试"
+      - "若修改 Spring 接口或 admin 认证流程，同时运行相关接口测试和 admin 测试"
       - "不要格式化无关文件，也不要替换 Oxc 工具链"
   archive:
     guidance:
