@@ -1,6 +1,7 @@
 import { HTTPError, NetworkError, TimeoutError } from "@repo/http-client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { AuthApiError, login, logout, me } from "@/api/auth";
+import { login, logout, me } from "@/api/auth";
+import { ApiError } from "@/api/client";
 import { http } from "@/lib/http";
 
 vi.mock("@/lib/http", () => ({
@@ -189,7 +190,7 @@ describe("auth api", () => {
       (reason: unknown) => reason,
     );
 
-    expect(error).toBeInstanceOf(AuthApiError);
+    expect(error).toBeInstanceOf(ApiError);
     expect(error).toMatchObject({
       code: "NETWORK_ERROR",
       message: "无法连接后端服务，请稍后重试",

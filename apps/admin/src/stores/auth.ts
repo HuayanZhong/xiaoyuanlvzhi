@@ -1,11 +1,11 @@
 import { create } from "zustand";
 import {
-  AuthApiError,
   login as loginRequest,
   logout as logoutRequest,
   me as meRequest,
   type AdminAccount,
 } from "@/api/auth";
+import { ApiError } from "@/api/client";
 import { onUnauthorized } from "@/lib/auth-events";
 import { clearToken, getToken, setToken } from "@/lib/token";
 
@@ -84,7 +84,7 @@ export const useAuthStore = create<AuthState>()((set) => {
         }
         clearToken();
         set({ status: "anonymous", account: null });
-        throw new AuthApiError("NOT_ADMIN", "仅管理员账号可登录管理后台", 403);
+        throw new ApiError("NOT_ADMIN", "仅管理员账号可登录管理后台", 403);
       }
 
       setToken(result.accessToken);
@@ -120,7 +120,7 @@ onUnauthorized(() => {
 
 function isUnauthorized(error: unknown): boolean {
   return (
-    error instanceof AuthApiError &&
+    error instanceof ApiError &&
     (error.status === 401 || error.code === "UNAUTHORIZED")
   );
 }

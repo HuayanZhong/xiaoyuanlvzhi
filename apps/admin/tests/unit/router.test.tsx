@@ -2,9 +2,24 @@ import { render, screen } from "@testing-library/react";
 import { App as AntdApp } from "antd";
 import { createMemoryRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { routes } from "../../src/router";
 import { useAuthStore } from "../../src/stores/auth";
+
+vi.mock("@/api/plants", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/api/plants")>();
+
+  return {
+    ...actual,
+    listSpecies: vi.fn().mockResolvedValue([]),
+    listIndividuals: vi.fn().mockResolvedValue([]),
+  };
+});
+
+vi.mock("@/api/files", () => ({
+  loadImage: vi.fn(),
+  uploadImage: vi.fn(),
+}));
 
 const account = {
   id: 1,
@@ -79,6 +94,28 @@ describe("admin routes", () => {
       await screen.findByRole("heading", { name: "领养管理" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: /运营/ })).toBeInTheDocument();
+  });
+
+  it("renders the species page instead of a placeholder", async () => {
+    useAuthStore.setState({ status: "authenticated", account });
+
+    renderPath("/plants/species");
+
+    expect(
+      await screen.findByRole("heading", { name: "品种档案" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("该模块正在建设中")).not.toBeInTheDocument();
+  });
+
+  it("renders the instances page instead of a placeholder", async () => {
+    useAuthStore.setState({ status: "authenticated", account });
+
+    renderPath("/plants/instances");
+
+    expect(
+      await screen.findByRole("heading", { name: "单株库存" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("该模块正在建设中")).not.toBeInTheDocument();
   });
 
   it("redirects an authenticated admin away from the login page", async () => {

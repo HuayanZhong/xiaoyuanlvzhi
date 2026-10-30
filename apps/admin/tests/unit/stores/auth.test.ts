@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  AuthApiError,
   login as loginRequest,
   logout as logoutRequest,
   me as meRequest,
   type AdminAccount,
   type AuthResult,
 } from "@/api/auth";
+import { ApiError } from "@/api/client";
 import { emitUnauthorized } from "@/lib/auth-events";
 import { clearToken, getToken, setToken } from "@/lib/token";
 import { useAuthStore } from "@/stores/auth";
@@ -71,7 +71,7 @@ describe("auth store", () => {
   it("clears an expired token on 401", async () => {
     setToken("expired-token");
     vi.mocked(meRequest).mockRejectedValue(
-      new AuthApiError("UNAUTHORIZED", "请先登录或重新登录", 401),
+      new ApiError("UNAUTHORIZED", "请先登录或重新登录", 401),
     );
 
     await useAuthStore.getState().restore();
@@ -83,7 +83,7 @@ describe("auth store", () => {
   it("keeps the token and reports an error when the backend is down", async () => {
     setToken("spring-token");
     vi.mocked(meRequest).mockRejectedValue(
-      new AuthApiError("NETWORK_ERROR", "无法连接后端服务"),
+      new ApiError("NETWORK_ERROR", "无法连接后端服务"),
     );
 
     await useAuthStore.getState().restore();
@@ -151,7 +151,7 @@ describe("auth store", () => {
     setToken("spring-token");
     useAuthStore.setState({ status: "authenticated", account });
     vi.mocked(logoutRequest).mockRejectedValue(
-      new AuthApiError("NETWORK_ERROR", "无法连接后端服务"),
+      new ApiError("NETWORK_ERROR", "无法连接后端服务"),
     );
 
     const result = await useAuthStore.getState().logout();
@@ -165,7 +165,7 @@ describe("auth store", () => {
     setToken("spring-token");
     useAuthStore.setState({ status: "authenticated", account });
     vi.mocked(logoutRequest).mockRejectedValue(
-      new AuthApiError("UNAUTHORIZED", "请先登录", 401),
+      new ApiError("UNAUTHORIZED", "请先登录", 401),
     );
 
     const result = await useAuthStore.getState().logout();

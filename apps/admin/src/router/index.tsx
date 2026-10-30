@@ -5,6 +5,8 @@ import RequireAdmin, {
 import AdminShell from "@/layouts/AdminShell";
 import DashboardPage from "@/pages/dashboard/DashboardPage";
 import LoginPage from "@/pages/auth/LoginPage";
+import InstancesPage from "@/pages/plants/InstancesPage";
+import SpeciesPage from "@/pages/plants/SpeciesPage";
 import PlaceholderPage from "@/pages/placeholder/PlaceholderPage";
 
 const moduleRoutes: RouteObject[] = [
@@ -12,8 +14,8 @@ const moduleRoutes: RouteObject[] = [
   { path: "care-reviews", element: <PlaceholderPage /> },
   { path: "tasks", element: <PlaceholderPage /> },
   { path: "feedback", element: <PlaceholderPage /> },
-  { path: "plants/species", element: <PlaceholderPage /> },
-  { path: "plants/instances", element: <PlaceholderPage /> },
+  { path: "plants/species", element: <SpeciesPage /> },
+  { path: "plants/instances", element: <InstancesPage /> },
   { path: "points/rules", element: <PlaceholderPage /> },
   { path: "points/rewards", element: <PlaceholderPage /> },
   { path: "points/orders", element: <PlaceholderPage /> },

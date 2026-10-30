@@ -35,8 +35,8 @@ export default function MobileNavDrawer({
       onClose={onClose}
       open={open}
       placement="left"
+      size={288}
       title="导航"
-      width={288}
     >
       <Menu
         items={items}
