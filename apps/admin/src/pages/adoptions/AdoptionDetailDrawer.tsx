@@ -25,12 +25,12 @@ import {
 } from "@/api/adoptions";
 import type { StudentView } from "@/api/accounts";
 import LoadFailure from "@/components/common/LoadFailure";
+import ReasonModal from "@/components/common/ReasonModal";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { notifyError } from "@/lib/api-feedback";
 import { formatDateTime } from "@/lib/format";
 import { emitToast } from "@/lib/toast-events";
 import ApprovePlantModal from "./ApprovePlantModal";
-import ReasonModal from "./ReasonModal";
 import ReturnDecisionModal from "./ReturnDecisionModal";
 import {
   adoptionStatusColor,

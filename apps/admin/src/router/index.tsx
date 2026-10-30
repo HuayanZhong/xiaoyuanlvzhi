@@ -4,6 +4,7 @@ import RequireAdmin, {
 } from "@/components/auth/RequireAdmin";
 import AdminShell from "@/layouts/AdminShell";
 import AdoptionsPage from "@/pages/adoptions/AdoptionsPage";
+import CareReviewsPage from "@/pages/care/CareReviewsPage";
 import DashboardPage from "@/pages/dashboard/DashboardPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import InstancesPage from "@/pages/plants/InstancesPage";
@@ -12,7 +13,7 @@ import PlaceholderPage from "@/pages/placeholder/PlaceholderPage";
 
 const moduleRoutes: RouteObject[] = [
   { path: "adoptions", element: <AdoptionsPage /> },
-  { path: "care-reviews", element: <PlaceholderPage /> },
+  { path: "care-reviews", element: <CareReviewsPage /> },
   { path: "tasks", element: <PlaceholderPage /> },
   { path: "feedback", element: <PlaceholderPage /> },
   { path: "plants/species", element: <SpeciesPage /> },

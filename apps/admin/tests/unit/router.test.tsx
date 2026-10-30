@@ -15,6 +15,15 @@ vi.mock("@/api/adoptions", async (importOriginal) => {
   };
 });
 
+vi.mock("@/api/care", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/api/care")>();
+
+  return {
+    ...actual,
+    listCareCheckins: vi.fn().mockResolvedValue([]),
+  };
+});
+
 vi.mock("@/api/accounts", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/api/accounts")>();
 
@@ -112,6 +121,17 @@ describe("admin routes", () => {
       await screen.findByRole("heading", { name: "领养管理" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: /运营/ })).toBeInTheDocument();
+    expect(screen.queryByText("该模块正在建设中")).not.toBeInTheDocument();
+  });
+
+  it("renders the care reviews page instead of a placeholder", async () => {
+    useAuthStore.setState({ status: "authenticated", account });
+
+    renderPath("/care-reviews");
+
+    expect(
+      await screen.findByRole("heading", { name: "养护审核" }),
+    ).toBeInTheDocument();
     expect(screen.queryByText("该模块正在建设中")).not.toBeInTheDocument();
   });
 

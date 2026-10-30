@@ -1,4 +1,4 @@
-import { Image, Skeleton } from "antd";
+import { Button, Flex, Image, Skeleton, Typography } from "antd";
 import type { CSSProperties } from "react";
 import { useFileUrl } from "@/hooks/useFileUrl";
 
@@ -20,10 +20,29 @@ export default function AuthenticatedImage({
   style,
   preview = true,
 }: AuthenticatedImageProps) {
-  const url = useFileUrl(fileId);
+  const { url, loading, error, reload } = useFileUrl(fileId);
 
-  if (!url) {
-    return <Skeleton.Image active style={{ width, height }} />;
+  if (error) {
+    return (
+      <Flex
+        align="center"
+        gap={2}
+        justify="center"
+        style={{ height, width }}
+        vertical
+      >
+        <Typography.Text style={{ fontSize: 12 }} type="secondary">
+          图片加载失败
+        </Typography.Text>
+        <Button size="small" type="link" onClick={reload}>
+          重试
+        </Button>
+      </Flex>
+    );
+  }
+
+  if (loading || !url) {
+    return <Skeleton.Image active style={{ height, width }} />;
   }
 
   return (
