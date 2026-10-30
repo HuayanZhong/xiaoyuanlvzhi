@@ -9,12 +9,13 @@ import DashboardPage from "@/pages/dashboard/DashboardPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import InstancesPage from "@/pages/plants/InstancesPage";
 import SpeciesPage from "@/pages/plants/SpeciesPage";
+import TasksPage from "@/pages/tasks/TasksPage";
 import PlaceholderPage from "@/pages/placeholder/PlaceholderPage";
 
 const moduleRoutes: RouteObject[] = [
   { path: "adoptions", element: <AdoptionsPage /> },
   { path: "care-reviews", element: <CareReviewsPage /> },
-  { path: "tasks", element: <PlaceholderPage /> },
+  { path: "tasks", element: <TasksPage /> },
   { path: "feedback", element: <PlaceholderPage /> },
   { path: "plants/species", element: <SpeciesPage /> },
   { path: "plants/instances", element: <InstancesPage /> },

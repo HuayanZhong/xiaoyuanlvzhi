@@ -43,6 +43,16 @@ vi.mock("@/api/plants", async (importOriginal) => {
   };
 });
 
+vi.mock("@/api/tasks", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/api/tasks")>();
+
+  return {
+    ...actual,
+    listTasks: vi.fn().mockResolvedValue([]),
+    listTaskParticipations: vi.fn().mockResolvedValue([]),
+  };
+});
+
 vi.mock("@/api/files", () => ({
   loadImage: vi.fn(),
   uploadImage: vi.fn(),
@@ -131,6 +141,17 @@ describe("admin routes", () => {
 
     expect(
       await screen.findByRole("heading", { name: "养护审核" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("该模块正在建设中")).not.toBeInTheDocument();
+  });
+
+  it("renders the tasks page instead of a placeholder", async () => {
+    useAuthStore.setState({ status: "authenticated", account });
+
+    renderPath("/tasks");
+
+    expect(
+      await screen.findByRole("heading", { name: "环保任务" }),
     ).toBeInTheDocument();
     expect(screen.queryByText("该模块正在建设中")).not.toBeInTheDocument();
   });

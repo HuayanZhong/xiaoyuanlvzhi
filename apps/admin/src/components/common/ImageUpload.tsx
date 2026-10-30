@@ -14,6 +14,7 @@ export type ImageUploadProps = {
   value?: number[];
   onChange?: (value: number[]) => void;
   max?: number;
+  disabled?: boolean;
 };
 
 /** 校验图片格式、大小和数量；合法时返回 null。 */
@@ -42,6 +43,7 @@ export default function ImageUpload({
   value = EMPTY_IDS,
   onChange,
   max = 1,
+  disabled = false,
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const full = value.length >= max;
@@ -88,6 +90,7 @@ export default function ImageUpload({
           />
           <Button
             aria-label={`移除图片 ${id}`}
+            disabled={disabled}
             icon={<CloseOutlined />}
             shape="circle"
             size="small"
@@ -97,7 +100,7 @@ export default function ImageUpload({
         </div>
       ))}
 
-      {!full && (
+      {!full && !disabled && (
         <Upload
           accept={ACCEPTED_TYPES.join(",")}
           beforeUpload={beforeUpload}
@@ -118,12 +121,15 @@ export default function ImageUpload({
 export function SingleImageUpload({
   value,
   onChange,
+  disabled,
 }: {
   value?: number | null;
   onChange?: (value: number | null) => void;
+  disabled?: boolean;
 }) {
   return (
     <ImageUpload
+      disabled={disabled}
       max={1}
       onChange={(ids) => onChange?.(ids[0] ?? null)}
       value={value == null ? [] : [value]}
