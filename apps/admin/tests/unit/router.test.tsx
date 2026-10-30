@@ -6,6 +6,24 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { routes } from "../../src/router";
 import { useAuthStore } from "../../src/stores/auth";
 
+vi.mock("@/api/adoptions", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/api/adoptions")>();
+
+  return {
+    ...actual,
+    listAdoptions: vi.fn().mockResolvedValue([]),
+  };
+});
+
+vi.mock("@/api/accounts", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/api/accounts")>();
+
+  return {
+    ...actual,
+    listStudents: vi.fn().mockResolvedValue([]),
+  };
+});
+
 vi.mock("@/api/plants", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/api/plants")>();
 
@@ -85,7 +103,7 @@ describe("admin routes", () => {
     expect(screen.getByRole("heading", { name: "工作台" })).toBeInTheDocument();
   });
 
-  it("renders a module placeholder for an authenticated admin", async () => {
+  it("renders the adoptions page instead of a placeholder", async () => {
     useAuthStore.setState({ status: "authenticated", account });
 
     renderPath("/adoptions");
@@ -94,6 +112,7 @@ describe("admin routes", () => {
       await screen.findByRole("heading", { name: "领养管理" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: /运营/ })).toBeInTheDocument();
+    expect(screen.queryByText("该模块正在建设中")).not.toBeInTheDocument();
   });
 
   it("renders the species page instead of a placeholder", async () => {

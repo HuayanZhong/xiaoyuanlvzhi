@@ -3,6 +3,7 @@ import RequireAdmin, {
   RedirectIfAuthenticated,
 } from "@/components/auth/RequireAdmin";
 import AdminShell from "@/layouts/AdminShell";
+import AdoptionsPage from "@/pages/adoptions/AdoptionsPage";
 import DashboardPage from "@/pages/dashboard/DashboardPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import InstancesPage from "@/pages/plants/InstancesPage";
@@ -10,7 +11,7 @@ import SpeciesPage from "@/pages/plants/SpeciesPage";
 import PlaceholderPage from "@/pages/placeholder/PlaceholderPage";
 
 const moduleRoutes: RouteObject[] = [
-  { path: "adoptions", element: <PlaceholderPage /> },
+  { path: "adoptions", element: <AdoptionsPage /> },
   { path: "care-reviews", element: <PlaceholderPage /> },
   { path: "tasks", element: <PlaceholderPage /> },
   { path: "feedback", element: <PlaceholderPage /> },
