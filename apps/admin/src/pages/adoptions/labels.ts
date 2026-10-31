@@ -1,5 +1,7 @@
 import type { AdoptionStatus, ReturnResult } from "@/api/adoptions";
 
+export type AdoptionStatusFilter = "all" | AdoptionStatus | "CHANGES";
+
 export const ADOPTION_STATUS_OPTIONS = [
   { value: "all", label: "全部状态" },
   { value: "PENDING_REVIEW", label: "待审核" },
@@ -10,8 +12,9 @@ export const ADOPTION_STATUS_OPTIONS = [
   { value: "RETURN_REVIEW", label: "归还审核中" },
   { value: "ENDED", label: "已结束" },
   { value: "CANCELLED", label: "已取消" },
+  { value: "CHANGES", label: "待处理变更（取消/归还）" },
 ] as const satisfies ReadonlyArray<{
-  value: "all" | AdoptionStatus;
+  value: AdoptionStatusFilter;
   label: string;
 }>;
 

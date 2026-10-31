@@ -46,10 +46,10 @@ const emitToastMock = vi.mocked(emitToast);
 
 const NOW = new Date("2026-10-30T12:00:00");
 
-function renderPage() {
+function renderPage(initialEntry = "/points/orders") {
   const router = createMemoryRouter(
     [{ path: "/points/orders", element: <OrdersPage now={NOW} /> }],
-    { initialEntries: ["/points/orders"] },
+    { initialEntries: [initialEntry] },
   );
 
   return render(
@@ -142,6 +142,24 @@ describe("OrdersPage", () => {
     expect(screen.getByText("已领取")).toBeInTheDocument();
     expect(screen.getByText("已超时，等待退分")).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "确认领取" })).toHaveLength(1);
+  });
+
+  it("applies the order status from the URL", async () => {
+    renderPage("/points/orders?status=WAITING_PICKUP");
+
+    expect(await screen.findByText("张三")).toBeInTheDocument();
+    expect(screen.queryByText("王五")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /重\s*置/ }));
+
+    expect(await screen.findByText("王五")).toBeInTheDocument();
+  });
+
+  it("ignores an invalid order status parameter", async () => {
+    renderPage("/points/orders?status=NOPE");
+
+    expect(await screen.findByText("张三")).toBeInTheDocument();
+    expect(screen.getByText("王五")).toBeInTheDocument();
   });
 
   it("filters by keyword, status and date, then resets", async () => {

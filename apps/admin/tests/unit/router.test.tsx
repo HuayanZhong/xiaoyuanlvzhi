@@ -82,6 +82,43 @@ vi.mock("@/api/feedback", async (importOriginal) => {
   };
 });
 
+vi.mock("@/api/dashboard", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/api/dashboard")>();
+
+  return {
+    ...actual,
+    getDashboard: vi.fn().mockResolvedValue({
+      pendingAdoptions: 0,
+      pendingAdoptionChanges: 0,
+      pendingCareCheckins: 0,
+      pendingTaskSubmissions: 0,
+      waitingRewardOrders: 0,
+      pendingFeedback: 0,
+      availablePlants: 0,
+      activePlants: 0,
+      recentItems: [],
+    }),
+    getStatistics: vi.fn().mockResolvedValue({
+      from: "2026-10-01",
+      to: "2026-10-30",
+      currentActivePlants: 0,
+      adoptionsStarted: 0,
+      participatingStudents: 0,
+      completedTaskParticipants: 0,
+      endedTaskParticipants: 0,
+      taskCompletionRate: null,
+      pointsGranted: 0,
+      pointRanking: [],
+      adoptionTrend: [],
+      pointGrantTrend: [],
+    }),
+  };
+});
+
+vi.mock("@/components/common/EChart", () => ({
+  default: () => <div data-testid="echart" />,
+}));
+
 vi.mock("@/api/files", () => ({
   loadImage: vi.fn(),
   uploadImage: vi.fn(),

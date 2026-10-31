@@ -27,11 +27,12 @@ import {
   ADOPTION_STATUS_OPTIONS,
   adoptionStatusColor,
   adoptionStatusLabel,
+  type AdoptionStatusFilter,
 } from "./labels";
 
 const PAGE_SIZE = 10;
 
-type StatusFilter = "all" | AdoptionStatus;
+type StatusFilter = AdoptionStatusFilter;
 
 type AdoptionFilters = {
   keyword: string;
@@ -50,6 +51,10 @@ const EMPTY_FILTERS: AdoptionFilters = {
 };
 
 function parseStatus(value: string | null): StatusFilter {
+  if (value === "CHANGES") {
+    return "CHANGES";
+  }
+
   return ADOPTION_STATUSES.includes(value as AdoptionStatus)
     ? (value as AdoptionStatus)
     : "all";
@@ -137,7 +142,11 @@ export default function AdoptionsPage() {
         })
         .filter(
           (adoption) =>
-            filters.status === "all" || adoption.status === filters.status,
+            filters.status === "all" ||
+            (filters.status === "CHANGES"
+              ? adoption.status === "CANCEL_REVIEW" ||
+                adoption.status === "RETURN_REVIEW"
+              : adoption.status === filters.status),
         )
         .filter(
           (adoption) =>

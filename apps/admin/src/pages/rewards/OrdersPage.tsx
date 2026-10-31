@@ -12,6 +12,7 @@ import {
   type TableColumnsType,
 } from "antd";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router";
 import { listStudents, type StudentView } from "@/api/accounts";
 import { ApiError } from "@/api/client";
 import { claimOrder, listOrders, type OrderView } from "@/api/rewards";
@@ -44,6 +45,19 @@ const EMPTY_FILTERS: OrderFilters = {
   from: "",
   to: "",
 };
+
+const ORDER_STATUS_VALUES = new Set([
+  "WAITING_PICKUP",
+  "CLAIMED",
+  "CANCELLED",
+  "EXPIRED",
+]);
+
+function parseStatus(value: string | null): OrderStatusFilter {
+  return value && ORDER_STATUS_VALUES.has(value)
+    ? (value as OrderStatusFilter)
+    : "all";
+}
 
 type OrdersPageProps = {
   /** 测试或外部嵌入时可固定当前时间；默认使用浏览器时间。 */
@@ -78,14 +92,18 @@ function claimError(error: unknown): string {
 
 /** 兑换订单管理：筛选、核销、取消和超时只读提示。 */
 export default function OrdersPage({ now: nowProp }: OrdersPageProps) {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [now] = useState(() => nowProp ?? new Date());
   const [orders, setOrders] = useState<OrderView[]>([]);
   const [students, setStudents] = useState<StudentView[]>([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
   const [studentsFailed, setStudentsFailed] = useState(false);
-  const [draft, setDraft] = useState<OrderFilters>(EMPTY_FILTERS);
-  const [filters, setFilters] = useState<OrderFilters>(EMPTY_FILTERS);
+  const [draft, setDraft] = useState<OrderFilters>(() => ({
+    ...EMPTY_FILTERS,
+    status: parseStatus(searchParams.get("status")),
+  }));
+  const [filters, setFilters] = useState<OrderFilters>(draft);
   const [page, setPage] = useState(1);
   const [claimingId, setClaimingId] = useState<number | null>(null);
   const [cancelTarget, setCancelTarget] = useState<OrderView | null>(null);
@@ -178,15 +196,29 @@ export default function OrdersPage({ now: nowProp }: OrdersPageProps) {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
 
+  const syncStatusParam = (status: OrderStatusFilter) => {
+    const next = new URLSearchParams(searchParams);
+
+    if (status === "all") {
+      next.delete("status");
+    } else {
+      next.set("status", status);
+    }
+
+    setSearchParams(next, { replace: true });
+  };
+
   const applyFilters = () => {
     setFilters(draft);
     setPage(1);
+    syncStatusParam(draft.status);
   };
 
   const resetFilters = () => {
     setDraft(EMPTY_FILTERS);
     setFilters(EMPTY_FILTERS);
     setPage(1);
+    syncStatusParam("all");
   };
 
   const claim = async (order: OrderView) => {

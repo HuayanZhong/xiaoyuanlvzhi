@@ -27,7 +27,7 @@ admin SHALL 在 `/adoptions` 显示领养申请列表，包含申请编号、学
 
 ### Requirement: 领养申请筛选
 
-列表 SHALL 支持按关键词、状态、品种和提交日期范围筛选。关键词 SHALL 不区分大小写匹配申请编号、学生姓名、学号和邮箱；筛选在点击“查询”后生效，“重置”恢复默认。筛选与分页 SHALL 在客户端完成。`status` 查询参数 SHALL 作为状态初始筛选，无效值 SHALL 被忽略。
+列表 SHALL 支持按关键词、状态、品种和提交日期范围筛选。关键词 SHALL 不区分大小写匹配申请编号、学生姓名、学号和邮箱；筛选在点击“查询”后生效，“重置”恢复默认。筛选与分页 SHALL 在客户端完成。`status` 查询参数 SHALL 作为状态初始筛选；除已知申请状态外，SHALL 接受组合值 `CHANGES`，表示取消审核中或归还审核中；其他值 SHALL 被忽略。
 
 #### Scenario: 关键词筛选
 
@@ -39,6 +39,11 @@ admin SHALL 在 `/adoptions` 显示领养申请列表，包含申请编号、学
 - **WHEN** 管理员直接访问 `/adoptions?status=PENDING_REVIEW`
 - **THEN** 状态筛选初始为“待审核”，列表只显示待审核申请
 
+#### Scenario: 组合变更筛选
+
+- **WHEN** 管理员直接访问 `/adoptions?status=CHANGES`
+- **THEN** 状态筛选显示“待处理变更”，列表只显示取消审核中和归还审核中的申请
+
 #### Scenario: 组合筛选
 
 - **WHEN** 管理员同时选择状态、品种和提交日期范围并点击“查询”
@@ -46,7 +51,7 @@ admin SHALL 在 `/adoptions` 显示领养申请列表，包含申请编号、学
 
 #### Scenario: 无效状态参数
 
-- **WHEN** `status` 不是已知申请状态
+- **WHEN** `status` 既不是已知申请状态也不是 `CHANGES`
 - **THEN** admin 忽略该参数并显示全部申请，不显示错误页
 
 #### Scenario: 重置筛选

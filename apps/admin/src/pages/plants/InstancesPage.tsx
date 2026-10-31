@@ -48,6 +48,20 @@ function parseSpeciesId(value: string | null): number | "all" {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : "all";
 }
 
+const INDIVIDUAL_STATUS_VALUES = new Set([
+  "AVAILABLE",
+  "WAITING_PICKUP",
+  "ACTIVE",
+  "MAINTENANCE",
+  "DISABLED",
+]);
+
+function parseStatus(value: string | null): StatusFilter {
+  return value && INDIVIDUAL_STATUS_VALUES.has(value)
+    ? (value as IndividualStatus)
+    : "all";
+}
+
 const EMPTY_FILTERS: IndividualFilters = {
   keyword: "",
   speciesId: "all",
@@ -63,6 +77,7 @@ export default function InstancesPage() {
   const [draft, setDraft] = useState<IndividualFilters>(() => ({
     ...EMPTY_FILTERS,
     speciesId: parseSpeciesId(searchParams.get("speciesId")),
+    status: parseStatus(searchParams.get("status")),
   }));
   const [filters, setFilters] = useState<IndividualFilters>(draft);
   const [page, setPage] = useState(1);
@@ -133,29 +148,35 @@ export default function InstancesPage() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
 
-  const applyFilters = () => {
-    setFilters(draft);
-    setPage(1);
-
+  const syncQueryParams = (nextFilters: IndividualFilters) => {
     const next = new URLSearchParams(searchParams);
 
-    if (draft.speciesId === "all") {
+    if (nextFilters.speciesId === "all") {
       next.delete("speciesId");
     } else {
-      next.set("speciesId", String(draft.speciesId));
+      next.set("speciesId", String(nextFilters.speciesId));
+    }
+
+    if (nextFilters.status === "all") {
+      next.delete("status");
+    } else {
+      next.set("status", nextFilters.status);
     }
 
     setSearchParams(next, { replace: true });
+  };
+
+  const applyFilters = () => {
+    setFilters(draft);
+    setPage(1);
+    syncQueryParams(draft);
   };
 
   const resetFilters = () => {
     setDraft(EMPTY_FILTERS);
     setFilters(EMPTY_FILTERS);
     setPage(1);
-
-    const next = new URLSearchParams(searchParams);
-    next.delete("speciesId");
-    setSearchParams(next, { replace: true });
+    syncQueryParams(EMPTY_FILTERS);
   };
 
   const openCreate = () => {

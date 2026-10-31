@@ -392,6 +392,34 @@ describe("AdoptionsPage", () => {
     expect(screen.queryByText("ADP-002")).not.toBeInTheDocument();
   });
 
+  it("applies the combined change filter from the URL", async () => {
+    listAdoptions.mockResolvedValue([
+      makeAdoption({ id: 1, applicationNo: "ADP-PENDING" }),
+      makeAdoption({
+        id: 2,
+        applicationNo: "ADP-CANCEL",
+        status: "CANCEL_REVIEW",
+      }),
+      makeAdoption({
+        id: 3,
+        applicationNo: "ADP-RETURN",
+        status: "RETURN_REVIEW",
+      }),
+      makeAdoption({
+        id: 4,
+        applicationNo: "ADP-REJECTED",
+        status: "REJECTED",
+      }),
+    ]);
+
+    renderPage("/adoptions?status=CHANGES");
+
+    expect(await screen.findByText("ADP-CANCEL")).toBeInTheDocument();
+    expect(screen.getByText("ADP-RETURN")).toBeInTheDocument();
+    expect(screen.queryByText("ADP-PENDING")).not.toBeInTheDocument();
+    expect(screen.queryByText("ADP-REJECTED")).not.toBeInTheDocument();
+  });
+
   it("ignores an invalid status parameter", async () => {
     listAdoptions.mockResolvedValue([
       makeAdoption({ id: 1, applicationNo: "ADP-001" }),

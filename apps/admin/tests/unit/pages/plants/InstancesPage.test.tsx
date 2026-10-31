@@ -217,6 +217,76 @@ describe("InstancesPage", () => {
     expect(await screen.findByText("PLANT-001")).toBeInTheDocument();
   });
 
+  it("applies the status filter from the URL", async () => {
+    listSpecies.mockResolvedValue([makeSpecies()]);
+    listIndividuals.mockResolvedValue([
+      makeIndividual({ id: 10, code: "PLANT-AVAILABLE" }),
+      makeIndividual({
+        id: 11,
+        code: "PLANT-ACTIVE",
+        status: "ACTIVE",
+      }),
+      makeIndividual({
+        id: 12,
+        code: "PLANT-MAINTENANCE",
+        status: "MAINTENANCE",
+      }),
+    ]);
+
+    renderPage("/plants/instances?status=ACTIVE");
+
+    expect(await screen.findByText("PLANT-ACTIVE")).toBeInTheDocument();
+    expect(screen.queryByText("PLANT-AVAILABLE")).not.toBeInTheDocument();
+    expect(screen.queryByText("PLANT-MAINTENANCE")).not.toBeInTheDocument();
+  });
+
+  it("combines the species and status filters from the URL", async () => {
+    listSpecies.mockResolvedValue([
+      makeSpecies({ id: 1, name: "绿萝" }),
+      makeSpecies({ id: 2, name: "芦荟" }),
+    ]);
+    listIndividuals.mockResolvedValue([
+      makeIndividual({
+        id: 10,
+        code: "PLANT-1-ACTIVE",
+        speciesId: 1,
+        status: "ACTIVE",
+      }),
+      makeIndividual({
+        id: 11,
+        code: "PLANT-1-OTHER",
+        speciesId: 1,
+        status: "MAINTENANCE",
+      }),
+      makeIndividual({
+        id: 12,
+        code: "PLANT-2-ACTIVE",
+        speciesId: 2,
+        speciesName: "芦荟",
+        status: "ACTIVE",
+      }),
+    ]);
+
+    renderPage("/plants/instances?speciesId=1&status=ACTIVE");
+
+    expect(await screen.findByText("PLANT-1-ACTIVE")).toBeInTheDocument();
+    expect(screen.queryByText("PLANT-1-OTHER")).not.toBeInTheDocument();
+    expect(screen.queryByText("PLANT-2-ACTIVE")).not.toBeInTheDocument();
+  });
+
+  it("ignores an invalid individual status parameter", async () => {
+    listSpecies.mockResolvedValue([makeSpecies()]);
+    listIndividuals.mockResolvedValue([
+      makeIndividual({ id: 10, code: "PLANT-001" }),
+      makeIndividual({ id: 11, code: "PLANT-002", status: "MAINTENANCE" }),
+    ]);
+
+    renderPage("/plants/instances?status=NOPE");
+
+    expect(await screen.findByText("PLANT-001")).toBeInTheDocument();
+    expect(screen.getByText("PLANT-002")).toBeInTheDocument();
+  });
+
   it("filters by keyword and status, then resets", async () => {
     listSpecies.mockResolvedValue([makeSpecies()]);
     listIndividuals.mockResolvedValue([
