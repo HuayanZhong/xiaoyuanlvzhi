@@ -73,6 +73,15 @@ vi.mock("@/api/rewards", async (importOriginal) => {
   };
 });
 
+vi.mock("@/api/feedback", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/api/feedback")>();
+
+  return {
+    ...actual,
+    listFeedback: vi.fn().mockResolvedValue([]),
+  };
+});
+
 vi.mock("@/api/files", () => ({
   loadImage: vi.fn(),
   uploadImage: vi.fn(),
@@ -172,6 +181,17 @@ describe("admin routes", () => {
 
     expect(
       await screen.findByRole("heading", { name: "环保任务" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("该模块正在建设中")).not.toBeInTheDocument();
+  });
+
+  it("renders the feedback page instead of a placeholder", async () => {
+    useAuthStore.setState({ status: "authenticated", account });
+
+    renderPath("/feedback");
+
+    expect(
+      await screen.findByRole("heading", { name: "问题反馈" }),
     ).toBeInTheDocument();
     expect(screen.queryByText("该模块正在建设中")).not.toBeInTheDocument();
   });

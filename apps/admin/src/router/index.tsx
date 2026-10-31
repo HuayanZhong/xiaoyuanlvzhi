@@ -6,6 +6,7 @@ import AdminShell from "@/layouts/AdminShell";
 import AdoptionsPage from "@/pages/adoptions/AdoptionsPage";
 import CareReviewsPage from "@/pages/care/CareReviewsPage";
 import DashboardPage from "@/pages/dashboard/DashboardPage";
+import FeedbackPage from "@/pages/feedback/FeedbackPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import InstancesPage from "@/pages/plants/InstancesPage";
 import PointsPage from "@/pages/points/PointsPage";
@@ -19,7 +20,7 @@ const moduleRoutes: RouteObject[] = [
   { path: "adoptions", element: <AdoptionsPage /> },
   { path: "care-reviews", element: <CareReviewsPage /> },
   { path: "tasks", element: <TasksPage /> },
-  { path: "feedback", element: <PlaceholderPage /> },
+  { path: "feedback", element: <FeedbackPage /> },
   { path: "plants/species", element: <SpeciesPage /> },
   { path: "plants/instances", element: <InstancesPage /> },
   { path: "points/rules", element: <PointsPage /> },
