@@ -63,6 +63,16 @@ vi.mock("@/api/points", async (importOriginal) => {
   };
 });
 
+vi.mock("@/api/rewards", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/api/rewards")>();
+
+  return {
+    ...actual,
+    listRewards: vi.fn().mockResolvedValue([]),
+    listOrders: vi.fn().mockResolvedValue([]),
+  };
+});
+
 vi.mock("@/api/files", () => ({
   loadImage: vi.fn(),
   uploadImage: vi.fn(),
@@ -173,6 +183,28 @@ describe("admin routes", () => {
 
     expect(
       await screen.findByRole("heading", { name: "积分规则与流水" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("该模块正在建设中")).not.toBeInTheDocument();
+  });
+
+  it("renders the rewards page instead of a placeholder", async () => {
+    useAuthStore.setState({ status: "authenticated", account });
+
+    renderPath("/points/rewards");
+
+    expect(
+      await screen.findByRole("heading", { name: "奖励商品" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("该模块正在建设中")).not.toBeInTheDocument();
+  });
+
+  it("renders the orders page instead of a placeholder", async () => {
+    useAuthStore.setState({ status: "authenticated", account });
+
+    renderPath("/points/orders");
+
+    expect(
+      await screen.findByRole("heading", { name: "兑换订单" }),
     ).toBeInTheDocument();
     expect(screen.queryByText("该模块正在建设中")).not.toBeInTheDocument();
   });

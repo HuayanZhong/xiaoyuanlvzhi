@@ -9,6 +9,8 @@ import DashboardPage from "@/pages/dashboard/DashboardPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import InstancesPage from "@/pages/plants/InstancesPage";
 import PointsPage from "@/pages/points/PointsPage";
+import OrdersPage from "@/pages/rewards/OrdersPage";
+import RewardsPage from "@/pages/rewards/RewardsPage";
 import SpeciesPage from "@/pages/plants/SpeciesPage";
 import TasksPage from "@/pages/tasks/TasksPage";
 import PlaceholderPage from "@/pages/placeholder/PlaceholderPage";
@@ -21,8 +23,8 @@ const moduleRoutes: RouteObject[] = [
   { path: "plants/species", element: <SpeciesPage /> },
   { path: "plants/instances", element: <InstancesPage /> },
   { path: "points/rules", element: <PointsPage /> },
-  { path: "points/rewards", element: <PlaceholderPage /> },
-  { path: "points/orders", element: <PlaceholderPage /> },
+  { path: "points/rewards", element: <RewardsPage /> },
+  { path: "points/orders", element: <OrdersPage /> },
   { path: "students", element: <PlaceholderPage /> },
   { path: "articles", element: <PlaceholderPage /> },
   { path: "statistics", element: <PlaceholderPage /> },
