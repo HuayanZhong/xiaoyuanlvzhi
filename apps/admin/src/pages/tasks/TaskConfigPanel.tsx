@@ -6,7 +6,6 @@ import {
   Input,
   Popconfirm,
   Select,
-  Table,
   Tag,
   Typography,
   type TableColumnsType,
@@ -14,6 +13,7 @@ import {
 import { useMemo, useState } from "react";
 import type { AdminTaskView, TaskStatus } from "@/api/tasks";
 import LoadFailure from "@/components/common/LoadFailure";
+import AdminTable from "@/components/common/AdminTable";
 import { formatDateTime } from "@/lib/format";
 import {
   TASK_STATUS_OPTIONS,
@@ -279,7 +279,7 @@ export default function TaskConfigPanel({
         <Button onClick={resetFilters}>重置</Button>
       </Flex>
 
-      <Table<AdminTaskView>
+      <AdminTable<AdminTaskView>
         columns={columns}
         dataSource={filtered}
         loading={loading}

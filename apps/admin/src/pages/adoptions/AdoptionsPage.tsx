@@ -5,7 +5,6 @@ import {
   Flex,
   Input,
   Select,
-  Table,
   Tag,
   Typography,
   type TableColumnsType,
@@ -20,6 +19,7 @@ import {
 } from "@/api/adoptions";
 import { listStudents, type StudentView } from "@/api/accounts";
 import LoadFailure from "@/components/common/LoadFailure";
+import AdminTable from "@/components/common/AdminTable";
 import ModulePage from "@/components/common/ModulePage";
 import { formatDateTime } from "@/lib/format";
 import AdoptionDetailDrawer from "./AdoptionDetailDrawer";
@@ -342,7 +342,7 @@ export default function AdoptionsPage() {
             <Button onClick={resetFilters}>重置</Button>
           </Flex>
 
-          <Table<AdoptionView>
+          <AdminTable<AdoptionView>
             columns={columns}
             dataSource={filtered}
             loading={loading}

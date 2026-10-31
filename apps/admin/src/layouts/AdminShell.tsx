@@ -41,7 +41,7 @@ export default function AdminShell() {
   };
 
   return (
-    <Layout>
+    <Layout className="admin-shell">
       <Header>
         <Flex align="center" flex="auto" gap={12} justify="space-between">
           <Flex align="center" gap={12}>
@@ -84,7 +84,7 @@ export default function AdminShell() {
           </Sider>
         )}
 
-        <Content style={{ padding: 24 }}>
+        <Content className="admin-content" style={{ padding: 24 }}>
           <Outlet />
         </Content>
       </Layout>

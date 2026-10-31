@@ -9,6 +9,7 @@ export type StudentView = {
   department: string | null;
   className: string | null;
   status: string;
+  pointsBalance: number;
 };
 
 export function listStudents(): Promise<StudentView[]> {

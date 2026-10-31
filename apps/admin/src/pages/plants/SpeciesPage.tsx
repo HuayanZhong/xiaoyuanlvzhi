@@ -7,7 +7,6 @@ import {
   Popconfirm,
   Select,
   Space,
-  Table,
   Tag,
   Typography,
   type TableColumnsType,
@@ -17,6 +16,7 @@ import { useNavigate } from "react-router";
 import { listSpecies, setSpeciesEnabled, type SpeciesView } from "@/api/plants";
 import AuthenticatedImage from "@/components/common/AuthenticatedImage";
 import LoadFailure from "@/components/common/LoadFailure";
+import AdminTable from "@/components/common/AdminTable";
 import ModulePage from "@/components/common/ModulePage";
 import { notifyError } from "@/lib/api-feedback";
 import { formatDateTime } from "@/lib/format";
@@ -277,7 +277,7 @@ export default function SpeciesPage() {
             <Button onClick={resetFilters}>重置</Button>
           </Flex>
 
-          <Table<SpeciesView>
+          <AdminTable<SpeciesView>
             columns={columns}
             dataSource={filtered}
             loading={loading}

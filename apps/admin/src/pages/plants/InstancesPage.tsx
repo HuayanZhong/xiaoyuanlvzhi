@@ -7,7 +7,6 @@ import {
   Popconfirm,
   Select,
   Space,
-  Table,
   Tag,
   Typography,
   type TableColumnsType,
@@ -25,6 +24,7 @@ import {
   type SpeciesView,
 } from "@/api/plants";
 import LoadFailure from "@/components/common/LoadFailure";
+import AdminTable from "@/components/common/AdminTable";
 import ModulePage from "@/components/common/ModulePage";
 import { notifyError } from "@/lib/api-feedback";
 import { formatDateTime } from "@/lib/format";
@@ -352,7 +352,7 @@ export default function InstancesPage() {
             <Button onClick={resetFilters}>重置</Button>
           </Flex>
 
-          <Table<IndividualView>
+          <AdminTable<IndividualView>
             columns={columns}
             dataSource={filtered}
             loading={loading}

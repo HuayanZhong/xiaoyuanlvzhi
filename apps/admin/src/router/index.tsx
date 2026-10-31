@@ -8,6 +8,7 @@ import CareReviewsPage from "@/pages/care/CareReviewsPage";
 import DashboardPage from "@/pages/dashboard/DashboardPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import InstancesPage from "@/pages/plants/InstancesPage";
+import PointsPage from "@/pages/points/PointsPage";
 import SpeciesPage from "@/pages/plants/SpeciesPage";
 import TasksPage from "@/pages/tasks/TasksPage";
 import PlaceholderPage from "@/pages/placeholder/PlaceholderPage";
@@ -19,7 +20,7 @@ const moduleRoutes: RouteObject[] = [
   { path: "feedback", element: <PlaceholderPage /> },
   { path: "plants/species", element: <SpeciesPage /> },
   { path: "plants/instances", element: <InstancesPage /> },
-  { path: "points/rules", element: <PlaceholderPage /> },
+  { path: "points/rules", element: <PointsPage /> },
   { path: "points/rewards", element: <PlaceholderPage /> },
   { path: "points/orders", element: <PlaceholderPage /> },
   { path: "students", element: <PlaceholderPage /> },

@@ -5,7 +5,6 @@ import {
   Flex,
   Input,
   Select,
-  Table,
   Tag,
   Typography,
   type TableColumnsType,
@@ -20,6 +19,7 @@ import {
   type CareCheckinStatus,
 } from "@/api/care";
 import LoadFailure from "@/components/common/LoadFailure";
+import AdminTable from "@/components/common/AdminTable";
 import ModulePage from "@/components/common/ModulePage";
 import { formatDateTime } from "@/lib/format";
 import CareDetailDrawer from "./CareDetailDrawer";
@@ -429,7 +429,7 @@ export default function CareReviewsPage() {
             <Button onClick={resetFilters}>重置</Button>
           </Flex>
 
-          <Table<AdminCheckinView>
+          <AdminTable<AdminCheckinView>
             columns={columns}
             dataSource={filtered}
             loading={loading}

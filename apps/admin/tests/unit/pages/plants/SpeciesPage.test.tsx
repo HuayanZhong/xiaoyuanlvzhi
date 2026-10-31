@@ -122,10 +122,13 @@ describe("SpeciesPage", () => {
     expect(await screen.findByText("绿萝")).toBeInTheDocument();
     expect(screen.getByText("芦荟")).toBeInTheDocument();
 
-    const table = screen.getByRole("table");
-    expect(within(table).getAllByText("启用").length).toBeGreaterThan(0);
-    expect(within(table).getAllByText("停用").length).toBeGreaterThan(0);
-    expect(within(table).getAllByText("简单").length).toBeGreaterThan(0);
+    const tableText = screen
+      .getAllByRole("table")
+      .map((table) => table.textContent)
+      .join(" ");
+    expect(tableText).toContain("启用");
+    expect(tableText).toContain("停用");
+    expect(tableText).toContain("简单");
     expect(screen.getAllByText("可领养单株").length).toBeGreaterThan(0);
   });
 

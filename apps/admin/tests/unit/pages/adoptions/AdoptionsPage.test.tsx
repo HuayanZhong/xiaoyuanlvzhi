@@ -75,6 +75,7 @@ function makeStudent(
     department: "计算机学院",
     className: "软件工程 1 班",
     status: "ACTIVE",
+    pointsBalance: 80,
     ...overrides,
   };
 }

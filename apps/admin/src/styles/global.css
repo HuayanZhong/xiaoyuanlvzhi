@@ -141,6 +141,25 @@
   }
 }
 
+.admin-shell {
+  height: 100vh;
+}
+
+.admin-shell > .ant-layout {
+  min-height: 0;
+}
+
+.admin-shell .admin-content {
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.admin-table-scroll .ant-table-body {
+  overflow-y: auto !important;
+}
+
 @layer base {
   html,
   body {

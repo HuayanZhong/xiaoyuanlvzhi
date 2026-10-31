@@ -5,7 +5,6 @@ import {
   Flex,
   Input,
   Select,
-  Table,
   Tag,
   Typography,
   type TableColumnsType,
@@ -18,6 +17,7 @@ import type {
   ParticipationStatus,
 } from "@/api/tasks";
 import LoadFailure from "@/components/common/LoadFailure";
+import AdminTable from "@/components/common/AdminTable";
 import { formatDateTime } from "@/lib/format";
 import {
   PARTICIPATION_STATUS_OPTIONS,
@@ -342,7 +342,7 @@ export default function TaskReviewPanel({
         <Button onClick={onReset}>重置</Button>
       </Flex>
 
-      <Table<AdminParticipationView>
+      <AdminTable<AdminParticipationView>
         columns={columns}
         dataSource={filtered}
         loading={loading}
