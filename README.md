@@ -31,6 +31,26 @@ Turborepo + pnpm 多应用工作区。
 
 业务路由受路由守卫保护，未登录访问会回到 `/login?returnTo=...`；账号菜单提供退出登录。Spring 是最终认证和角色边界，管理端只接受 `role` 为 `ADMIN` 的账号。
 
+## web 页面
+
+- `/login`：QQ 邮箱 + 密码登录；登录成功后保存 accessToken，并回到 `returnTo` 指定的站内路径或首页。登录页提示忘记密码需联系管理员。
+- `/register`：QQ 邮箱 + 6 位验证码注册，验证码 60 秒重发冷却；填写姓名、学号、院系、班级、手机号和密码后直接登录并进入首页。邮箱、学号或手机号冲突会在对应字段提示。
+- `/`：首页摘要，展示姓名、当前积分和在养绿植数；无在养绿植时显示“暂无在养绿植”，加载失败可重试。
+- `/me`：只读资料（姓名、学号、院系、班级、手机号、邮箱、积分、在养绿植数）和退出登录。资料编辑、通知和问题反馈随后续迭代提供。
+- 未登录访问 `/` 或 `/me` 会先进入 `/login?returnTo=...`；已登录访问登录/注册页会回到首页；未知路径显示带返回入口的 404 页面。
+- 绿植、任务和积分导航随对应模块落地后加入底部导航，当前只显示“首页”和“我的”。
+
+认证通过 `GET /api/v1/auth/me` 在启动时恢复，accessToken 保存在同源 `student-auth-token` Cookie（`SameSite=Lax`，7 天）中，服务端渲染时也能读取；账号对象不持久化。业务请求统一经过 `@repo/http-client` 适配层，解析 Spring 信封、注入 Bearer、处理 401 并区分网络/超时错误。
+
+页面使用纯 CSS 语义 token，不引入 UI 组件库；移动优先，底部导航遵循安全区，交互控件至少 44px。`/api/v1/` 是默认 API base；浏览器请求始终同源，由 Nitro 的 `server/api/[...path].ts` 在开发和生产的服务端转发到 `SPRING_API_ORIGIN`，SSR 阶段则直接访问 Spring。首页和“我的”通过 `useAsyncData` 在服务端取数，首屏 HTML 已包含内容。
+
+运行 web 测试：
+
+```sh
+pnpm --filter web test
+pnpm --filter web exec vitest run tests/nuxt/pages/login.test.ts
+```
+
 ## 共享配置
 
 - `packages/typescript-config`: 共享 `tsconfig` 预设（base / react-app）

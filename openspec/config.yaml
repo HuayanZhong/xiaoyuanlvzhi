@@ -7,12 +7,16 @@ context: |
   本仓库是 pnpm + Turborepo 前端工作区，包含两个应用：
   admin（React 19 + Vite 8，端口 3000）与 web（Nuxt 4 + Vue 3，端口 4000）。
 
-  Spring 后端是服务端行为的边界，API 根路径为 /api/v1。admin 开发服务器把
-  /api/* 原样代理到 http://localhost:8080，生产环境假定同源反向代理。admin 已
-  实现真实登录、启动会话恢复和路由守卫；Spring 仍是最终认证与角色边界，管理端
-  只在浏览器保存 accessToken。除提案明确新增外，不要假设已有领域 API。
+  Spring 后端是服务端行为的边界，API 根路径为 /api/v1。admin 的 Vite 开发服务器
+  把 /api/* 原样代理到 http://localhost:8080；web 的 Nitro server/api 路由在开发
+  和生产环境都把浏览器 /api/v1/* 转发到 SPRING_API_ORIGIN/api/v1，SSR 取数由
+  Nuxt 服务端直接访问 Spring。admin 已实现真实登录、启动会话恢复和路由守卫；
+  web 是启用 SSR 的 Nuxt 应用，已实现 QQ 邮箱注册/登录、服务端会话恢复、路由守卫、
+  401 处理和退出，首页与“我的”通过 useAsyncData 在服务端取数。Spring 仍是最终
+  认证与角色边界，两端都只在同源 Cookie 中保存 accessToken（web 使用可被服务端
+  读取的 student-auth-token Cookie）。除提案明确新增外，不要假设已有领域 API。
 
-  共享 HTTP 客户端包 @repo/http-client 基于 ky，供 admin 使用。跨应用运行时
+  共享 HTTP 客户端包 @repo/http-client 基于 ky，供 admin 与 web 共用。跨应用运行时
   代码必须放在工作区包中，不能直接引用另一个应用的文件。
 
   环境配置已落到仓库根目录：`.env` 提供跨环境默认值，`.env.development` 与
@@ -21,7 +25,9 @@ context: |
   优先，进程环境最高）。共享包 @repo/env 只提供 parseEnv 与 zod 构造器，不读文件、
   不读 process.env；只有应用级适配层可以读取 VITE_*、NUXT_* 或 process.env。
   admin 通过 VITE_API_BASE_URL 取得 API 基地址，未配置时回退到 /api/v1/；
-  SPRING_API_ORIGIN 只用于 Vite 开发代理。
+  web 通过 runtimeConfig.public.apiBaseUrl 取得 API 基地址，未配置时同样回退到
+  /api/v1/；服务端通过 runtimeConfig.springApiOrigin 转发并直接访问 Spring。
+  SPRING_API_ORIGIN 用于 admin 开发代理和 web 的 Nitro 服务端转发（开发与生产）。
 
   工具链约束：TypeScript 6、Vitest 5、Oxc（oxlint/oxfmt）。不要添加 ESLint、
   Prettier 或第二套格式化工具。保持版本与工作区一致，并在新增固定版本依赖时

@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@repo/env": "workspace:*",
+    "@repo/http-client": "workspace:*",
     "nuxt": "4.6.3",
     "vue": "3.5.44"
   },

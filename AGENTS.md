@@ -24,7 +24,7 @@ pnpm + Turborepo workspace with two apps and four workspace packages:
 | `@repo/typescript-config` | Shared tsconfig presets          | —    | `base`, `react-app`, `library` |
 | `@repo/vitest-config`     | Shared Vitest defaults           | —    | Test/coverage defaults         |
 
-The apps are still early skeletons: `admin` has a real login flow, session restore, route guard, and an admin shell with placeholder module routes, but no domain API calls yet. `@repo/http-client` is the only shared runtime package; `@repo/env` is build/startup-time only. There is no shared UI package. The admin dev server proxies `/api/*` to the Spring backend at `http://localhost:8080`; Spring remains the authentication and role boundary.
+`admin` is a complete React SPA with real login, session restore, route guards, an admin shell, and the dashboard/module pages listed under `apps/admin`. `web` is the Nuxt student app: QQ email registration and login, a home summary, read-only profile, and logout; later student modules extend it. `@repo/http-client` is the only shared runtime package; `@repo/env` is build/startup-time only. There is no shared UI package. The admin dev server proxies `/api` to Spring; web forwards browser `/api/v1/*` through a Nitro `server/api` route and calls Spring directly during SSR. Spring remains the authentication and role boundary.
 
 ## Commands
 
@@ -85,7 +85,7 @@ Every app script injects them with `dotenv -c <mode> -e ../../.env -- <command>`
 
 `@repo/env` exports `parseEnv(schema, env?, options?)`, `EnvError`, a re-exported `z`, and zod builders (`envString`, `envOptionalString`, `envUrlString`, `envIntString`, `envBoolString`). Each app declares its own schema in `src|config/config/env.ts`; `parseEnv` throws with every invalid key listed. The shared package knows no business variable names.
 
-`NODE_ENV` is asymmetric: admin and web bake their values in at build time (`.env.production`); the workspace no longer has a runtime Node service that reads `NODE_ENV` from the environment.
+`NODE_ENV` is asymmetric: admin bakes its values in at build time (`.env.production`). Web's Nuxt/Nitro server also builds its config at build time, but the deployed Nitro process can override private runtime config with `NUXT_*` variables; `SPRING_API_ORIGIN` must be reachable from that process.
 
 Nuxt resolves its port as `--port → NUXT_PORT → NITRO_PORT → PORT`, falling back to `devServer.port`. No root env file sets `PORT` or `NUXT_PORT`; `nuxt.config.ts` keeps the web dev server on 4000.
 
@@ -144,15 +144,19 @@ Only `src/lib/http.ts` reads `import.meta.env`; keep future environment access i
 
 ### `apps/web`
 
-Nuxt 4 application. The root component is `app/app.vue`; `config/env.ts` parses `WEB_PORT` (default 4000) and `nuxt.config.ts` feeds it to `devServer.port`.
+Nuxt 4 student application with SSR enabled (the Nuxt default). The root component is `app/app.vue`; layouts, pages, middleware, composables, plugins, utils, components and CSS tokens live under `app/`. Server code lives in `server/`: `server/api/[...path].ts` forwards browser `/api/*` requests to Spring with `proxyRequest`, preserving method, query, body and headers. Shared framework-agnostic helpers live under `shared/utils/` and are auto-imported. `config/env.ts` parses `WEB_PORT` (default 4000), `API_BASE_URL` (optional) and `SPRING_API_ORIGIN` (default `http://localhost:8080`); `nuxt.config.ts` feeds the port to `devServer.port`, the API base to `runtimeConfig.public.apiBaseUrl`, and the origin to the private `runtimeConfig.springApiOrigin` used by the server route.
+
+Routes: `/login` and `/register` use the auth layout; `/` (home summary) and `/me` (read-only profile and logout) use the default shell with bottom navigation; `[...slug].vue` renders the public 404 page. `app/middleware/auth.global.ts` redirects anonymous visitors from protected pages to `/login?returnTo=...`, and authenticated visitors away from auth pages; it resolves the session during SSR as well. The access token is stored in the same-origin `student-auth-token` cookie (`SameSite=Lax`, 7 days) so the server can read it; the account itself is runtime state restored through `GET /api/v1/auth/me`. `app/plugins/http.ts` is universal: the browser client uses the relative `apiBaseUrl` and therefore goes through `server/api`, while the SSR client calls `${SPRING_API_ORIGIN}/api/v1/` directly. `app/utils/api.ts` parses the Spring envelope, injects Bearer tokens and emits the single 401 event handled by `app/plugins/auth.client.ts`. Pages load data with `useAsyncData` so the first render is server-rendered. API calls use paths relative to `/api/v1/`.
+
+Browser requests stay same-origin and are proxied by Nitro in both development and production; no `nitro.devProxy` or external reverse proxy is required for `/api`. Styling uses pure-CSS semantic tokens from `app/assets/css/tokens.css`; components use tokens instead of raw hex values, and no UI library is used.
 
 `tsconfig.json` extends the generated `./.nuxt/tsconfig.json`. If types are stale after changing dependencies or app structure, run `pnpm --filter web exec nuxt prepare`. Nuxt's generated config includes `tests/nuxt/**/*`, which is why Nuxt tests live there.
 
-`vitest.config.ts` uses `defineVitestConfig` from `@nuxt/test-utils/config`, the `nuxt` environment with jsdom, and `tests/nuxt/**/*.test.ts`. `apps/web/.nuxtrc` is generated by Nuxt/test-utils and should not be hand-edited.
+`vitest.config.ts` uses `defineVitestConfig` from `@nuxt/test-utils/config`, the `nuxt` environment with jsdom, `tests/nuxt/**/*.test.ts`, and `tests/nuxt/setup.ts` to clear the auth cookie, reset auth state and drop cached async data between tests. `apps/web/.nuxtrc` is generated by Nuxt/test-utils and should not be hand-edited.
 
 ### Shared packages
 
-- `@repo/http-client`: exports `createHttpClient`, default timeout/retry constants, and ky's HTTP/network/timeout errors plus guards from `src/index.ts`. It is source-exported with no build step and never reads environment variables.
+- `@repo/http-client`: exports `createHttpClient`, default timeout/retry constants, and ky's HTTP/network/timeout errors plus guards from `src/index.ts`. It is source-exported with no build step and never reads environment variables; `admin` and `web` both consume it.
 - `@repo/env`: exports `parseEnv`, `EnvError`, `z`, and the zod builders from `src/index.ts`, source-exported with no build step. It performs no file loading; callers pass a plain record (normally `process.env`) and declare their own schema.
 - `@repo/typescript-config`: `base.json` is strict `NodeNext`/ES2022; `react-app.json` switches to bundler resolution, `react-jsx`, and `vite/client` types; `library.json` is the bundler/no-emit preset for non-React runtime packages. The config packages extend `base.json`.
 - `@repo/vitest-config`: exports `baseTestConfig` from `src/base.ts`. App and package configs spread it into their own `test` block and override `environment`, `include`, `setupFiles`, or `environmentOptions`. The shared coverage `include` covers `src`, `app`, and `shared`; update it if source moves.

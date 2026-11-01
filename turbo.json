@@ -4,7 +4,12 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/.env*"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/.env*",
+        "$TURBO_ROOT$/packages/http-client/**",
+        "$TURBO_ROOT$/packages/env/**"
+      ],
       "env": ["API_BASE_URL", "NODE_ENV"],
       "outputs": ["dist/**", ".output/**"]
     },
@@ -19,20 +24,27 @@
       "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/.oxfmtrc.json"]
     },
     "check-types": {
-      "dependsOn": ["^check-types"]
+      "dependsOn": ["^check-types"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/packages/http-client/**",
+        "$TURBO_ROOT$/packages/env/**"
+      ]
     },
     "test": {
       "inputs": [
         "$TURBO_DEFAULT$",
         "$TURBO_ROOT$/packages/vitest-config/**",
-        "$TURBO_ROOT$/packages/env/**"
+        "$TURBO_ROOT$/packages/env/**",
+        "$TURBO_ROOT$/packages/http-client/**"
       ]
     },
     "test:coverage": {
       "inputs": [
         "$TURBO_DEFAULT$",
         "$TURBO_ROOT$/packages/vitest-config/**",
-        "$TURBO_ROOT$/packages/env/**"
+        "$TURBO_ROOT$/packages/env/**",
+        "$TURBO_ROOT$/packages/http-client/**"
       ],
       "outputs": ["coverage/**"]
     },

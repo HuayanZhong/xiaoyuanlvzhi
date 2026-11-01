@@ -43,7 +43,9 @@
     {
       "files": ["apps/web/**"],
       "rules": {
-        "no-undef": "off"
+        "no-undef": "off",
+        "react/rules-of-hooks": "off",
+        "react/exhaustive-deps": "off"
       }
     }
   ],

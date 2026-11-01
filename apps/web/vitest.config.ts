@@ -11,5 +11,6 @@ export default defineVitestConfig({
       },
     },
     include: ["tests/nuxt/**/*.test.ts"],
+    setupFiles: ["tests/nuxt/setup.ts"],
   },
 });

@@ -1,0 +1,60 @@
+:root {
+  color-scheme: light;
+
+  --color-bg: #f4f7f2;
+  --color-surface: #ffffff;
+  --color-surface-muted: #eef3ea;
+  --color-text: #1f2d22;
+  --color-text-muted: #5a6a5d;
+  --color-text-subtle: #7c8b7f;
+  --color-primary: #2f6b3c;
+  --color-primary-strong: #24552f;
+  --color-primary-soft: #e3efe2;
+  --color-on-primary: #ffffff;
+  --color-border: #d6e2d4;
+  --color-border-strong: #b7c9b4;
+  --color-danger: #a3241d;
+  --color-danger-soft: #fbe9e7;
+  --color-warning: #7c5800;
+  --color-warning-soft: #fff4d6;
+  --color-focus: #1f6feb;
+  --color-overlay: rgb(31 45 34 / 45%);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 2.5rem;
+  --space-8: 3rem;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+  --radius-full: 999px;
+
+  --font-sans:
+    system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei",
+    sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 1.875rem;
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.6;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  --shadow-sm: 0 1px 2px rgb(31 45 34 / 8%);
+  --shadow-md: 0 6px 18px rgb(31 45 34 / 10%);
+
+  --layout-max-width: 30rem;
+  --nav-height: 3.5rem;
+  --touch-target: 2.75rem;
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-top: env(safe-area-inset-top, 0px);
+}
