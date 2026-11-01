@@ -46,8 +46,25 @@ export type BlobRequestOptions = {
   signal?: AbortSignal;
 };
 
+export type FormRequestOptions = {
+  /** 与 `request` 一致：`undefined` 读取当前登录态，`null` 表示匿名。 */
+  token?: string | null;
+  signal?: AbortSignal;
+  retry?: number;
+  expectData?: boolean;
+};
+
 export type ApiClient = {
   request<T>(path: string, options?: ApiRequestOptions): Promise<T>;
+  /**
+   * 以 multipart/form-data 提交表单。不设置 Content-Type，由浏览器补 boundary；
+   * 上传默认不重试，避免重复创建文件。
+   */
+  requestForm<T>(
+    path: string,
+    form: FormData,
+    options?: FormRequestOptions,
+  ): Promise<T>;
   /** 读取二进制资源；不解析 Spring 的 JSON 信封。 */
   requestBlob(path: string, options?: BlobRequestOptions): Promise<Blob>;
 };
@@ -113,41 +130,44 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
         onUnauthorized();
       }
 
-      const envelope = await readEnvelope(response);
+      return unwrapResponse<T>(response, expectData);
+    },
 
-      if (response.ok) {
-        if (!envelope) {
-          throw new ApiError(
-            "INVALID_RESPONSE",
-            "服务返回了无法识别的响应",
-            response.status,
-          );
-        }
+    async requestForm<T>(
+      path: string,
+      form: FormData,
+      formOptions: FormRequestOptions = {},
+    ) {
+      assertRelativePath(path);
 
-        if (!envelope.success) {
-          throw businessError(envelope, response.status);
-        }
+      const { token, signal, retry = 0, expectData = true } = formOptions;
+      const headers = new Headers();
+      const accessToken = token === undefined ? readToken() : token;
 
-        if (envelope.data === null && expectData) {
-          throw new ApiError(
-            "EMPTY_RESPONSE",
-            "服务未返回数据，请稍后重试",
-            response.status,
-          );
-        }
-
-        return envelope.data as T;
+      if (accessToken) {
+        headers.set("Authorization", `Bearer ${accessToken}`);
       }
 
-      if (envelope && !envelope.success && envelope.error) {
-        throw new ApiError(
-          envelope.error.code,
-          envelope.error.message,
-          response.status,
-        );
+      let response: Response;
+
+      try {
+        response = await client(path, {
+          method: "POST",
+          headers,
+          body: form,
+          signal,
+          retry,
+          throwHttpErrors: false,
+        });
+      } catch (error) {
+        throw transportError(error);
       }
 
-      throw statusError(response.status);
+      if (response.status === 401) {
+        onUnauthorized();
+      }
+
+      return unwrapResponse<T>(response, expectData);
     },
 
     async requestBlob(path, blobOptions = {}) {
@@ -206,6 +226,47 @@ function assertRelativePath(path: string): void {
 
 function isAuthAction(path: string): boolean {
   return AUTH_ACTION_PREFIXES.some((prefix) => path.startsWith(prefix));
+}
+
+async function unwrapResponse<T>(
+  response: Response,
+  expectData: boolean,
+): Promise<T> {
+  const envelope = await readEnvelope(response);
+
+  if (response.ok) {
+    if (!envelope) {
+      throw new ApiError(
+        "INVALID_RESPONSE",
+        "服务返回了无法识别的响应",
+        response.status,
+      );
+    }
+
+    if (!envelope.success) {
+      throw businessError(envelope, response.status);
+    }
+
+    if (envelope.data === null && expectData) {
+      throw new ApiError(
+        "EMPTY_RESPONSE",
+        "服务未返回数据，请稍后重试",
+        response.status,
+      );
+    }
+
+    return envelope.data as T;
+  }
+
+  if (envelope && !envelope.success && envelope.error) {
+    throw new ApiError(
+      envelope.error.code,
+      envelope.error.message,
+      response.status,
+    );
+  }
+
+  throw statusError(response.status);
 }
 
 async function readEnvelope(

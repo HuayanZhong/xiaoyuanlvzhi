@@ -62,11 +62,25 @@ describe("auth route guard", () => {
       path: "/login",
       query: { returnTo: "/adoptions/9" },
     });
+    expect(resolveAuthRedirect(target("/my-plants"), anonymous)).toEqual({
+      path: "/login",
+      query: { returnTo: "/my-plants" },
+    });
+    expect(resolveAuthRedirect(target("/my-plants/10"), anonymous)).toEqual({
+      path: "/login",
+      query: { returnTo: "/my-plants/10" },
+    });
+    expect(resolveAuthRedirect(target("/care/9"), anonymous)).toEqual({
+      path: "/login",
+      query: { returnTo: "/care/9" },
+    });
   });
 
   it("keeps lookalike paths public", () => {
     expect(resolveAuthRedirect(target("/plantsx"), anonymous)).toBeNull();
     expect(resolveAuthRedirect(target("/adoptions-old"), anonymous)).toBeNull();
+    expect(resolveAuthRedirect(target("/my-plantsx"), anonymous)).toBeNull();
+    expect(resolveAuthRedirect(target("/care-old"), anonymous)).toBeNull();
   });
 
   it("allows authenticated visitors into the plant and adoption routes", () => {
@@ -76,12 +90,21 @@ describe("auth route guard", () => {
     expect(
       resolveAuthRedirect(target("/adoptions/9"), authenticated),
     ).toBeNull();
+    expect(resolveAuthRedirect(target("/my-plants"), authenticated)).toBeNull();
+    expect(
+      resolveAuthRedirect(target("/my-plants/10"), authenticated),
+    ).toBeNull();
+    expect(resolveAuthRedirect(target("/care/9"), authenticated)).toBeNull();
   });
 
   it("sends unauthorized business pages to login", () => {
     expect(resolveUnauthorizedRedirect(target("/plants/3"))).toEqual({
       path: "/login",
       query: { returnTo: "/plants/3" },
+    });
+    expect(resolveUnauthorizedRedirect(target("/care/9"))).toEqual({
+      path: "/login",
+      query: { returnTo: "/care/9" },
     });
     expect(resolveUnauthorizedRedirect(target("/unknown"))).toBeNull();
   });

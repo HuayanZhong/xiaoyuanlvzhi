@@ -87,6 +87,9 @@ describe("me page", () => {
     }
 
     expect(wrapper.findAll(".ui-ledger")).toHaveLength(2);
+    expect(wrapper.get(".me-page__care-link").attributes("href")).toBe(
+      "/my-plants",
+    );
   });
 
   it("uses a placeholder for empty optional fields", async () => {

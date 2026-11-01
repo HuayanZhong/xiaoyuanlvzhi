@@ -39,6 +39,9 @@ describe("home page", () => {
     expect(wrapper.text()).toContain("你好，张三");
     expect(wrapper.text()).toContain("120");
     expect(wrapper.text()).toContain("2");
+    expect(wrapper.get(".home-page__record").attributes("href")).toBe(
+      "/my-plants",
+    );
   });
 
   it("explains an empty plant count instead of showing a bare zero", async () => {

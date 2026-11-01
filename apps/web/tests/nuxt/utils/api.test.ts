@@ -8,6 +8,7 @@ type RequestOptions = {
   retry?: number;
   throwHttpErrors?: boolean;
   json?: unknown;
+  body?: BodyInit | null;
 };
 
 type Handler = (path: string, options: RequestOptions) => Promise<Response>;
@@ -252,6 +253,66 @@ describe("web API adapter", () => {
     await expect(api.request("profile")).rejects.toMatchObject({
       code: "UPSTREAM_ERROR",
       status: 503,
+    });
+  });
+});
+
+describe("web API form uploads", () => {
+  it("posts form data without setting content type", async () => {
+    let seenPath: string | undefined;
+    let seen: RequestOptions | undefined;
+    const api = createApiClient({
+      baseUrl: "/api/v1/",
+      getToken: () => "student-token",
+      client: fakeClient(async (path, options) => {
+        seenPath = path;
+        seen = options;
+        return success({ id: 12, url: "/api/v1/files/12" });
+      }),
+    });
+    const form = new FormData();
+    form.append("file", new Blob(["image"], { type: "image/png" }), "a.png");
+
+    await expect(api.requestForm("files", form)).resolves.toEqual({
+      id: 12,
+      url: "/api/v1/files/12",
+    });
+    expect(seenPath).toBe("files");
+    expect(seen?.method).toBe("POST");
+    expect(seen?.body).toBe(form);
+    expect(seen?.headers?.get("Authorization")).toBe("Bearer student-token");
+    expect(seen?.headers?.has("Content-Type")).toBe(false);
+    expect(seen?.retry).toBe(0);
+  });
+
+  it("emits unauthorized for a 401 upload", async () => {
+    const onUnauthorized = vi.fn();
+    const api = createApiClient({
+      baseUrl: "/api/v1/",
+      onUnauthorized,
+      client: fakeClient(async () => failure(401, "UNAUTHORIZED")),
+    });
+
+    await expect(
+      api.requestForm("files", new FormData()),
+    ).rejects.toMatchObject({ code: "UNAUTHORIZED", status: 401 });
+    expect(onUnauthorized).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the server message for an invalid file", async () => {
+    const api = createApiClient({
+      baseUrl: "/api/v1/",
+      client: fakeClient(async () =>
+        failure(400, "UNSUPPORTED_FILE_TYPE", "只支持 JPG、PNG 或 WebP 图片"),
+      ),
+    });
+
+    await expect(
+      api.requestForm("files", new FormData()),
+    ).rejects.toMatchObject({
+      code: "UNSUPPORTED_FILE_TYPE",
+      message: "只支持 JPG、PNG 或 WebP 图片",
+      status: 400,
     });
   });
 });

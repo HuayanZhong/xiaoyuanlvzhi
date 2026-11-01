@@ -311,6 +311,14 @@ function load() {
           </FolioSection>
 
           <section class="adoption-detail__actions" aria-label="申请操作">
+            <NuxtLink
+              v-if="status === 'ACTIVE'"
+              to="/my-plants"
+              class="adoption-detail__care-link"
+            >
+              去我的绿植提交养护打卡
+            </NuxtLink>
+
             <template v-if="hasActions">
               <UiButton
                 v-if="canAdoption(status, 'withdraw')"
@@ -471,6 +479,16 @@ function load() {
   margin: 0;
   color: var(--color-subtle);
   font-size: var(--font-size-sm);
+}
+
+.adoption-detail__care-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  color: var(--color-ink);
+  font-size: var(--font-size-sm);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .adoption-detail__form {

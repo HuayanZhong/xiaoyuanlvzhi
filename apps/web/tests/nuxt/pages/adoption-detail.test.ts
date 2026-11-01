@@ -133,6 +133,16 @@ describe("adoption detail page", () => {
     ).toHaveLength(action === "撤回申请" ? 1 : 0);
   });
 
+  it("links active adoptions to my plants", async () => {
+    loadMock.mockResolvedValue(application({ status: "ACTIVE" }));
+    const wrapper = await mountPage();
+    await flushPromises();
+
+    expect(wrapper.get(".adoption-detail__care-link").attributes("href")).toBe(
+      "/my-plants",
+    );
+  });
+
   it.each(["CANCEL_REVIEW", "RETURN_REVIEW", "ENDED", "CANCELLED"])(
     "keeps %s read-only",
     async (status) => {

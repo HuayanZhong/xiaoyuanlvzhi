@@ -16,7 +16,7 @@ export type AuthRedirect = {
 
 const AUTH_PAGES = new Set(["/login", "/register"]);
 const PROTECTED_PAGES = new Set(["/", "/me"]);
-const PROTECTED_PREFIXES = ["/plants", "/adoptions"];
+const PROTECTED_PREFIXES = ["/plants", "/adoptions", "/my-plants", "/care"];
 
 /** 认证页与受保护页之外的路径（包括 404）保持公开。 */
 export function resolveAuthRedirect(

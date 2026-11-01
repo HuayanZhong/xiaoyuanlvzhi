@@ -65,13 +65,17 @@ function load() {
     <template v-else-if="profile">
       <div class="home-page__sheet">
         <FolioSection index="01" title="在养记录" meta="ADOPTIONS">
-          <div v-if="activeCount > 0" class="home-page__record">
+          <NuxtLink
+            v-if="activeCount > 0"
+            to="/my-plants"
+            class="home-page__record"
+          >
             <p class="home-page__record-label">在养数量</p>
             <p class="home-page__record-value">
               {{ activeCount }}<span class="home-page__unit">PL</span>
             </p>
             <Stamp tone="alive">在养中</Stamp>
-          </div>
+          </NuxtLink>
 
           <UiEmptyState
             v-else
@@ -137,6 +141,13 @@ function load() {
   gap: var(--space-2);
   align-items: flex-start;
   padding: var(--space-1) 0 var(--space-5);
+  color: inherit;
+  text-decoration: none;
+}
+
+.home-page__record:hover .home-page__record-value {
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .home-page__record-label {

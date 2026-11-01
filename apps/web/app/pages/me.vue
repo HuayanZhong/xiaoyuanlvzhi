@@ -187,6 +187,10 @@ async function confirmLogout() {
                 :stamp-tone="row.stampTone"
               />
             </Ledger>
+
+            <NuxtLink to="/my-plants" class="me-page__care-link">
+              我的绿植 · 养护打卡
+            </NuxtLink>
           </FolioSection>
 
           <UiEmptyState
@@ -299,6 +303,17 @@ async function confirmLogout() {
   flex-direction: column;
   gap: var(--space-6);
   min-width: 0;
+}
+
+.me-page__care-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  margin-top: var(--space-3);
+  color: var(--color-ink);
+  font-size: var(--font-size-sm);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .me-page__actions {
