@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getDashboard, getStatistics } from "@/api/dashboard";
+import { getDashboard } from "@/api/dashboard";
 import { http } from "@/lib/http";
 
 vi.mock("@/lib/http", () => ({
@@ -30,19 +30,6 @@ describe("dashboard api", () => {
 
     await expect(getDashboard()).resolves.toEqual(data);
     expect(get).toHaveBeenCalledWith("admin/dashboard", {});
-  });
-
-  it("loads statistics without a date range", async () => {
-    const data = {
-      from: "2026-10-02",
-      to: "2026-10-31",
-      adoptionTrend: [],
-      pointGrantTrend: [],
-    };
-    get.mockReturnValue(jsonResponse({ success: true, data, error: null }));
-
-    await expect(getStatistics()).resolves.toEqual(data);
-    expect(get).toHaveBeenCalledWith("admin/statistics", {});
   });
 
   it("rejects a failed envelope", async () => {

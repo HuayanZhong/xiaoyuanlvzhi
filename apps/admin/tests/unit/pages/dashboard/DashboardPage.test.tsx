@@ -10,11 +10,15 @@ import zhCN from "antd/locale/zh_CN";
 import { createMemoryRouter, RouterProvider, useLocation } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as dashboardApi from "@/api/dashboard";
+import * as statisticsApi from "@/api/statistics";
 import DashboardPage from "@/pages/dashboard/DashboardPage";
 import { makeDashboard, makeRecentItem, makeStatistics } from "./fixtures";
 
 vi.mock("@/api/dashboard", () => ({
   getDashboard: vi.fn(),
+}));
+
+vi.mock("@/api/statistics", () => ({
   getStatistics: vi.fn(),
 }));
 
@@ -36,7 +40,7 @@ vi.mock("@/components/common/EChart", () => ({
 }));
 
 const getDashboard = vi.mocked(dashboardApi.getDashboard);
-const getStatistics = vi.mocked(dashboardApi.getStatistics);
+const getStatistics = vi.mocked(statisticsApi.getStatistics);
 
 function LocationProbe() {
   const location = useLocation();

@@ -1,8 +1,5 @@
-import type {
-  DashboardPendingItem,
-  DashboardView,
-  StatisticsView,
-} from "@/api/dashboard";
+import type { DashboardPendingItem, DashboardView } from "@/api/dashboard";
+import type { StatisticsView } from "@/api/statistics";
 
 export function makeRecentItem(
   overrides: Partial<DashboardPendingItem> = {},

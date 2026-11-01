@@ -30,11 +30,10 @@ import {
 import { useNavigate } from "react-router";
 import {
   getDashboard,
-  getStatistics,
   type DashboardPendingItem,
   type DashboardView,
-  type StatisticsView,
 } from "@/api/dashboard";
+import { getStatistics, type StatisticsView } from "@/api/statistics";
 import LoadFailure from "@/components/common/LoadFailure";
 import ModulePage from "@/components/common/ModulePage";
 import { formatDateTime } from "@/lib/format";
@@ -45,7 +44,7 @@ import {
   buildPointGrantTrendOption,
   isTrendEmpty,
   type ChartTokens,
-} from "./charts";
+} from "@/lib/charts";
 import {
   businessTypeLabel,
   pendingStatusColor,
@@ -227,6 +226,7 @@ export default function DashboardPage() {
     () => ({
       colorPrimary: token.colorPrimary,
       colorSuccess: token.colorSuccess,
+      colorWarning: token.colorWarning,
       colorText: token.colorText,
       colorTextSecondary: token.colorTextSecondary,
       colorBorderSecondary: token.colorBorderSecondary,
@@ -235,6 +235,7 @@ export default function DashboardPage() {
     [
       token.colorPrimary,
       token.colorSuccess,
+      token.colorWarning,
       token.colorText,
       token.colorTextSecondary,
       token.colorBorderSecondary,

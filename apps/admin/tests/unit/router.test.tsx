@@ -108,6 +108,14 @@ vi.mock("@/api/dashboard", async (importOriginal) => {
       activePlants: 0,
       recentItems: [],
     }),
+  };
+});
+
+vi.mock("@/api/statistics", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/api/statistics")>();
+
+  return {
+    ...actual,
     getStatistics: vi.fn().mockResolvedValue({
       from: "2026-10-01",
       to: "2026-10-30",
@@ -320,12 +328,15 @@ describe("admin routes", () => {
     expect(screen.queryByText("该模块正在建设中")).not.toBeInTheDocument();
   });
 
-  it("keeps the statistics placeholder", async () => {
+  it("renders the statistics page instead of a placeholder", async () => {
     useAuthStore.setState({ status: "authenticated", account });
 
     renderPath("/statistics");
 
-    expect(await screen.findByText("该模块正在建设中")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "数据统计" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("该模块正在建设中")).not.toBeInTheDocument();
   });
 
   it("redirects an authenticated admin away from the login page", async () => {
