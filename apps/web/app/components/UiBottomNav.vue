@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { isNavActive } from "~/utils/navigation";
+
 const props = defineProps<{
   items: Array<{ label: string; to: string }>;
   currentPath?: string;
@@ -9,11 +11,7 @@ const route = useRoute();
 const activePath = computed(() => props.currentPath ?? route.path);
 
 function isActive(to: string) {
-  if (to === "/") {
-    return activePath.value === "/";
-  }
-
-  return activePath.value === to || activePath.value.startsWith(`${to}/`);
+  return isNavActive(activePath.value, to);
 }
 </script>
 

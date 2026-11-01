@@ -15,12 +15,23 @@ export function resolveApiBaseUrl(value: string | undefined): string {
  *
  * `path` 是 `/api` 之后的通配段（例如 `v1/auth/login`），拼接时必须补回
  * `/api` 前缀；两端斜杠先归一化，避免出现 `//` 或重复的 `/api`。
+ * `search` 是浏览器请求的原始查询串（含 `?`），必须一并转发，否则筛选
+ * 和分页参数会在代理层丢失。
  */
-export function resolveSpringApiTarget(origin: string, path: string): string {
+export function resolveSpringApiTarget(
+  origin: string,
+  path: string,
+  search = "",
+): string {
   const targetOrigin = origin.replace(/\/+$/, "");
   const targetPath = path.replace(/^\/+/, "");
-
-  return targetPath
+  const target = targetPath
     ? `${targetOrigin}/api/${targetPath}`
     : `${targetOrigin}/api`;
+
+  if (!search) {
+    return target;
+  }
+
+  return `${target}${search.startsWith("?") ? search : `?${search}`}`;
 }

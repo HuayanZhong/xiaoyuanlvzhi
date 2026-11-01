@@ -1,6 +1,7 @@
 import { mountSuspended } from "@nuxt/test-utils/runtime";
 import { describe, expect, it } from "vitest";
 import UiBottomNav from "../../../app/components/UiBottomNav.vue";
+import { STUDENT_NAV } from "../../../app/utils/navigation";
 
 const items = [
   { label: "首页", to: "/" },
@@ -45,5 +46,21 @@ describe("UiBottomNav", () => {
     expect(
       links.every((link) => link.attributes("tabindex") === undefined),
     ).toBe(true);
+  });
+
+  it("exposes the implemented student modules and selects the plant entry", async () => {
+    const wrapper = await mountSuspended(UiBottomNav, {
+      props: { items: STUDENT_NAV, currentPath: "/plants/3" },
+    });
+
+    const links = wrapper.findAll("a");
+    expect(links.map((link) => link.text())).toEqual(["首页", "绿植", "我的"]);
+    expect(links.map((link) => link.attributes("href"))).toEqual([
+      "/",
+      "/plants",
+      "/me",
+    ]);
+    expect(links[1]!.attributes("aria-current")).toBe("page");
+    expect(links[0]!.attributes("aria-current")).toBeUndefined();
   });
 });

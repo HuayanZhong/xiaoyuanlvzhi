@@ -30,4 +30,19 @@ describe("web API base", () => {
       "http://localhost:8080/api",
     );
   });
+
+  it("forwards the browser query string", () => {
+    expect(
+      resolveSpringApiTarget(
+        "http://localhost:8080",
+        "v1/plants",
+        "?keyword=%E7%BB%BF&location=%E5%9B%BE%E4%B9%A6%E9%A6%86",
+      ),
+    ).toBe(
+      "http://localhost:8080/api/v1/plants?keyword=%E7%BB%BF&location=%E5%9B%BE%E4%B9%A6%E9%A6%86",
+    );
+    expect(
+      resolveSpringApiTarget("http://localhost:8080", "v1/plants", "keyword=x"),
+    ).toBe("http://localhost:8080/api/v1/plants?keyword=x");
+  });
 });

@@ -160,7 +160,7 @@ async function confirmLogout() {
 
         <div class="me-page__record">
           <FolioSection index="01" title="登记资料" meta="RECORD">
-            <UiLedger>
+            <Ledger>
               <TagRow
                 v-for="row in recordRows"
                 :key="row.label"
@@ -171,11 +171,11 @@ async function confirmLogout() {
                 :stamp="row.stamp"
                 :stamp-tone="row.stampTone"
               />
-            </UiLedger>
+            </Ledger>
           </FolioSection>
 
           <FolioSection index="02" title="积分与领养" meta="POINTS">
-            <UiLedger>
+            <Ledger>
               <TagRow
                 v-for="row in dataRows"
                 :key="row.label"
@@ -186,7 +186,7 @@ async function confirmLogout() {
                 :stamp="row.stamp"
                 :stamp-tone="row.stampTone"
               />
-            </UiLedger>
+            </Ledger>
           </FolioSection>
 
           <UiEmptyState

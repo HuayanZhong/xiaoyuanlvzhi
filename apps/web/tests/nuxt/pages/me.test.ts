@@ -85,6 +85,8 @@ describe("me page", () => {
     ]) {
       expect(wrapper.text()).toContain(value);
     }
+
+    expect(wrapper.findAll(".ui-ledger")).toHaveLength(2);
   });
 
   it("uses a placeholder for empty optional fields", async () => {

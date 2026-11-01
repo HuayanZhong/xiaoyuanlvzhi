@@ -40,8 +40,16 @@ export type ApiClientOptions = {
   onUnauthorized?: () => void;
 };
 
+export type BlobRequestOptions = {
+  /** 与 `request` 一致：`undefined` 读取当前登录态，`null` 表示匿名。 */
+  token?: string | null;
+  signal?: AbortSignal;
+};
+
 export type ApiClient = {
   request<T>(path: string, options?: ApiRequestOptions): Promise<T>;
+  /** 读取二进制资源；不解析 Spring 的 JSON 信封。 */
+  requestBlob(path: string, options?: BlobRequestOptions): Promise<Blob>;
 };
 
 const AUTH_ACTION_PREFIXES = [
@@ -140,6 +148,49 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
       }
 
       throw statusError(response.status);
+    },
+
+    async requestBlob(path, blobOptions = {}) {
+      assertRelativePath(path);
+
+      const headers = new Headers();
+      const accessToken =
+        blobOptions.token === undefined ? readToken() : blobOptions.token;
+
+      if (accessToken) {
+        headers.set("Authorization", `Bearer ${accessToken}`);
+      }
+
+      let response: Response;
+
+      try {
+        response = await client(path, {
+          method: "GET",
+          headers,
+          signal: blobOptions.signal,
+          throwHttpErrors: false,
+        });
+      } catch (error) {
+        throw transportError(error);
+      }
+
+      if (response.status === 401) {
+        onUnauthorized();
+      }
+
+      if (!response.ok) {
+        throw statusError(response.status);
+      }
+
+      try {
+        return await response.blob();
+      } catch {
+        throw new ApiError(
+          "INVALID_RESPONSE",
+          "图片读取失败，请稍后重试",
+          response.status,
+        );
+      }
     },
   };
 }

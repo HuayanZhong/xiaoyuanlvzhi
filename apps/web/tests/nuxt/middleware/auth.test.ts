@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { resolveAuthRedirect, resolveReturnTo } from "~/utils/auth-route";
+import {
+  resolveAuthRedirect,
+  resolveReturnTo,
+  resolveUnauthorizedRedirect,
+} from "~/utils/auth-route";
 
 const anonymous = { status: "anonymous" as const, isAuthenticated: false };
 const authenticated = {
@@ -41,6 +45,45 @@ describe("auth route guard", () => {
   it("does not interfere with the 404 catch-all or protected pages when authenticated", () => {
     expect(resolveAuthRedirect(target("/unknown"), authenticated)).toBeNull();
     expect(resolveAuthRedirect(target("/me"), authenticated)).toBeNull();
+  });
+
+  it("protects the plant and adoption routes for anonymous visitors", () => {
+    expect(resolveAuthRedirect(target("/plants"), anonymous)).toEqual({
+      path: "/login",
+      query: { returnTo: "/plants" },
+    });
+    expect(
+      resolveAuthRedirect(target("/plants/3", "/plants/3?x=1"), anonymous),
+    ).toEqual({
+      path: "/login",
+      query: { returnTo: "/plants/3?x=1" },
+    });
+    expect(resolveAuthRedirect(target("/adoptions/9"), anonymous)).toEqual({
+      path: "/login",
+      query: { returnTo: "/adoptions/9" },
+    });
+  });
+
+  it("keeps lookalike paths public", () => {
+    expect(resolveAuthRedirect(target("/plantsx"), anonymous)).toBeNull();
+    expect(resolveAuthRedirect(target("/adoptions-old"), anonymous)).toBeNull();
+  });
+
+  it("allows authenticated visitors into the plant and adoption routes", () => {
+    expect(resolveAuthRedirect(target("/plants"), authenticated)).toBeNull();
+    expect(resolveAuthRedirect(target("/plants/3"), authenticated)).toBeNull();
+    expect(resolveAuthRedirect(target("/adoptions"), authenticated)).toBeNull();
+    expect(
+      resolveAuthRedirect(target("/adoptions/9"), authenticated),
+    ).toBeNull();
+  });
+
+  it("sends unauthorized business pages to login", () => {
+    expect(resolveUnauthorizedRedirect(target("/plants/3"))).toEqual({
+      path: "/login",
+      query: { returnTo: "/plants/3" },
+    });
+    expect(resolveUnauthorizedRedirect(target("/unknown"))).toBeNull();
   });
 });
 

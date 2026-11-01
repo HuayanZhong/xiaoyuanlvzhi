@@ -8,9 +8,10 @@ import { resolveSpringApiTarget } from "~~/shared/utils/api";
 export default defineEventHandler((event) => {
   const config = useRuntimeConfig(event);
   const path = getRouterParam(event, "path") ?? "";
+  const search = getRequestURL(event).search;
 
   return proxyRequest(
     event,
-    resolveSpringApiTarget(config.springApiOrigin, path),
+    resolveSpringApiTarget(config.springApiOrigin, path, search),
   );
 });

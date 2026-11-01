@@ -77,7 +77,11 @@ function load() {
             v-else
             title="暂无在养绿植"
             description="领养一株后，这里会记录你的养护进度。"
-          />
+          >
+            <NuxtLink to="/plants" class="home-page__browse">
+              去看看可领养品种
+            </NuxtLink>
+          </UiEmptyState>
 
           <p class="home-page__note">领养审核通过后，植株会登记在这里。</p>
         </FolioSection>
@@ -174,6 +178,17 @@ function load() {
   color: var(--color-graphite);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-normal);
+}
+
+.home-page__browse {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  margin-top: var(--space-2);
+  color: var(--color-ink);
+  font-size: var(--font-size-sm);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .home-page__strip {

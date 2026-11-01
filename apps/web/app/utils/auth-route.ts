@@ -16,6 +16,7 @@ export type AuthRedirect = {
 
 const AUTH_PAGES = new Set(["/login", "/register"]);
 const PROTECTED_PAGES = new Set(["/", "/me"]);
+const PROTECTED_PREFIXES = ["/plants", "/adoptions"];
 
 /** 认证页与受保护页之外的路径（包括 404）保持公开。 */
 export function resolveAuthRedirect(
@@ -24,7 +25,7 @@ export function resolveAuthRedirect(
 ): AuthRedirect | null {
   const path = normalizePath(target.path);
 
-  if (PROTECTED_PAGES.has(path) && !auth.isAuthenticated) {
+  if (isProtectedPath(path) && !auth.isAuthenticated) {
     return { path: "/login", query: { returnTo: target.fullPath } };
   }
 
@@ -39,11 +40,21 @@ export function resolveAuthRedirect(
 export function resolveUnauthorizedRedirect(
   target: AuthRouteTarget,
 ): AuthRedirect | null {
-  if (!PROTECTED_PAGES.has(normalizePath(target.path))) {
+  if (!isProtectedPath(normalizePath(target.path))) {
     return null;
   }
 
   return { path: "/login", query: { returnTo: target.fullPath } };
+}
+
+function isProtectedPath(path: string): boolean {
+  if (PROTECTED_PAGES.has(path)) {
+    return true;
+  }
+
+  return PROTECTED_PREFIXES.some(
+    (prefix) => path === prefix || path.startsWith(`${prefix}/`),
+  );
 }
 
 /**

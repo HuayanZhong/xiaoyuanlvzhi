@@ -1,17 +1,11 @@
 <script setup lang="ts">
-const navItems = [
-  { label: "首页", to: "/" },
-  { label: "我的", to: "/me" },
-];
+import { isNavActive, STUDENT_NAV } from "~/utils/navigation";
 
+const navItems = STUDENT_NAV;
 const route = useRoute();
 
 function isActive(to: string) {
-  if (to === "/") {
-    return route.path === "/";
-  }
-
-  return route.path === to || route.path.startsWith(`${to}/`);
+  return isNavActive(route.path, to);
 }
 </script>
 

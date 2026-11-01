@@ -47,6 +47,9 @@ describe("home page", () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain("暂无在养绿植");
+    expect(wrapper.get(".home-page__browse").attributes("href")).toBe(
+      "/plants",
+    );
   });
 
   it("falls back to the student number when the name is empty", async () => {

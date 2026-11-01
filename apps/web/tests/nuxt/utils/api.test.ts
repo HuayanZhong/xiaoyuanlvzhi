@@ -255,3 +255,66 @@ describe("web API adapter", () => {
     });
   });
 });
+
+describe("web API binary reads", () => {
+  it("loads a file with the bearer token and returns the blob", async () => {
+    let seen: RequestOptions | undefined;
+    const api = createApiClient({
+      baseUrl: "/api/v1/",
+      getToken: () => "student-token",
+      client: fakeClient(async (_path, options) => {
+        seen = options;
+        return new Response(new Uint8Array([1, 2, 3]), {
+          status: 200,
+          headers: { "content-type": "image/png" },
+        });
+      }),
+    });
+
+    const blob = await api.requestBlob("files/9");
+
+    expect(seen?.headers?.get("Authorization")).toBe("Bearer student-token");
+    expect(blob.type).toBe("image/png");
+    expect(blob.size).toBe(3);
+  });
+
+  it("emits a single unauthorized event for a 401 image request", async () => {
+    const onUnauthorized = vi.fn();
+    const api = createApiClient({
+      baseUrl: "/api/v1/",
+      onUnauthorized,
+      client: fakeClient(async () => failure(401, "UNAUTHORIZED")),
+    });
+
+    await expect(api.requestBlob("files/9")).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+      status: 401,
+    });
+    expect(onUnauthorized).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the session on a missing file", async () => {
+    const onUnauthorized = vi.fn();
+    const api = createApiClient({
+      baseUrl: "/api/v1/",
+      onUnauthorized,
+      client: fakeClient(async () => failure(404, "FILE_NOT_FOUND")),
+    });
+
+    await expect(api.requestBlob("files/9")).rejects.toMatchObject({
+      status: 404,
+    });
+    expect(onUnauthorized).not.toHaveBeenCalled();
+  });
+
+  it("rejects paths that escape the configured base URL", async () => {
+    const api = createApiClient({
+      baseUrl: "/api/v1/",
+      client: fakeClient(async () => new Response("", { status: 200 })),
+    });
+
+    await expect(api.requestBlob("/files/9")).rejects.toMatchObject({
+      code: "INVALID_REQUEST_PATH",
+    });
+  });
+});
