@@ -7,7 +7,7 @@ import {
   type CareCheckin,
   type CareSubmission,
 } from "~/utils/care-api";
-import { resolveCareError } from "~/utils/care-errors";
+import { resolveActionError } from "~/utils/action-errors";
 import { canResubmit, careStatusMeta } from "~/utils/care-status";
 import { formatDateTime } from "~/utils/datetime";
 
@@ -114,7 +114,7 @@ async function submit() {
     attempted.value = false;
     await refresh();
   } catch (error) {
-    submitError.value = resolveCareError(error);
+    submitError.value = resolveActionError(error);
   } finally {
     submitting.value = false;
   }

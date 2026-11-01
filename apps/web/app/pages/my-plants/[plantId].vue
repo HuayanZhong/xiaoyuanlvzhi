@@ -8,7 +8,7 @@ import {
   type CareCheckin,
   type CareEligiblePlant,
 } from "~/utils/care-api";
-import { resolveCareError } from "~/utils/care-errors";
+import { resolveActionError } from "~/utils/action-errors";
 import { canCare, careStatusMeta } from "~/utils/care-status";
 import { formatDateTime } from "~/utils/datetime";
 
@@ -137,7 +137,7 @@ async function submit() {
 
     await navigateTo(`/care/${created.id}`);
   } catch (error) {
-    submitError.value = resolveCareError(error);
+    submitError.value = resolveActionError(error);
 
     if (error instanceof ApiError && CONFLICT_CODES.has(error.code)) {
       await refresh();

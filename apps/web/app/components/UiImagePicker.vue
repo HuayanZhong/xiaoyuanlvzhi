@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { resolveCareError } from "~/utils/care-errors";
+import { resolveActionError } from "~/utils/action-errors";
 import { uploadImage } from "~/utils/upload-api";
 
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -97,7 +97,7 @@ async function handleChange(event: Event) {
       nextKey += 1;
       publish();
     } catch (error) {
-      localError.value = resolveCareError(error);
+      localError.value = resolveActionError(error);
     } finally {
       uploading.value -= 1;
     }

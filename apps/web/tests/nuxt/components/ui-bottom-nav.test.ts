@@ -54,13 +54,29 @@ describe("UiBottomNav", () => {
     });
 
     const links = wrapper.findAll("a");
-    expect(links.map((link) => link.text())).toEqual(["首页", "绿植", "我的"]);
+    expect(links.map((link) => link.text())).toEqual([
+      "首页",
+      "绿植",
+      "任务",
+      "我的",
+    ]);
     expect(links.map((link) => link.attributes("href"))).toEqual([
       "/",
       "/plants",
+      "/tasks",
       "/me",
     ]);
     expect(links[1]!.attributes("aria-current")).toBe("page");
     expect(links[0]!.attributes("aria-current")).toBeUndefined();
+  });
+
+  it("selects the task entry on task detail pages", async () => {
+    const wrapper = await mountSuspended(UiBottomNav, {
+      props: { items: STUDENT_NAV, currentPath: "/tasks/7" },
+    });
+
+    const links = wrapper.findAll("a");
+    expect(links[2]!.attributes("aria-current")).toBe("page");
+    expect(links[2]!.classes()).toContain("ui-bottom-nav__link--active");
   });
 });

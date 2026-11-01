@@ -6,9 +6,15 @@ describe("student navigation", () => {
     expect(STUDENT_NAV.map((item) => item.label)).toEqual([
       "首页",
       "绿植",
+      "任务",
       "我的",
     ]);
-    expect(STUDENT_NAV.map((item) => item.to)).toEqual(["/", "/plants", "/me"]);
+    expect(STUDENT_NAV.map((item) => item.to)).toEqual([
+      "/",
+      "/plants",
+      "/tasks",
+      "/me",
+    ]);
   });
 
   it("treats detail routes as part of their module", () => {
