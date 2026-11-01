@@ -39,35 +39,51 @@ function isActive(to: string) {
   position: fixed;
   inset: auto 0 0;
   z-index: 10;
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
   padding-bottom: var(--safe-area-bottom);
+  background: var(--color-sheet);
+  border-top: var(--border-divider);
 }
 
 .ui-bottom-nav__list {
   display: flex;
-  margin: 0;
+  width: 100%;
+  margin: 0 auto;
   padding: 0;
   list-style: none;
 }
 
 .ui-bottom-nav__item {
   flex: 1;
+  min-width: 0;
 }
 
 .ui-bottom-nav__link {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: var(--nav-height);
-  color: var(--color-text-muted);
+  color: var(--color-graphite);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-label);
   text-decoration: none;
 }
 
 .ui-bottom-nav__link--active {
-  color: var(--color-primary-strong);
-  background: var(--color-primary-soft);
+  color: var(--color-ink);
+}
+
+.ui-bottom-nav__link--active::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: var(--color-ink);
+  content: "";
+}
+
+@media (min-width: 48rem) {
+  .ui-bottom-nav {
+    display: none;
+  }
 }
 </style>

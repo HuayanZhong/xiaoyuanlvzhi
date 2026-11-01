@@ -38,7 +38,7 @@ function handleInput(event: Event) {
     <div class="ui-password">
       <input
         :id="id"
-        class="ui-password__input"
+        class="ui-password__input ui-control"
         :type="visible ? 'text' : 'password'"
         :value="modelValue"
         :autocomplete="autocomplete"
@@ -46,11 +46,13 @@ function handleInput(event: Event) {
         :required="required"
         :aria-invalid="error ? 'true' : undefined"
         :aria-describedby="error ? errorId : hint ? hintId : undefined"
+        placeholder="请输入密码"
         @input="handleInput"
       />
       <button
         type="button"
         class="ui-password__toggle"
+        :disabled="disabled"
         :aria-label="visible ? '隐藏密码' : '显示密码'"
         :aria-pressed="visible"
         @click="visible = !visible"
@@ -64,33 +66,33 @@ function handleInput(event: Event) {
 <style scoped>
 .ui-password {
   display: flex;
-  gap: var(--space-1);
+  gap: var(--space-2);
   align-items: stretch;
+  min-width: 0;
 }
 
 .ui-password__input {
   flex: 1;
   min-width: 0;
-  min-height: var(--touch-target);
-  padding: var(--space-2) var(--space-3);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-md);
-  color: var(--color-text);
-}
-
-.ui-password__input[aria-invalid="true"] {
-  border-color: var(--color-danger);
 }
 
 .ui-password__toggle {
+  flex: none;
   min-width: var(--touch-target);
-  min-height: var(--touch-target);
+  min-height: var(--control-height);
   padding: 0 var(--space-2);
-  background: var(--color-surface-muted);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  color: var(--color-primary-strong);
+  background: var(--color-sheet);
+  border: var(--border-interactive);
+  border-radius: var(--radius-none);
+  color: var(--color-ink);
   font-size: var(--font-size-sm);
+  line-height: var(--line-height-tight);
+}
+
+.ui-password__toggle:disabled {
+  background: var(--color-ink-wash);
+  border: var(--border-dashed);
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
 }
 </style>

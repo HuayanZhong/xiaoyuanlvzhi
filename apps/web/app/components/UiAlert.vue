@@ -1,7 +1,7 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
-    tone?: "error" | "success" | "info";
+    tone?: "error" | "success" | "info" | "warning";
   }>(),
   {
     tone: "error",
@@ -22,27 +22,33 @@ withDefaults(
 
 <style scoped>
 .ui-alert {
-  padding: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: transparent;
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  border-left-width: 2px;
+  border-radius: var(--radius-none);
   font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
 }
 
 .ui-alert--error {
-  background: var(--color-danger-soft);
-  border-color: var(--color-danger);
+  border-left-color: var(--color-danger);
   color: var(--color-danger);
 }
 
 .ui-alert--success {
-  background: var(--color-primary-soft);
-  border-color: var(--color-primary);
-  color: var(--color-primary-strong);
+  border-left-color: var(--color-ink);
+  color: var(--color-ink);
 }
 
 .ui-alert--info {
-  background: var(--color-surface-muted);
-  border-color: var(--color-border);
-  color: var(--color-text-muted);
+  border-left-color: var(--color-rule-strong);
+  color: var(--color-graphite);
+}
+
+.ui-alert--warning {
+  border: 1px dashed var(--color-seal);
+  border-left-width: 2px;
+  color: var(--color-seal);
 }
 </style>

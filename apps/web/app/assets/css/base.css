@@ -15,19 +15,42 @@ body {
 
 body {
   min-height: 100vh;
-  background: var(--color-bg);
+  background: var(--color-paper);
   color: var(--color-text);
   font-family: var(--font-sans);
   font-size: var(--font-size-md);
-  line-height: var(--line-height-normal);
+  font-variant-numeric: tabular-nums;
+  font-synthesis-weight: none;
+  line-height: var(--line-height-body);
+  text-rendering: optimizeLegibility;
 }
 
 #__nuxt {
   min-height: 100vh;
 }
 
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: var(--font-weight-regular);
+}
+
 a {
-  color: var(--color-primary);
+  color: var(--color-text);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+::selection {
+  background: var(--color-ink);
+  color: var(--color-on-ink);
 }
 
 img,
@@ -49,7 +72,7 @@ button {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-focus);
+  outline: var(--border-focus);
   outline-offset: 2px;
 }
 

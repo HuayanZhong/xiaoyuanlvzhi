@@ -54,7 +54,7 @@ function handleInput(event: Event) {
     <div class="ui-code">
       <input
         :id="id"
-        class="ui-code__input"
+        class="ui-code__input ui-control ui-control--code"
         type="text"
         inputmode="numeric"
         maxlength="6"
@@ -82,21 +82,11 @@ function handleInput(event: Event) {
   display: flex;
   gap: var(--space-2);
   align-items: stretch;
+  min-width: 0;
 }
 
 .ui-code__input {
   flex: 1;
   min-width: 0;
-  min-height: var(--touch-target);
-  padding: var(--space-2) var(--space-3);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-md);
-  color: var(--color-text);
-  letter-spacing: 0.2em;
-}
-
-.ui-code__input[aria-invalid="true"] {
-  border-color: var(--color-danger);
 }
 </style>

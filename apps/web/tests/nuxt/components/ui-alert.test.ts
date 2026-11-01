@@ -21,4 +21,19 @@ describe("UiAlert", () => {
 
     expect(wrapper.get(".ui-alert").attributes("role")).toBe("status");
   });
+
+  it("renders warning and success tones with their own classes", async () => {
+    const warning = await mountSuspended(UiAlert, {
+      props: { tone: "warning" },
+      slots: { default: "待你处理" },
+    });
+    const success = await mountSuspended(UiAlert, {
+      props: { tone: "success" },
+      slots: { default: "已通过" },
+    });
+
+    expect(warning.get(".ui-alert").classes()).toContain("ui-alert--warning");
+    expect(success.get(".ui-alert").classes()).toContain("ui-alert--success");
+    expect(success.get(".ui-alert").attributes("role")).toBe("status");
+  });
 });

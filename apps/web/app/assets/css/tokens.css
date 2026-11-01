@@ -1,60 +1,188 @@
 :root {
   color-scheme: light;
 
-  --color-bg: #f4f7f2;
-  --color-surface: #ffffff;
-  --color-surface-muted: #eef3ea;
-  --color-text: #1f2d22;
-  --color-text-muted: #5a6a5d;
-  --color-text-subtle: #7c8b7f;
-  --color-primary: #2f6b3c;
-  --color-primary-strong: #24552f;
-  --color-primary-soft: #e3efe2;
-  --color-on-primary: #ffffff;
-  --color-border: #d6e2d4;
-  --color-border-strong: #b7c9b4;
-  --color-danger: #a3241d;
-  --color-danger-soft: #fbe9e7;
-  --color-warning: #7c5800;
-  --color-warning-soft: #fff4d6;
-  --color-focus: #1f6feb;
-  --color-overlay: rgb(31 45 34 / 45%);
+  /* Palette: raw values only live here. Cool paper, ink and one seal red. */
+  --palette-paper: #f4f3ee;
+  --palette-sheet: #fbfaf6;
+  --palette-ink: #171714;
+  --palette-ink-soft: #2a2a25;
+  --palette-graphite: #4c4c44;
+  --palette-muted: #6b6b61;
+  --palette-rule: #cfcec6;
+  --palette-rule-strong: #8a8980;
+  --palette-seal: #962d24;
+  --palette-seal-deep: #6f1f19;
+  --palette-ink-wash: #eae9e2;
+  --palette-seal-wash: #f3e7e3;
+  --palette-overlay: rgb(23 23 20 / 48%);
+  --palette-on-ink-muted: rgb(244 243 238 / 68%);
+  --palette-on-ink-wash: rgb(244 243 238 / 7%);
 
+  /* Semantic colors: components consume these. */
+  --color-paper: var(--palette-paper);
+  --color-sheet: var(--palette-sheet);
+  --color-card: var(--palette-sheet);
+  --color-ink: var(--palette-ink);
+  --color-ink-hover: var(--palette-ink-soft);
+  --color-graphite: var(--palette-graphite);
+  --color-subtle: var(--palette-muted);
+  --color-rule: var(--palette-rule);
+  --color-rule-strong: var(--palette-rule-strong);
+  --color-seal: var(--palette-seal);
+  --color-seal-deep: var(--palette-seal-deep);
+  --color-ink-wash: var(--palette-ink-wash);
+  --color-seal-wash: var(--palette-seal-wash);
+  --color-on-ink: var(--palette-sheet);
+  --color-on-seal: var(--palette-sheet);
+  --color-on-ink-muted: var(--palette-on-ink-muted);
+  --color-on-ink-wash: var(--palette-on-ink-wash);
+
+  --color-hairline: var(--color-rule);
+  --color-divider: var(--color-rule-strong);
+  --color-border-interactive: var(--color-rule-strong);
+  --color-focus: var(--palette-ink);
+  --color-overlay: var(--palette-overlay);
+
+  /* Status: no plant green. Living records are stamped in ink. */
+  --color-status-alive: var(--color-ink);
+  --color-status-alive-soft: var(--color-ink-wash);
+  --color-status-alive-border: var(--color-rule-strong);
+  --color-pending: var(--color-seal);
+  --color-pending-soft: var(--color-seal-wash);
+  --color-danger: var(--color-seal-deep);
+  --color-danger-soft: var(--color-seal-wash);
+
+  /* Aliases kept for components that still read the older naming. */
+  --color-bg: var(--color-paper);
+  --color-surface: var(--color-sheet);
+  --color-surface-muted: var(--color-paper);
+  --color-text: var(--color-ink);
+  --color-text-muted: var(--color-graphite);
+  --color-text-subtle: var(--color-subtle);
+  --color-text-disabled: var(--color-subtle);
+  --color-primary: var(--color-ink);
+  --color-primary-strong: var(--color-ink);
+  --color-primary-soft: var(--color-ink-wash);
+  --color-on-primary: var(--color-on-ink);
+  --color-border: var(--color-rule);
+  --color-border-strong: var(--color-rule-strong);
+  --color-vermilion: var(--color-seal);
+  --color-vermilion-soft: var(--color-seal-wash);
+  --color-crimson: var(--color-seal-deep);
+  --color-crimson-soft: var(--color-seal-wash);
+  --color-moss: var(--color-ink);
+  --color-moss-soft: var(--color-ink-wash);
+  --color-warning: var(--color-seal);
+  --color-warning-soft: var(--color-seal-wash);
+
+  /* Space: 4px base; page gutters scale with the viewport. */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
   --space-4: 1rem;
   --space-5: 1.5rem;
   --space-6: 2rem;
-  --space-7: 2.5rem;
-  --space-8: 3rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --space-gutter-320: 0.75rem;
 
-  --radius-sm: 0.375rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 1rem;
+  /* Radius: printed sheet corners, not pills. */
+  --radius-none: 0;
+  --radius-xs: 0.125rem;
+  --radius-sm: 0.125rem;
+  --radius-md: 0.125rem;
+  --radius-lg: 0.125rem;
   --radius-full: 999px;
 
+  /* Type: Songti display, sans body, mono data. */
+  --font-serif:
+    "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
   --font-sans:
     system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei",
     sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-size-label: 0.6875rem;
+  --font-size-caption: 0.75rem;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-md: 1rem;
-  --font-size-lg: 1.25rem;
+  --font-size-lg: 1.125rem;
   --font-size-xl: 1.5rem;
-  --font-size-2xl: 1.875rem;
+  --font-size-title-card: 1.5rem;
+  --font-size-title-sub: 2rem;
+  --font-size-reading: 2.5rem;
+  --font-size-2xl: 2.5rem;
+  --font-size-3xl: 3rem;
+  --font-size-display: clamp(2.5rem, 5vw, 3.75rem);
+  --font-size-measure: clamp(2.25rem, 4vw, 3.5rem);
   --line-height-tight: 1.25;
+  --line-height-display: 1.08;
+  --line-height-reading: 1;
   --line-height-normal: 1.6;
+  --line-height-body: 1.65;
   --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
+  --tracking-title: 0.01em;
+  --tracking-title-cn: 0.02em;
+  --tracking-label: 0.18em;
+  --tracking-mono: 0.02em;
+  --tracking-code: 0.2em;
 
-  --shadow-sm: 0 1px 2px rgb(31 45 34 / 8%);
-  --shadow-md: 0 6px 18px rgb(31 45 34 / 10%);
+  /* Borders: structural lines are visible; decoration stays light. */
+  --border-hairline: 1px solid var(--color-rule);
+  --border-divider: 1px solid var(--color-rule-strong);
+  --border-interactive: 1px solid var(--color-border-interactive);
+  --border-ink: 1px solid var(--color-ink);
+  --border-anchor: 2px solid var(--color-ink);
+  --border-pending: 1px solid var(--color-seal);
+  --border-danger: 2px solid var(--color-danger);
+  --border-danger-control: 1.5px solid var(--color-danger);
+  --border-dashed: 1px dashed var(--color-rule-strong);
+  --border-focus: 2px solid var(--color-ink);
 
-  --layout-max-width: 30rem;
+  /* Elevation: paper stays flat; only overlays lift. */
+  --shadow-none: none;
+  --shadow-sm: var(--shadow-none);
+  --shadow-overlay: 0 18px 48px rgb(23 23 20 / 16%);
+  --shadow-md: var(--shadow-overlay);
+
+  /* Motion: explain state changes only. */
+  --motion-press: 90ms ease-out;
+  --motion-color: 140ms ease-out;
+  --motion-enter: 180ms cubic-bezier(0.2, 0, 0, 1);
+  --motion-exit: 120ms ease-out;
+  --motion-zero: 0ms;
+
+  /* Layout: a desktop sheet with a mobile fallback. */
+  --layout-max-width: 70rem;
+  --layout-reading-width: 42rem;
+  --layout-gutter: clamp(1rem, 4vw, 2.5rem);
+  --masthead-height: 4.5rem;
   --nav-height: 3.5rem;
   --touch-target: 2.75rem;
+  --control-height: 3rem;
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-top: env(safe-area-inset-top, 0px);
+}
+
+/* Dark theme: deep paper and light ink, same seal red. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --palette-paper: #1b1c18;
+  --palette-sheet: #22231e;
+  --palette-ink: #e8e6dc;
+  --palette-ink-soft: #f2f0e8;
+  --palette-graphite: #b8b6aa;
+  --palette-muted: #8f8d82;
+  --palette-rule: #3a3b34;
+  --palette-rule-strong: #74746c;
+  --palette-seal: #d26757;
+  --palette-seal-deep: #e08375;
+  --palette-ink-wash: #2a2b25;
+  --palette-seal-wash: #34221f;
+  --palette-overlay: rgb(0 0 0 / 62%);
+  --color-on-seal: var(--palette-paper);
+  --shadow-overlay: 0 18px 48px rgb(0 0 0 / 52%);
 }

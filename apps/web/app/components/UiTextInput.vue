@@ -48,7 +48,7 @@ function handleInput(event: Event) {
   >
     <input
       :id="id"
-      class="ui-input"
+      class="ui-input ui-control"
       :type="props.type"
       :value="modelValue"
       :autocomplete="autocomplete"
@@ -67,19 +67,5 @@ function handleInput(event: Event) {
 <style scoped>
 .ui-input {
   width: 100%;
-  min-height: var(--touch-target);
-  padding: var(--space-2) var(--space-3);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-md);
-  color: var(--color-text);
-}
-
-.ui-input::placeholder {
-  color: var(--color-text-subtle);
-}
-
-.ui-input[aria-invalid="true"] {
-  border-color: var(--color-danger);
 }
 </style>

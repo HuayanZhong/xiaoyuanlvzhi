@@ -23,15 +23,15 @@ withDefaults(
   align-items: center;
   justify-content: center;
   padding: var(--space-6) var(--space-4);
-  color: var(--color-text-muted);
+  color: var(--color-graphite);
   font-size: var(--font-size-sm);
 }
 
 .ui-loading__spinner {
-  width: 1.25rem;
-  height: 1.25rem;
-  border: 2px solid var(--color-border-strong);
-  border-top-color: var(--color-primary);
+  width: 1rem;
+  height: 1rem;
+  border: 1.5px solid currentcolor;
+  border-right-color: transparent;
   border-radius: var(--radius-full);
   animation: ui-loading-spin 700ms linear infinite;
 }

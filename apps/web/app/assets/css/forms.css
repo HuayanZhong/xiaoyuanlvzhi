@@ -1,0 +1,40 @@
+/* Shared printed-form control. Components add structure, not color. */
+.ui-control {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--control-height);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-sheet);
+  border: var(--border-interactive);
+  border-radius: var(--radius-none);
+  color: var(--color-ink);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-tight);
+  transition:
+    border-color var(--motion-color),
+    background-color var(--motion-color);
+}
+
+.ui-control::placeholder {
+  color: var(--color-subtle);
+}
+
+.ui-control:focus {
+  border-color: var(--color-ink);
+}
+
+.ui-control[aria-invalid="true"] {
+  border: var(--border-danger-control);
+}
+
+.ui-control:disabled {
+  background: var(--color-ink-wash);
+  border: var(--border-dashed);
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.ui-control--code {
+  letter-spacing: var(--tracking-code);
+}

@@ -33,29 +33,70 @@ const displayName = computed(() => {
   );
 });
 
-const rows = computed(() => {
+const pageTitle = computed(() => (profile.value ? displayName.value : "我的"));
+
+type ProfileRow = {
+  label: string;
+  value: string;
+  mono?: boolean;
+  code?: string;
+  stamp?: string;
+  stampTone?: "alive" | "pending" | "danger" | "neutral";
+};
+
+const recordRows = computed<ProfileRow[]>(() => {
   const current = profile.value;
 
   return [
-    { label: "姓名", value: displayName.value },
-    { label: "学号", value: placeholder(current?.studentNumber) },
     { label: "院系", value: placeholder(current?.department) },
     { label: "班级", value: placeholder(current?.className) },
     { label: "手机号", value: placeholder(current?.phone) },
     { label: "邮箱", value: placeholder(current?.email) },
-    { label: "当前积分", value: String(current?.pointsBalance ?? 0) },
+  ];
+});
+
+const dataRows = computed<ProfileRow[]>(() => {
+  const current = profile.value;
+  const activeCount = current?.activeAdoptionCount ?? 0;
+
+  return [
+    {
+      label: "当前积分",
+      value: String(current?.pointsBalance ?? 0),
+      code: "PT",
+      mono: true,
+    },
     {
       label: "在养绿植",
-      value:
-        (current?.activeAdoptionCount ?? 0) > 0
-          ? String(current?.activeAdoptionCount)
-          : "暂无在养绿植",
+      value: activeCount > 0 ? String(activeCount) : "暂无在养绿植",
+      code: "PL",
+      stamp: activeCount > 0 ? "在养中" : undefined,
+      stampTone: "alive",
+      mono: activeCount > 0,
     },
   ];
 });
 
+const missingOptional = computed(() => {
+  const current = profile.value;
+
+  if (!current) {
+    return false;
+  }
+
+  return !current.phone?.trim() || !current.className?.trim();
+});
+
 function placeholder(value: string | null | undefined): string {
   return value?.trim() || "未填写";
+}
+
+function formatDate(value: string | null | undefined): string {
+  if (!value) {
+    return "—";
+  }
+
+  return value.slice(0, 10).replaceAll("-", ".");
 }
 
 function load() {
@@ -85,7 +126,12 @@ async function confirmLogout() {
 
 <template>
   <section class="me-page">
-    <UiPageHeader title="我的" subtitle="账号资料与登录状态" />
+    <UiPageHeader
+      eyebrow="持档人档案 · HOLDER FILE"
+      :title="pageTitle"
+      subtitle="账号资料与登录状态"
+      :meta="profile?.studentNumber || undefined"
+    />
 
     <UiLoading v-if="loading && !profile" />
 
@@ -95,16 +141,70 @@ async function confirmLogout() {
     </UiAlert>
 
     <template v-else-if="profile">
-      <dl class="me-page__list">
-        <div v-for="row in rows" :key="row.label" class="me-page__row">
-          <dt class="me-page__label">{{ row.label }}</dt>
-          <dd class="me-page__value">{{ row.value }}</dd>
-        </div>
-      </dl>
+      <div class="me-page__sheet">
+        <aside class="me-page__identity">
+          <p class="me-page__identity-label">持档人 · HOLDER</p>
+          <p class="me-page__identity-name">{{ displayName }}</p>
+          <dl class="me-page__identity-meta">
+            <div>
+              <dt>档案编号</dt>
+              <dd>{{ placeholder(profile.studentNumber) }}</dd>
+            </div>
+            <div>
+              <dt>建档日期</dt>
+              <dd>{{ formatDate(profile.createdAt) }}</dd>
+            </div>
+          </dl>
+          <Stamp tone="alive">在册</Stamp>
+        </aside>
 
-      <UiButton variant="secondary" block @click="confirming = true">
-        退出登录
-      </UiButton>
+        <div class="me-page__record">
+          <FolioSection index="01" title="登记资料" meta="RECORD">
+            <UiLedger>
+              <TagRow
+                v-for="row in recordRows"
+                :key="row.label"
+                :label="row.label"
+                :value="row.value"
+                :mono="row.mono"
+                :code="row.code"
+                :stamp="row.stamp"
+                :stamp-tone="row.stampTone"
+              />
+            </UiLedger>
+          </FolioSection>
+
+          <FolioSection index="02" title="积分与领养" meta="POINTS">
+            <UiLedger>
+              <TagRow
+                v-for="row in dataRows"
+                :key="row.label"
+                :label="row.label"
+                :value="row.value"
+                :mono="row.mono"
+                :code="row.code"
+                :stamp="row.stamp"
+                :stamp-tone="row.stampTone"
+              />
+            </UiLedger>
+          </FolioSection>
+
+          <UiEmptyState
+            v-if="missingOptional"
+            title="资料待补全"
+            description="手机号或班级尚未填写，请联系管理员更正。"
+          />
+
+          <div class="me-page__actions">
+            <p class="me-page__actions-note">
+              退出后需要重新登录才能查看个人资料。
+            </p>
+            <UiButton variant="danger" @click="confirming = true">
+              退出登录
+            </UiButton>
+          </div>
+        </div>
+      </div>
     </template>
 
     <UiConfirmDialog
@@ -123,46 +223,111 @@ async function confirmLogout() {
 .me-page {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
-}
-
-.me-page__list {
-  margin: 0;
-  padding: 0 var(--space-4);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-.me-page__row {
-  display: flex;
-  gap: var(--space-3);
-  align-items: baseline;
-  justify-content: space-between;
-  padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.me-page__row:last-child {
-  border-bottom: 0;
-}
-
-.me-page__label {
-  flex: none;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-}
-
-.me-page__value {
-  margin: 0;
-  overflow-wrap: anywhere;
-  color: var(--color-text);
-  font-size: var(--font-size-md);
-  text-align: right;
+  gap: var(--space-6);
+  padding-bottom: var(--space-5);
 }
 
 .me-page__error-text {
   margin: 0 0 var(--space-3);
+}
+
+.me-page__sheet {
+  display: grid;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.me-page__identity {
+  position: relative;
+  padding: var(--space-5);
+  border: var(--border-ink);
+  box-shadow:
+    inset 0 0 0 3px var(--color-paper),
+    inset 0 0 0 4px var(--color-rule);
+}
+
+.me-page__identity-label {
+  margin: 0;
+  color: var(--color-seal);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  letter-spacing: var(--tracking-code);
+}
+
+.me-page__identity-name {
+  margin: var(--space-3) 0 var(--space-5);
+  color: var(--color-ink);
+  font-family: var(--font-serif);
+  font-size: 2.5rem;
+  letter-spacing: var(--tracking-title-cn);
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.me-page__identity-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-5);
+  padding-top: var(--space-3);
+  border-top: var(--border-hairline);
+}
+
+.me-page__identity-meta div {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.me-page__identity-meta dt {
+  color: var(--color-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: var(--tracking-code);
+}
+
+.me-page__identity-meta dd {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+}
+
+.me-page__record {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.me-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-4);
+  border-top: var(--border-hairline);
+}
+
+.me-page__actions-note {
+  max-width: 26rem;
+  margin: 0;
+  color: var(--color-graphite);
+  font-size: var(--font-size-sm);
+}
+
+@media (min-width: 48rem) {
+  .me-page__sheet {
+    grid-template-columns: minmax(16rem, 4fr) minmax(0, 8fr);
+    gap: var(--space-8);
+  }
+}
+
+@media (max-width: 30rem) {
+  .me-page__identity-name {
+    font-size: 2rem;
+  }
 }
 </style>

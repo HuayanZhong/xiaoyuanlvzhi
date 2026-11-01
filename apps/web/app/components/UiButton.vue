@@ -2,7 +2,7 @@
 withDefaults(
   defineProps<{
     type?: "button" | "submit";
-    variant?: "primary" | "secondary" | "ghost";
+    variant?: "primary" | "secondary" | "ghost" | "danger";
     loading?: boolean;
     block?: boolean;
     disabled?: boolean;
@@ -46,50 +46,72 @@ defineExpose({
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  min-height: var(--touch-target);
-  padding: var(--space-2) var(--space-4);
+  min-height: var(--control-height);
+  padding: 0 var(--space-5);
+  background: transparent;
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-none);
+  color: var(--color-ink);
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-medium);
+  letter-spacing: 0.02em;
   line-height: var(--line-height-tight);
   transition:
-    background-color 120ms ease,
-    border-color 120ms ease,
-    color 120ms ease;
+    background-color var(--motion-color),
+    border-color var(--motion-color),
+    color var(--motion-color),
+    transform var(--motion-press);
 }
 
-.ui-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+.ui-button:not(:disabled):active {
+  transform: translateY(1px);
 }
 
 .ui-button--primary {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  border: 2px solid var(--color-ink);
+  color: var(--color-ink);
 }
 
 .ui-button--primary:not(:disabled):hover {
-  background: var(--color-primary-strong);
+  background: var(--color-ink-wash);
 }
 
 .ui-button--secondary {
-  background: var(--color-surface);
-  border-color: var(--color-border-strong);
-  color: var(--color-primary-strong);
+  border: var(--border-interactive);
+  color: var(--color-ink);
 }
 
 .ui-button--secondary:not(:disabled):hover {
-  background: var(--color-primary-soft);
+  border-color: var(--color-ink);
+  background: var(--color-ink-wash);
 }
 
 .ui-button--ghost {
-  background: transparent;
-  color: var(--color-primary-strong);
+  padding-inline: var(--space-2);
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .ui-button--ghost:not(:disabled):hover {
-  background: var(--color-primary-soft);
+  background: var(--color-ink-wash);
+}
+
+.ui-button--danger {
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+}
+
+.ui-button--danger:not(:disabled):hover {
+  background: var(--color-danger-soft);
+}
+
+.ui-button:disabled {
+  background: var(--color-ink-wash);
+  border: var(--border-dashed);
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+  opacity: 1;
 }
 
 .ui-button--block {
@@ -99,7 +121,7 @@ defineExpose({
 .ui-button__spinner {
   width: 1rem;
   height: 1rem;
-  border: 2px solid currentcolor;
+  border: 1.5px solid currentcolor;
   border-right-color: transparent;
   border-radius: var(--radius-full);
   animation: ui-button-spin 700ms linear infinite;

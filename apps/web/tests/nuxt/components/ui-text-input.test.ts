@@ -32,4 +32,18 @@ describe("UiTextInput", () => {
     expect(wrapper.get("#email-error").text()).toBe("请输入邮箱");
     expect(wrapper.get("#email-error").attributes("role")).toBe("alert");
   });
+
+  it("uses the shared control styles and supports the disabled state", async () => {
+    const wrapper = await mountSuspended(UiTextInput, {
+      props: {
+        id: "email",
+        label: "邮箱",
+        modelValue: "",
+        disabled: true,
+      },
+    });
+
+    expect(wrapper.get("input").classes()).toContain("ui-control");
+    expect(wrapper.get("input").attributes("disabled")).toBeDefined();
+  });
 });

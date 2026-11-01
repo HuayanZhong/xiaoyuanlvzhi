@@ -261,7 +261,11 @@ async function submit() {
 
 <template>
   <section class="register-page">
-    <UiPageHeader title="注册" subtitle="使用 QQ 邮箱验证后创建学生账号" />
+    <UiPageHeader
+      eyebrow="学生入口 · STUDENT ACCESS"
+      title="注册"
+      subtitle="使用 QQ 邮箱验证后创建学生账号"
+    />
 
     <UiAlert v-if="formError" tone="error">{{ formError }}</UiAlert>
 
@@ -393,22 +397,26 @@ async function submit() {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  min-width: 0;
   margin: 0;
-  padding: 0;
+  padding: var(--space-5) 0 0;
   border: 0;
+  border-top: var(--border-hairline);
 }
 
 .register-page__legend {
   padding: 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  color: var(--color-ink);
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--tracking-title-cn);
 }
 
 .register-page__hint,
 .register-page__switch {
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--color-graphite);
   font-size: var(--font-size-sm);
 }
 
@@ -421,7 +429,9 @@ async function submit() {
   align-items: center;
   min-height: var(--touch-target);
   padding: 0 var(--space-1);
-  color: var(--color-primary-strong);
+  color: var(--color-ink);
   font-weight: var(--font-weight-medium);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 </style>

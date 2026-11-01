@@ -45,6 +45,7 @@ watch(
     @keydown.esc="emit('cancel')"
   >
     <div class="ui-confirm__panel">
+      <p class="ui-confirm__eyebrow">确认操作 · CONFIRM</p>
       <h2 :id="titleId" class="ui-confirm__title">{{ title }}</h2>
       <p v-if="message" class="ui-confirm__message">{{ message }}</p>
       <div class="ui-confirm__actions">
@@ -71,21 +72,36 @@ watch(
 }
 
 .ui-confirm__panel {
-  width: min(100%, 22rem);
-  padding: var(--space-4);
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  width: min(100%, 24rem);
+  padding: var(--space-5);
+  background: var(--color-sheet);
+  border: var(--border-ink);
+  border-radius: var(--radius-none);
+  box-shadow: var(--shadow-overlay);
+  animation: ui-confirm-in var(--motion-enter);
+}
+
+.ui-confirm__eyebrow {
+  margin: 0 0 var(--space-3);
+  color: var(--color-seal);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  letter-spacing: var(--tracking-code);
 }
 
 .ui-confirm__title {
   margin: 0;
-  font-size: var(--font-size-lg);
+  color: var(--color-ink);
+  font-family: var(--font-serif);
+  font-size: var(--font-size-title-card);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--tracking-title-cn);
+  line-height: var(--line-height-tight);
 }
 
 .ui-confirm__message {
-  margin: var(--space-2) 0 0;
-  color: var(--color-text-muted);
+  margin: var(--space-3) 0 0;
+  color: var(--color-graphite);
   font-size: var(--font-size-sm);
 }
 
@@ -94,5 +110,29 @@ watch(
   gap: var(--space-2);
   justify-content: flex-end;
   margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: var(--border-hairline);
+}
+
+@keyframes ui-confirm-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 30rem) {
+  .ui-confirm__actions {
+    flex-direction: column-reverse;
+  }
+
+  .ui-confirm__actions :deep(.ui-button) {
+    width: 100%;
+  }
 }
 </style>

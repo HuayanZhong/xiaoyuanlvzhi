@@ -79,7 +79,11 @@ async function submit() {
 
 <template>
   <section class="auth-page">
-    <UiPageHeader title="登录" subtitle="使用 QQ 邮箱和密码进入学生端" />
+    <UiPageHeader
+      eyebrow="学生入口 · STUDENT ACCESS"
+      title="登录"
+      subtitle="使用 QQ 邮箱和密码进入学生端"
+    />
 
     <UiAlert v-if="notice" tone="info">{{ notice }}</UiAlert>
 
@@ -152,7 +156,7 @@ async function submit() {
 .auth-page__hint,
 .auth-page__switch {
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--color-graphite);
   font-size: var(--font-size-sm);
   text-align: center;
 }
@@ -162,7 +166,9 @@ async function submit() {
   align-items: center;
   min-height: var(--touch-target);
   padding: 0 var(--space-1);
-  color: var(--color-primary-strong);
+  color: var(--color-ink);
   font-weight: var(--font-weight-medium);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 </style>

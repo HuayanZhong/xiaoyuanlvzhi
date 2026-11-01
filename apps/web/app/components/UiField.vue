@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import UiInlineError from "./UiInlineError.vue";
+
 const props = defineProps<{
   label?: string;
   controlId?: string;
@@ -20,9 +22,7 @@ const hintId = computed(() =>
       {{ label }}
     </label>
     <slot :error-id="errorId" :hint-id="hintId" />
-    <p v-if="error" :id="errorId" class="ui-field__error" role="alert">
-      {{ error }}
-    </p>
+    <UiInlineError v-if="error" :id="errorId" :message="error" />
     <p v-else-if="hint" :id="hintId" class="ui-field__hint">{{ hint }}</p>
   </div>
 </template>
@@ -32,25 +32,20 @@ const hintId = computed(() =>
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+  min-width: 0;
 }
 
 .ui-field__label {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
+  color: var(--color-graphite);
+  font-size: var(--font-size-label);
   font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-label);
 }
 
-.ui-field__error,
 .ui-field__hint {
   margin: 0;
-  font-size: var(--font-size-xs);
-}
-
-.ui-field__error {
-  color: var(--color-danger);
-}
-
-.ui-field__hint {
-  color: var(--color-text-subtle);
+  color: var(--color-subtle);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-normal);
 }
 </style>

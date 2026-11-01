@@ -31,4 +31,14 @@ describe("UiCodeField", () => {
     expect(button.text()).toContain("42 秒后重发");
     expect(button.attributes("disabled")).toBeDefined();
   });
+
+  it("uses the shared control and code tracking classes", async () => {
+    const wrapper = await mountSuspended(UiCodeField, {
+      props: { id: "code", label: "验证码", modelValue: "" },
+    });
+
+    const input = wrapper.get("input");
+    expect(input.classes()).toContain("ui-control");
+    expect(input.classes()).toContain("ui-control--code");
+  });
 });
