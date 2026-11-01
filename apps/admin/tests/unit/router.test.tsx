@@ -30,6 +30,7 @@ vi.mock("@/api/accounts", async (importOriginal) => {
   return {
     ...actual,
     listStudents: vi.fn().mockResolvedValue([]),
+    listStudentRecords: vi.fn().mockResolvedValue([]),
   };
 });
 
@@ -286,6 +287,25 @@ describe("admin routes", () => {
       await screen.findByRole("heading", { name: "单株库存" }),
     ).toBeInTheDocument();
     expect(screen.queryByText("该模块正在建设中")).not.toBeInTheDocument();
+  });
+
+  it("renders the students page instead of a placeholder", async () => {
+    useAuthStore.setState({ status: "authenticated", account });
+
+    renderPath("/students");
+
+    expect(
+      await screen.findByRole("heading", { name: "学生管理" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("该模块正在建设中")).not.toBeInTheDocument();
+  });
+
+  it("keeps the articles placeholder", async () => {
+    useAuthStore.setState({ status: "authenticated", account });
+
+    renderPath("/articles");
+
+    expect(await screen.findByText("该模块正在建设中")).toBeInTheDocument();
   });
 
   it("redirects an authenticated admin away from the login page", async () => {
