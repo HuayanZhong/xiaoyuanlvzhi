@@ -34,6 +34,15 @@ vi.mock("@/api/accounts", async (importOriginal) => {
   };
 });
 
+vi.mock("@/api/articles", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/api/articles")>();
+
+  return {
+    ...actual,
+    listArticles: vi.fn().mockResolvedValue([]),
+  };
+});
+
 vi.mock("@/api/plants", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/api/plants")>();
 
@@ -300,10 +309,21 @@ describe("admin routes", () => {
     expect(screen.queryByText("该模块正在建设中")).not.toBeInTheDocument();
   });
 
-  it("keeps the articles placeholder", async () => {
+  it("renders the articles page instead of a placeholder", async () => {
     useAuthStore.setState({ status: "authenticated", account });
 
     renderPath("/articles");
+
+    expect(
+      await screen.findByRole("heading", { name: "资讯管理" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("该模块正在建设中")).not.toBeInTheDocument();
+  });
+
+  it("keeps the statistics placeholder", async () => {
+    useAuthStore.setState({ status: "authenticated", account });
+
+    renderPath("/statistics");
 
     expect(await screen.findByText("该模块正在建设中")).toBeInTheDocument();
   });
