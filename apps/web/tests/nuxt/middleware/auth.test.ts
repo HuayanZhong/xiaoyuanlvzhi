@@ -70,6 +70,20 @@ describe("auth route guard", () => {
       path: "/login",
       query: { returnTo: "/tasks/7" },
     });
+    expect(resolveAuthRedirect(target("/points"), anonymous)).toEqual({
+      path: "/login",
+      query: { returnTo: "/points" },
+    });
+    expect(resolveAuthRedirect(target("/rewards"), anonymous)).toEqual({
+      path: "/login",
+      query: { returnTo: "/rewards" },
+    });
+    expect(resolveAuthRedirect(target("/rewards/orders/3"), anonymous)).toEqual(
+      {
+        path: "/login",
+        query: { returnTo: "/rewards/orders/3" },
+      },
+    );
     expect(resolveAuthRedirect(target("/my-plants"), anonymous)).toEqual({
       path: "/login",
       query: { returnTo: "/my-plants" },
@@ -88,6 +102,8 @@ describe("auth route guard", () => {
     expect(resolveAuthRedirect(target("/plantsx"), anonymous)).toBeNull();
     expect(resolveAuthRedirect(target("/adoptions-old"), anonymous)).toBeNull();
     expect(resolveAuthRedirect(target("/tasksx"), anonymous)).toBeNull();
+    expect(resolveAuthRedirect(target("/pointsx"), anonymous)).toBeNull();
+    expect(resolveAuthRedirect(target("/rewards-old"), anonymous)).toBeNull();
     expect(resolveAuthRedirect(target("/my-plantsx"), anonymous)).toBeNull();
     expect(resolveAuthRedirect(target("/care-old"), anonymous)).toBeNull();
   });
@@ -101,6 +117,11 @@ describe("auth route guard", () => {
     ).toBeNull();
     expect(resolveAuthRedirect(target("/tasks"), authenticated)).toBeNull();
     expect(resolveAuthRedirect(target("/tasks/7"), authenticated)).toBeNull();
+    expect(resolveAuthRedirect(target("/points"), authenticated)).toBeNull();
+    expect(resolveAuthRedirect(target("/rewards"), authenticated)).toBeNull();
+    expect(
+      resolveAuthRedirect(target("/rewards/orders/3"), authenticated),
+    ).toBeNull();
     expect(resolveAuthRedirect(target("/my-plants"), authenticated)).toBeNull();
     expect(
       resolveAuthRedirect(target("/my-plants/10"), authenticated),
@@ -120,6 +141,14 @@ describe("auth route guard", () => {
     expect(resolveUnauthorizedRedirect(target("/tasks/7"))).toEqual({
       path: "/login",
       query: { returnTo: "/tasks/7" },
+    });
+    expect(resolveUnauthorizedRedirect(target("/points"))).toEqual({
+      path: "/login",
+      query: { returnTo: "/points" },
+    });
+    expect(resolveUnauthorizedRedirect(target("/rewards/orders/3"))).toEqual({
+      path: "/login",
+      query: { returnTo: "/rewards/orders/3" },
     });
     expect(resolveUnauthorizedRedirect(target("/unknown"))).toBeNull();
   });

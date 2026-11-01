@@ -48,6 +48,9 @@ watch(
       <p class="ui-confirm__eyebrow">确认操作 · CONFIRM</p>
       <h2 :id="titleId" class="ui-confirm__title">{{ title }}</h2>
       <p v-if="message" class="ui-confirm__message">{{ message }}</p>
+      <div v-if="$slots.default" class="ui-confirm__body">
+        <slot />
+      </div>
       <div class="ui-confirm__actions">
         <UiButton variant="secondary" :disabled="busy" @click="emit('cancel')">
           {{ cancelText }}
@@ -101,6 +104,12 @@ watch(
 
 .ui-confirm__message {
   margin: var(--space-3) 0 0;
+  color: var(--color-graphite);
+  font-size: var(--font-size-sm);
+}
+
+.ui-confirm__body {
+  margin-top: var(--space-3);
   color: var(--color-graphite);
   font-size: var(--font-size-sm);
 }

@@ -20,6 +20,8 @@ const PROTECTED_PREFIXES = [
   "/plants",
   "/adoptions",
   "/tasks",
+  "/points",
+  "/rewards",
   "/my-plants",
   "/care",
 ];

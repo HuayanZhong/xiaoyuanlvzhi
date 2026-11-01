@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { isNavActive, STUDENT_NAV } from "~/utils/navigation";
+import { isNavItemActive, STUDENT_NAV } from "~/utils/navigation";
 
 const navItems = STUDENT_NAV;
 const route = useRoute();
 
 function isActive(to: string) {
-  return isNavActive(route.path, to);
+  const item = navItems.find((entry) => entry.to === to);
+
+  return item ? isNavItemActive(route.path, item) : false;
 }
 </script>
 
@@ -160,6 +162,7 @@ function isActive(to: string) {
   font-size: var(--font-size-sm);
   letter-spacing: var(--tracking-label);
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .app-shell__nav-link::after {
@@ -251,6 +254,16 @@ function isActive(to: string) {
 
   .app-shell__theme {
     margin-left: auto;
+  }
+}
+
+@media (max-width: 63.99rem) {
+  .app-shell__masthead-meta {
+    display: none;
+  }
+
+  .app-shell__nav {
+    gap: var(--space-4);
   }
 }
 

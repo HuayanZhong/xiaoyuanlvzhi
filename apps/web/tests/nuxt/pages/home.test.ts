@@ -42,6 +42,9 @@ describe("home page", () => {
     expect(wrapper.get(".home-page__record").attributes("href")).toBe(
       "/my-plants",
     );
+    expect(wrapper.get(".home-page__points-link").attributes("href")).toBe(
+      "/points",
+    );
   });
 
   it("explains an empty plant count instead of showing a bare zero", async () => {

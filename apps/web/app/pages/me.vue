@@ -42,6 +42,7 @@ type ProfileRow = {
   code?: string;
   stamp?: string;
   stampTone?: "alive" | "pending" | "danger" | "neutral";
+  to?: string;
 };
 
 const recordRows = computed<ProfileRow[]>(() => {
@@ -65,6 +66,7 @@ const dataRows = computed<ProfileRow[]>(() => {
       value: String(current?.pointsBalance ?? 0),
       code: "PT",
       mono: true,
+      to: "/points",
     },
     {
       label: "在养绿植",
@@ -176,16 +178,27 @@ async function confirmLogout() {
 
           <FolioSection index="02" title="积分与领养" meta="POINTS">
             <Ledger>
-              <TagRow
-                v-for="row in dataRows"
-                :key="row.label"
-                :label="row.label"
-                :value="row.value"
-                :mono="row.mono"
-                :code="row.code"
-                :stamp="row.stamp"
-                :stamp-tone="row.stampTone"
-              />
+              <template v-for="row in dataRows" :key="row.label">
+                <NuxtLink v-if="row.to" :to="row.to" class="me-page__row-link">
+                  <TagRow
+                    :label="row.label"
+                    :value="row.value"
+                    :mono="row.mono"
+                    :code="row.code"
+                    :stamp="row.stamp"
+                    :stamp-tone="row.stampTone"
+                  />
+                </NuxtLink>
+                <TagRow
+                  v-else
+                  :label="row.label"
+                  :value="row.value"
+                  :mono="row.mono"
+                  :code="row.code"
+                  :stamp="row.stamp"
+                  :stamp-tone="row.stampTone"
+                />
+              </template>
             </Ledger>
 
             <NuxtLink to="/my-plants" class="me-page__care-link">
@@ -303,6 +316,12 @@ async function confirmLogout() {
   flex-direction: column;
   gap: var(--space-6);
   min-width: 0;
+}
+
+.me-page__row-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
 }
 
 .me-page__care-link {

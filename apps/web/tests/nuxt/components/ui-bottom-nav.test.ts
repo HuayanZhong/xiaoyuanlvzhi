@@ -58,12 +58,14 @@ describe("UiBottomNav", () => {
       "首页",
       "绿植",
       "任务",
+      "积分",
       "我的",
     ]);
     expect(links.map((link) => link.attributes("href"))).toEqual([
       "/",
       "/plants",
       "/tasks",
+      "/points",
       "/me",
     ]);
     expect(links[1]!.attributes("aria-current")).toBe("page");
@@ -78,5 +80,23 @@ describe("UiBottomNav", () => {
     const links = wrapper.findAll("a");
     expect(links[2]!.attributes("aria-current")).toBe("page");
     expect(links[2]!.classes()).toContain("ui-bottom-nav__link--active");
+  });
+
+  it("selects the points entry on points and rewards pages", async () => {
+    const paths = ["/points", "/rewards", "/rewards/orders/9"];
+    const wrappers = await Promise.all(
+      paths.map((currentPath) =>
+        mountSuspended(UiBottomNav, {
+          props: { items: STUDENT_NAV, currentPath },
+        }),
+      ),
+    );
+
+    for (const wrapper of wrappers) {
+      const links = wrapper.findAll("a");
+      expect(links[3]!.attributes("aria-current")).toBe("page");
+      expect(links[3]!.classes()).toContain("ui-bottom-nav__link--active");
+      expect(links[2]!.attributes("aria-current")).toBeUndefined();
+    }
   });
 });

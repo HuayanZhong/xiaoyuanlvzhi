@@ -14,6 +14,16 @@ describe("UiConfirmDialog", () => {
     expect(dialog.text()).toContain("确定退出吗？");
   });
 
+  it("renders slot content above the actions", async () => {
+    const wrapper = await mountSuspended(UiConfirmDialog, {
+      props: { open: true, title: "确认兑换", message: "兑换后不可撤回。" },
+      slots: { default: "<p>扣除 50 PT</p>" },
+    });
+
+    expect(wrapper.get(".ui-confirm__body").text()).toContain("扣除 50 PT");
+    expect(wrapper.findAll("button")).toHaveLength(2);
+  });
+
   it("emits confirm and cancel", async () => {
     const wrapper = await mountSuspended(UiConfirmDialog, {
       props: { open: true, title: "退出登录" },

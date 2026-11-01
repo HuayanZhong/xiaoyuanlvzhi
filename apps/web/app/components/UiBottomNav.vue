@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { isNavActive } from "~/utils/navigation";
+import { isNavItemActive, type NavItem } from "~/utils/navigation";
 
 const props = defineProps<{
-  items: Array<{ label: string; to: string }>;
+  items: NavItem[];
   currentPath?: string;
 }>();
 
@@ -10,8 +10,8 @@ const route = useRoute();
 
 const activePath = computed(() => props.currentPath ?? route.path);
 
-function isActive(to: string) {
-  return isNavActive(activePath.value, to);
+function isActive(item: NavItem) {
+  return isNavItemActive(activePath.value, item);
 }
 </script>
 
@@ -22,8 +22,8 @@ function isActive(to: string) {
         <NuxtLink
           :to="item.to"
           class="ui-bottom-nav__link"
-          :class="{ 'ui-bottom-nav__link--active': isActive(item.to) }"
-          :aria-current="isActive(item.to) ? 'page' : undefined"
+          :class="{ 'ui-bottom-nav__link--active': isActive(item) }"
+          :aria-current="isActive(item) ? 'page' : undefined"
         >
           {{ item.label }}
         </NuxtLink>

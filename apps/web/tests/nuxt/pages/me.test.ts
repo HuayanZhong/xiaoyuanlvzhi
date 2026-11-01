@@ -90,6 +90,9 @@ describe("me page", () => {
     expect(wrapper.get(".me-page__care-link").attributes("href")).toBe(
       "/my-plants",
     );
+    expect(
+      wrapper.findAll("a").map((item) => item.attributes("href")),
+    ).toContain("/points");
   });
 
   it("uses a placeholder for empty optional fields", async () => {

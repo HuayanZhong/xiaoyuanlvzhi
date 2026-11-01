@@ -91,12 +91,15 @@ function load() {
         </FolioSection>
 
         <FolioSection index="02" title="积分余额" meta="POINTS">
-          <div class="home-page__points">
-            <p class="home-page__points-value">
-              {{ profile.pointsBalance }}<span class="home-page__unit">PT</span>
-            </p>
-            <p class="home-page__note">参与任务或兑换后，余额会更新。</p>
-          </div>
+          <NuxtLink to="/points" class="home-page__points-link">
+            <div class="home-page__points">
+              <p class="home-page__points-value">
+                {{ profile.pointsBalance
+                }}<span class="home-page__unit">PT</span>
+              </p>
+              <p class="home-page__note">参与任务或兑换后，余额会更新。</p>
+            </div>
+          </NuxtLink>
         </FolioSection>
       </div>
 
@@ -174,6 +177,12 @@ function load() {
   color: var(--color-seal);
   font-size: var(--font-size-sm);
   letter-spacing: var(--tracking-code);
+}
+
+.home-page__points-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
 }
 
 .home-page__points {
