@@ -115,7 +115,7 @@ Routing (`src/router/index.tsx`):
 
 - `/login` renders `LoginPage` without the admin shell; `/` and unknown paths redirect to `/login`. The shell routes are wrapped in `RequireAdmin`; unauthenticated visits redirect to `/login?returnTo=...`.
 - `AdminShell` is the layout route for `/dashboard` and 12 module routes (`/adoptions`, `/care-reviews`, `/tasks`, `/feedback`, `/plants/species`, `/plants/instances`, `/points/rules`, `/points/rewards`, `/points/orders`, `/students`, `/articles`, `/statistics`).
-- Module routes render `PlaceholderPage`; `/dashboard` renders the minimal workbench placeholder. Login calls Spring `POST /api/v1/auth/login`; startup restores the session through `GET /api/v1/auth/me`; accessToken lives in localStorage under the admin auth key.
+- Each module route renders its real page (`AdoptionsPage`, `CareReviewsPage`, `TasksPage`, `FeedbackPage`, `SpeciesPage`, `InstancesPage`, `PointsPage`, `RewardsPage`, `OrdersPage`, `StudentsPage`, `ArticlesPage`, `StatisticsPage`); `/dashboard` renders the real workbench. Login calls Spring `POST /api/v1/auth/login`; startup restores the session through `GET /api/v1/auth/me`; accessToken lives in localStorage under the admin auth key.
 
 Admin shell (`src/layouts/AdminShell.tsx`):
 
@@ -134,7 +134,7 @@ Styling:
 
 State: `src/stores/app.ts` holds `sidebarCollapsed` (wired into the desktop `Sider`) and persisted `themeMode` (`toggleTheme`).
 
-Pages live under domain folders (`src/pages/auth/LoginPage.tsx`, `src/pages/dashboard/DashboardPage.tsx`, `src/pages/placeholder/PlaceholderPage.tsx`); tests mirror them under `tests/unit/pages/`. Auth UI components live under `src/components/auth/` (`AuthLayout`, `AuthBrandPanel`, `LoginForm`); `src/lib/http.ts` is the environment adapter: it resolves `VITE_API_BASE_URL`, falls back to `/api/v1/`, and creates the shared ky client with Bearer injection and 401 handling.
+Pages live under domain folders (`src/pages/auth/LoginPage.tsx`, `src/pages/dashboard/DashboardPage.tsx`, and `src/pages/<domain>/<Page>.tsx` for the module pages); tests mirror them under `tests/unit/pages/`. Auth UI components live under `src/components/auth/` (`AuthLayout`, `AuthBrandPanel`, `LoginForm`); `src/lib/http.ts` is the environment adapter: it resolves `VITE_API_BASE_URL`, falls back to `/api/v1/`, and creates the shared ky client with Bearer injection and 401 handling.
 
 `src/config/env.ts` parses `ADMIN_PORT` (default 3000), `SPRING_API_ORIGIN` (default `http://localhost:8080`) and optional `API_BASE_URL`. `vite.config.ts` reads that object and writes `process.env.VITE_API_BASE_URL`; Vite then merges `VITE_*` into `import.meta.env`, so `http.ts` is unchanged and `@repo/env` never enters the browser bundle. The dev server port and the `/api` proxy target come from the env file, so the scripts must not pass `--port`.
 

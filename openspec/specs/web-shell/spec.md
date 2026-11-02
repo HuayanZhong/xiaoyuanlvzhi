@@ -57,7 +57,7 @@ Authenticated pages SHALL render a shared shell with a masthead, content area an
 
 ### Requirement: 底部导航
 
-The bottom navigation SHALL be displayed only below `48rem`. It SHALL contain only modules that are implemented in the current build. This change SHALL expose 首页, 绿植, 任务, 积分 and 我的; future modules SHALL add their entries when their pages exist. The current entry SHALL be highlighted visually and through `aria-current="page"`. At `48rem` and above the masthead SHALL expose the same entries as horizontal links.
+The bottom navigation SHALL be displayed only below `48rem`. It SHALL contain only modules that are implemented in the current build. The current build SHALL expose 首页, 绿植, 任务, 积分 and 我的; future modules SHALL add their entries when their pages exist. The current entry SHALL be highlighted visually and through `aria-current="page"`. At `48rem` and above the masthead SHALL expose the same entries as horizontal links.
 
 #### Scenario: 当前入口高亮
 
@@ -86,7 +86,7 @@ The bottom navigation SHALL be displayed only below `48rem`. It SHALL contain on
 
 #### Scenario: 不显示未实现模块
 
-- **WHEN** 通知或问题反馈模块尚未实现
+- **WHEN** 通知、问题反馈或养护模块已有页面但不在主导航中
 - **THEN** 导航不显示这些入口，不产生死链
 
 ### Requirement: 首页摘要
@@ -370,4 +370,4 @@ The web SHALL show a not-found page for unregistered paths. The page SHALL provi
 #### Scenario: 导航不新增入口
 
 - **WHEN** 任意学生端页面渲染底部导航或横向导航
-- **THEN** 导航项仍为首页、绿植、我的
+- **THEN** 导航项仍为首页、绿植、任务、积分、我的
