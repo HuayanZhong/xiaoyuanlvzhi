@@ -108,6 +108,11 @@ The home page SHALL show the current student's display name, current points bala
 - **WHEN** 学生的在养绿植数为 0
 - **THEN** 首页用“暂无在养绿植”说明代替空白数字，不显示错误
 
+#### Scenario: 有在养绿植时不显示零值说明
+
+- **WHEN** 学生的在养绿植数大于 0
+- **THEN** 首页显示在养数量和进入 `/my-plants` 的入口，不显示“领养审核通过后，植株会登记在这里”的零值说明
+
 #### Scenario: 首页加载失败
 
 - **WHEN** 资料请求因网络或 5xx 失败

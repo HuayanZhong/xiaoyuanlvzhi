@@ -164,8 +164,20 @@ describe("home page", () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain("暂无在养绿植");
+    expect(wrapper.text()).toContain("领养审核通过后，植株会登记在这里");
     expect(wrapper.get(".home-page__browse").attributes("href")).toBe(
       "/plants",
+    );
+  });
+
+  it("hides the zero-value note when the student has active plants", async () => {
+    profileMock.mockResolvedValue(profile({ activeAdoptionCount: 1 }));
+    const wrapper = await mountSuspended(HomePage);
+    await flushPromises();
+
+    expect(wrapper.text()).not.toContain("领养审核通过后，植株会登记在这里");
+    expect(wrapper.get(".home-page__record").attributes("href")).toBe(
+      "/my-plants",
     );
   });
 

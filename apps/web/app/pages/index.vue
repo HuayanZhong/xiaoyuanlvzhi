@@ -124,7 +124,9 @@ function load() {
             </NuxtLink>
           </UiEmptyState>
 
-          <p class="home-page__note">领养审核通过后，植株会登记在这里。</p>
+          <p v-if="activeCount === 0" class="home-page__note">
+            领养审核通过后，植株会登记在这里。
+          </p>
         </FolioSection>
 
         <FolioSection index="02" title="待处理事项" meta="PENDING">
