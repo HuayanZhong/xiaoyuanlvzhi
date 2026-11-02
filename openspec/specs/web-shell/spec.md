@@ -8,7 +8,7 @@
 
 ### Requirement: 学生端页面壳
 
-Authenticated pages SHALL render a shared shell with a masthead, content area and, on narrow viewports only, bottom navigation. At `48rem` and above the shell SHALL show a paper masthead with the wordmark, horizontal navigation and theme toggle; below `48rem` it SHALL show a compact masthead with the wordmark and theme toggle. The content area SHALL be at most `70rem` wide. `/` SHALL render the home page, `/me` SHALL render the profile page, `/plants` and `/plants/{id}` SHALL render the plant catalog and species detail, `/adoptions` and `/adoptions/{id}` SHALL render the application list and detail, `/tasks` and `/tasks/{id}` SHALL render the eco task list and task detail, `/points` SHALL render the points ledger, `/rewards` SHALL render the rewards shop, `/rewards/orders` and `/rewards/orders/{id}` SHALL render the redemption order list and order detail, `/my-plants` and `/my-plants/{plantId}` SHALL render the active plant list and the care page for one plant, and `/care/{id}` SHALL render a check-in detail. `/login` and `/register` SHALL use an auth layout without bottom navigation. Unauthenticated access to any student business route SHALL redirect to `/login` and return to the original path after login.
+Authenticated pages SHALL render a shared shell with a masthead, content area and, on narrow viewports only, bottom navigation. At `48rem` and above the shell SHALL show a paper masthead with the wordmark, horizontal navigation and theme toggle; below `48rem` it SHALL show a compact masthead with the wordmark and theme toggle. The content area SHALL be at most `70rem` wide. `/` SHALL render the home page, `/me` SHALL render the profile page, `/plants` and `/plants/{id}` SHALL render the plant catalog and species detail, `/adoptions` and `/adoptions/{id}` SHALL render the application list and detail, `/tasks` and `/tasks/{id}` SHALL render the eco task list and task detail, `/points` SHALL render the points ledger, `/rewards` SHALL render the rewards shop, `/rewards/orders` and `/rewards/orders/{id}` SHALL render the redemption order list and order detail, `/notifications` SHALL render the notification list, `/feedback` and `/feedback/{id}` SHALL render the feedback list and feedback detail, `/my-plants` and `/my-plants/{plantId}` SHALL render the active plant list and the care page for one plant, and `/care/{id}` SHALL render a check-in detail. `/login` and `/register` SHALL use an auth layout without bottom navigation. Unauthenticated access to any student business route SHALL redirect to `/login` and return to the original path after login.
 
 #### Scenario: 进入首页
 
@@ -40,6 +40,11 @@ Authenticated pages SHALL render a shared shell with a masthead, content area an
 - **WHEN** 已登录学生访问 `/points`、`/rewards`、`/rewards/orders` 或某个订单详情
 - **THEN** 页面使用同一套页面壳，显示字标、导航和主题切换，并能返回积分页或订单列表
 
+#### Scenario: 进入通知与反馈页面
+
+- **WHEN** 已登录学生访问 `/notifications`、`/feedback` 或某个反馈详情
+- **THEN** 页面使用同一套页面壳，显示字标、导航和主题切换，并能返回首页或反馈列表
+
 #### Scenario: 进入养护页面
 
 - **WHEN** 已登录学生访问 `/my-plants`、某个植株养护页或某个打卡详情
@@ -47,7 +52,7 @@ Authenticated pages SHALL render a shared shell with a masthead, content area an
 
 #### Scenario: 未登录访问业务页面
 
-- **WHEN** 未登录用户访问 `/plants`、某个品种详情、`/adoptions`、某个申请详情、`/tasks`、某个任务详情、`/points`、`/rewards`、`/rewards/orders`、某个订单详情、`/my-plants`、某个植株养护页或某个打卡详情
+- **WHEN** 未登录用户访问 `/plants`、某个品种详情、`/adoptions`、某个申请详情、`/tasks`、某个任务详情、`/points`、`/rewards`、`/rewards/orders`、某个订单详情、`/notifications`、`/feedback`、某个反馈详情、`/my-plants`、某个植株养护页或某个打卡详情
 - **THEN** 页面先进入 `/login`，登录后回到原路径
 
 ### Requirement: 底部导航
@@ -86,7 +91,7 @@ The bottom navigation SHALL be displayed only below `48rem`. It SHALL contain on
 
 ### Requirement: 首页摘要
 
-The home page SHALL show the current student's display name, current points balance and active plant count. It SHALL show a loading state while fetching, a retryable error on failure, and a clear zero-value presentation when the student has no active plants. The points balance SHALL link to the points ledger at `/points`.
+The home page SHALL show the current student's display name, current points balance and active plant count. It SHALL show a loading state while fetching, a retryable error on failure, and a clear zero-value presentation when the student has no active plants. The points balance SHALL link to the points ledger at `/points`. The home page SHALL provide a message entry that shows the unread notification count and links to `/notifications`.
 
 #### Scenario: 显示账号摘要
 
@@ -113,9 +118,14 @@ The home page SHALL show the current student's display name, current points bala
 - **WHEN** 学生在首页点击积分余额
 - **THEN** 页面进入 `/points`，主导航中的“积分”入口处于选中状态
 
+#### Scenario: 从首页进入通知列表
+
+- **WHEN** 学生在首页点击消息入口
+- **THEN** 页面进入 `/notifications`，主导航选中态保持不变
+
 ### Requirement: 我的页面
 
-The profile page SHALL show the current student's name, student number, department, class, phone, email, current points and active plant count. It SHALL provide a logout action wired to the student-auth logout flow. The current points SHALL link to the points ledger at `/points`. Profile editing, notifications and feedback SHALL remain out of scope for this change.
+The profile page SHALL show the current student's name, student number, department, class, phone, email, current points and active plant count. It SHALL provide a logout action wired to the student-auth logout flow. The current points SHALL link to the points ledger at `/points`. It SHALL provide an entry to `/notifications` showing the unread count and an entry to `/feedback`. It SHALL allow the student to edit the phone number and class name, while name, student number and email remain read-only. Notifications, feedback and profile editing are provided by the student-account-center capability.
 
 #### Scenario: 显示完整资料
 
@@ -141,6 +151,26 @@ The profile page SHALL show the current student's name, student number, departme
 
 - **WHEN** 学生点击“我的”页面中的当前积分
 - **THEN** 页面进入 `/points`
+
+#### Scenario: 从我的进入通知与反馈
+
+- **WHEN** 学生点击“我的”页面中的通知或问题反馈入口
+- **THEN** 页面分别进入 `/notifications` 或 `/feedback`
+
+#### Scenario: 修改手机号成功
+
+- **WHEN** 学生提交格式正确且未被其他账号使用的手机号
+- **THEN** 页面显示修改后的手机号，资料保持最新
+
+#### Scenario: 手机号已被使用
+
+- **WHEN** 学生提交已被其他账号绑定的手机号
+- **THEN** 页面显示「该手机号已关联其他账号」，原手机号保持不变
+
+#### Scenario: 清空班级
+
+- **WHEN** 学生清空班级并保存
+- **THEN** 页面把班级显示为“未填写”，其余资料不变
 
 ### Requirement: 响应式与安全区
 

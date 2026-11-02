@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { resolveRequestError } from "~/utils/auth-errors";
+import { loadNotificationSnapshot } from "~/utils/notification-api";
 import { getStudentProfile } from "~/utils/profile-api";
 
 const {
@@ -17,6 +18,16 @@ const {
 const profile = computed(() => data.value?.profile ?? null);
 const loading = computed(() => loadStatus.value === "pending");
 const errorMessage = computed(() => data.value?.errorMessage ?? "");
+
+const { data: notificationData } = await useAsyncData(
+  "notifications",
+  loadNotificationSnapshot,
+);
+
+const unreadCount = computed(() => notificationData.value?.unreadCount ?? 0);
+const notificationError = computed(
+  () => notificationData.value?.errorMessage ?? "",
+);
 
 const displayName = computed(() => {
   const current = profile.value;
@@ -102,6 +113,18 @@ function load() {
           </NuxtLink>
         </FolioSection>
       </div>
+
+      <NuxtLink to="/notifications" class="home-page__message">
+        <span class="home-page__message-label">消息 · NOTICES</span>
+        <span class="home-page__message-value">
+          <template v-if="notificationError">消息暂时不可用</template>
+          <template v-else-if="unreadCount > 0">
+            {{ unreadCount }} 条未读
+          </template>
+          <template v-else>暂无未读</template>
+        </span>
+        <span class="home-page__message-action" aria-hidden="true">查看 →</span>
+      </NuxtLink>
 
       <dl class="home-page__strip">
         <div class="home-page__strip-item">
@@ -209,6 +232,40 @@ function load() {
   font-size: var(--font-size-sm);
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+.home-page__message {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--touch-target);
+  padding: var(--space-3) 0;
+  border-top: var(--border-ink);
+  border-bottom: var(--border-hairline);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.home-page__message-label {
+  color: var(--color-graphite);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  letter-spacing: var(--tracking-code);
+}
+
+.home-page__message-value {
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  letter-spacing: var(--tracking-title-cn);
+}
+
+.home-page__message-action {
+  color: var(--color-seal);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  letter-spacing: var(--tracking-mono);
 }
 
 .home-page__strip {

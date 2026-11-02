@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import { resolveActionError } from "~/utils/action-errors";
 import { resolveRequestError } from "~/utils/auth-errors";
-import { getStudentProfile } from "~/utils/profile-api";
+import { loadNotificationSnapshot } from "~/utils/notification-api";
+import { clearHomeProfileCache } from "~/utils/profile-cache";
+import { getStudentProfile, updateStudentProfile } from "~/utils/profile-api";
 
 const { logout } = useAuth();
 
@@ -21,6 +24,44 @@ const loading = computed(() => loadStatus.value === "pending");
 const errorMessage = computed(() => data.value?.errorMessage ?? "");
 const confirming = ref(false);
 const loggingOut = ref(false);
+
+const { data: notificationData } = await useAsyncData(
+  "notifications",
+  loadNotificationSnapshot,
+);
+
+const unreadCount = computed(() => notificationData.value?.unreadCount ?? 0);
+const notificationError = computed(
+  () => notificationData.value?.errorMessage ?? "",
+);
+const notificationValue = computed(() => {
+  if (notificationError.value) {
+    return "暂时不可用";
+  }
+
+  return unreadCount.value > 0 ? `${unreadCount.value} 条未读` : "暂无未读";
+});
+
+const editing = ref(false);
+const phoneDraft = ref("");
+const classDraft = ref("");
+const savingProfile = ref(false);
+const saveError = ref("");
+const savedNotice = ref("");
+
+const phoneError = computed(() => {
+  if (!editing.value) {
+    return "";
+  }
+
+  const phone = phoneDraft.value.trim();
+
+  if (!phone) {
+    return "请填写手机号";
+  }
+
+  return /^1[3-9]\d{9}$/.test(phone) ? "" : "手机号格式不正确";
+});
 
 const displayName = computed(() => {
   const current = profile.value;
@@ -105,6 +146,51 @@ function load() {
   return refresh();
 }
 
+function startEdit() {
+  phoneDraft.value = profile.value?.phone ?? "";
+  classDraft.value = profile.value?.className ?? "";
+  saveError.value = "";
+  savedNotice.value = "";
+  editing.value = true;
+}
+
+function cancelEdit() {
+  if (savingProfile.value) {
+    return;
+  }
+
+  editing.value = false;
+  saveError.value = "";
+}
+
+async function saveProfile() {
+  if (savingProfile.value || !profile.value || phoneError.value) {
+    return;
+  }
+
+  savingProfile.value = true;
+  saveError.value = "";
+
+  try {
+    const updated = await updateStudentProfile({
+      phone: phoneDraft.value.trim(),
+      className: classDraft.value.trim(),
+    });
+
+    if (data.value) {
+      data.value = { profile: updated, errorMessage: "" };
+    }
+
+    editing.value = false;
+    savedNotice.value = "资料已更新";
+    clearHomeProfileCache();
+  } catch (error) {
+    saveError.value = resolveActionError(error);
+  } finally {
+    savingProfile.value = false;
+  }
+}
+
 async function confirmLogout() {
   if (loggingOut.value) {
     return;
@@ -174,6 +260,59 @@ async function confirmLogout() {
                 :stamp-tone="row.stampTone"
               />
             </Ledger>
+
+            <UiAlert v-if="savedNotice" tone="success">
+              <p class="me-page__notice">{{ savedNotice }}</p>
+            </UiAlert>
+
+            <form
+              v-if="editing"
+              class="me-page__edit"
+              @submit.prevent="saveProfile"
+            >
+              <UiTextInput
+                id="profile-phone"
+                v-model="phoneDraft"
+                label="手机号"
+                type="tel"
+                inputmode="tel"
+                autocomplete="tel"
+                :maxlength="11"
+                :error="phoneError"
+                hint="手机号用于账号识别，不能清空。"
+                :disabled="savingProfile"
+              />
+
+              <UiTextInput
+                id="profile-class"
+                v-model="classDraft"
+                label="班级"
+                hint="留空表示清空班级；最多 40 字。"
+                :maxlength="40"
+                :disabled="savingProfile"
+              />
+
+              <UiAlert v-if="saveError" tone="error">
+                <p class="me-page__notice">{{ saveError }}</p>
+              </UiAlert>
+
+              <div class="me-page__edit-actions">
+                <UiButton type="submit" :loading="savingProfile">
+                  保存资料
+                </UiButton>
+                <UiButton
+                  variant="secondary"
+                  :disabled="savingProfile"
+                  @click="cancelEdit"
+                >
+                  取消
+                </UiButton>
+              </div>
+            </form>
+
+            <UiButton v-else variant="secondary" @click="startEdit">
+              修改手机号与班级
+            </UiButton>
           </FolioSection>
 
           <FolioSection index="02" title="积分与领养" meta="POINTS">
@@ -206,10 +345,21 @@ async function confirmLogout() {
             </NuxtLink>
           </FolioSection>
 
+          <FolioSection index="03" title="账号服务" meta="SERVICES">
+            <Ledger>
+              <NuxtLink to="/notifications" class="me-page__row-link">
+                <TagRow label="通知" :value="notificationValue" />
+              </NuxtLink>
+              <NuxtLink to="/feedback" class="me-page__row-link">
+                <TagRow label="问题反馈" value="提交问题并查看回复" />
+              </NuxtLink>
+            </Ledger>
+          </FolioSection>
+
           <UiEmptyState
             v-if="missingOptional"
             title="资料待补全"
-            description="手机号或班级尚未填写，请联系管理员更正。"
+            description="手机号或班级尚未填写，可以在“登记资料”中补齐。"
           />
 
           <div class="me-page__actions">
@@ -333,6 +483,28 @@ async function confirmLogout() {
   font-size: var(--font-size-sm);
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+.me-page__edit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: var(--border-hairline);
+}
+
+.me-page__edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.me-page__notice {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
 }
 
 .me-page__actions {

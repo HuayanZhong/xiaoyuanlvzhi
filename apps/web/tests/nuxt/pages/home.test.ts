@@ -1,7 +1,9 @@
 import { flushPromises } from "@vue/test-utils";
 import { mountSuspended } from "@nuxt/test-utils/runtime";
-import { describe, expect, it, vi } from "vitest";
+import { clearNuxtData } from "#app";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "~/utils/api";
+import { loadNotificationSnapshot } from "~/utils/notification-api";
 import { getStudentProfile, type StudentProfile } from "~/utils/profile-api";
 import HomePage from "../../../app/pages/index.vue";
 
@@ -9,7 +11,12 @@ vi.mock("~/utils/profile-api", () => ({
   getStudentProfile: vi.fn(),
 }));
 
+vi.mock("~/utils/notification-api", () => ({
+  loadNotificationSnapshot: vi.fn(),
+}));
+
 const profileMock = vi.mocked(getStudentProfile);
+const notificationMock = vi.mocked(loadNotificationSnapshot);
 
 function profile(overrides: Partial<StudentProfile> = {}): StudentProfile {
   return {
@@ -31,6 +38,16 @@ function profile(overrides: Partial<StudentProfile> = {}): StudentProfile {
 }
 
 describe("home page", () => {
+  beforeEach(() => {
+    notificationMock.mockReset();
+    notificationMock.mockResolvedValue({
+      items: [],
+      unreadCount: 0,
+      errorMessage: "",
+    });
+    clearNuxtData("notifications");
+  });
+
   it("shows the student name, points and active plant count", async () => {
     profileMock.mockResolvedValue(profile());
     const wrapper = await mountSuspended(HomePage);
@@ -83,5 +100,43 @@ describe("home page", () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain("你好，张三");
+  });
+
+  it("shows the unread notification count and links to notifications", async () => {
+    profileMock.mockResolvedValue(profile());
+    notificationMock.mockResolvedValue({
+      items: [],
+      unreadCount: 3,
+      errorMessage: "",
+    });
+    const wrapper = await mountSuspended(HomePage);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("3 条未读");
+    expect(wrapper.get(".home-page__message").attributes("href")).toBe(
+      "/notifications",
+    );
+  });
+
+  it("keeps the home summary when notifications fail", async () => {
+    profileMock.mockResolvedValue(profile());
+    notificationMock.mockResolvedValue({
+      items: [],
+      unreadCount: 0,
+      errorMessage: "无法连接后端服务，请稍后重试",
+    });
+    const wrapper = await mountSuspended(HomePage);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("你好，张三");
+    expect(wrapper.text()).toContain("消息暂时不可用");
+  });
+
+  it("explains when there are no unread notifications", async () => {
+    profileMock.mockResolvedValue(profile());
+    const wrapper = await mountSuspended(HomePage);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("暂无未读");
   });
 });

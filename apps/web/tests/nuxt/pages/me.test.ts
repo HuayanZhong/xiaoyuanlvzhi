@@ -1,9 +1,16 @@
 import { flushPromises, type DOMWrapper } from "@vue/test-utils";
 import { mountSuspended, mockNuxtImport } from "@nuxt/test-utils/runtime";
-import { describe, expect, it, vi } from "vitest";
+import { clearNuxtData } from "#app";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { logoutStudent } from "~/utils/auth-api";
 import { ApiError } from "~/utils/api";
-import { getStudentProfile, type StudentProfile } from "~/utils/profile-api";
+import { loadNotificationSnapshot } from "~/utils/notification-api";
+import { clearHomeProfileCache } from "~/utils/profile-cache";
+import {
+  getStudentProfile,
+  updateStudentProfile,
+  type StudentProfile,
+} from "~/utils/profile-api";
 import MePage from "../../../app/pages/me.vue";
 
 vi.mock("~/utils/auth-api", () => ({
@@ -16,6 +23,15 @@ vi.mock("~/utils/auth-api", () => ({
 
 vi.mock("~/utils/profile-api", () => ({
   getStudentProfile: vi.fn(),
+  updateStudentProfile: vi.fn(),
+}));
+
+vi.mock("~/utils/notification-api", () => ({
+  loadNotificationSnapshot: vi.fn(),
+}));
+
+vi.mock("~/utils/profile-cache", () => ({
+  clearHomeProfileCache: vi.fn(),
 }));
 
 const { navigateToMock } = vi.hoisted(() => ({
@@ -25,6 +41,9 @@ const { navigateToMock } = vi.hoisted(() => ({
 mockNuxtImport("navigateTo", () => navigateToMock);
 
 const profileMock = vi.mocked(getStudentProfile);
+const updateMock = vi.mocked(updateStudentProfile);
+const notificationMock = vi.mocked(loadNotificationSnapshot);
+const cacheMock = vi.mocked(clearHomeProfileCache);
 const logoutMock = vi.mocked(logoutStudent);
 
 function profile(overrides: Partial<StudentProfile> = {}): StudentProfile {
@@ -68,7 +87,42 @@ async function confirmLogout(
   await flushPromises();
 }
 
+async function openEdit(wrapper: Awaited<ReturnType<typeof mountSuspended>>) {
+  const button = wrapper
+    .findAll("button")
+    .find((item: DOMWrapper<Element>) => item.text() === "修改手机号与班级");
+
+  await button!.trigger("click");
+  await flushPromises();
+}
+
+async function fillEdit(
+  wrapper: Awaited<ReturnType<typeof mountSuspended>>,
+  phone: string,
+  className: string,
+) {
+  await wrapper.get("#profile-phone").setValue(phone);
+  await wrapper.get("#profile-class").setValue(className);
+}
+
+async function submitEdit(wrapper: Awaited<ReturnType<typeof mountSuspended>>) {
+  await wrapper.get(".me-page__edit").trigger("submit");
+  await flushPromises();
+}
+
 describe("me page", () => {
+  beforeEach(() => {
+    updateMock.mockReset();
+    notificationMock.mockReset();
+    cacheMock.mockReset();
+    notificationMock.mockResolvedValue({
+      items: [],
+      unreadCount: 0,
+      errorMessage: "",
+    });
+    clearNuxtData();
+  });
+
   it("shows the full profile", async () => {
     profileMock.mockResolvedValue(profile());
     const wrapper = await mountSuspended(MePage);
@@ -86,7 +140,7 @@ describe("me page", () => {
       expect(wrapper.text()).toContain(value);
     }
 
-    expect(wrapper.findAll(".ui-ledger")).toHaveLength(2);
+    expect(wrapper.findAll(".ui-ledger")).toHaveLength(3);
     expect(wrapper.get(".me-page__care-link").attributes("href")).toBe(
       "/my-plants",
     );
@@ -133,5 +187,105 @@ describe("me page", () => {
       path: "/login",
       query: { notice: "revoke-failed" },
     });
+  });
+
+  it("links to notifications with the unread count and to feedback", async () => {
+    profileMock.mockResolvedValue(profile());
+    notificationMock.mockResolvedValue({
+      items: [],
+      unreadCount: 2,
+      errorMessage: "",
+    });
+    const wrapper = await mountSuspended(MePage);
+    await flushPromises();
+
+    const links = wrapper.findAll("a").map((item) => item.attributes("href"));
+
+    expect(links).toContain("/notifications");
+    expect(links).toContain("/feedback");
+    expect(wrapper.text()).toContain("2 条未读");
+  });
+
+  it("keeps the profile visible when notifications fail", async () => {
+    profileMock.mockResolvedValue(profile());
+    notificationMock.mockResolvedValue({
+      items: [],
+      unreadCount: 0,
+      errorMessage: "无法连接后端服务，请稍后重试",
+    });
+    const wrapper = await mountSuspended(MePage);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("张三");
+    expect(wrapper.text()).toContain("暂时不可用");
+  });
+
+  it("updates the phone and class and clears profile caches", async () => {
+    profileMock.mockResolvedValue(profile());
+    updateMock.mockResolvedValue(
+      profile({ phone: "13900139000", className: "软件工程 2 班" }),
+    );
+    const wrapper = await mountSuspended(MePage);
+    await flushPromises();
+
+    await openEdit(wrapper);
+    await fillEdit(wrapper, "13900139000", "软件工程 2 班");
+    await submitEdit(wrapper);
+
+    expect(updateMock).toHaveBeenCalledWith({
+      phone: "13900139000",
+      className: "软件工程 2 班",
+    });
+    expect(wrapper.text()).toContain("13900139000");
+    expect(wrapper.text()).toContain("软件工程 2 班");
+    expect(wrapper.text()).toContain("资料已更新");
+    expect(cacheMock).toHaveBeenCalled();
+  });
+
+  it("keeps the edit form when the phone is already used", async () => {
+    profileMock.mockResolvedValue(profile());
+    updateMock.mockRejectedValue(
+      new ApiError("PHONE_ALREADY_USED", "该手机号已关联其他账号", 409),
+    );
+    const wrapper = await mountSuspended(MePage);
+    await flushPromises();
+
+    await openEdit(wrapper);
+    await fillEdit(wrapper, "13900139000", "软件工程 1 班");
+    await submitEdit(wrapper);
+
+    expect(wrapper.text()).toContain("该手机号已关联其他账号");
+    expect(wrapper.find(".me-page__edit").exists()).toBe(true);
+    expect(cacheMock).not.toHaveBeenCalled();
+  });
+
+  it("clears the class when it is submitted empty", async () => {
+    profileMock.mockResolvedValue(profile());
+    updateMock.mockResolvedValue(profile({ className: null }));
+    const wrapper = await mountSuspended(MePage);
+    await flushPromises();
+
+    await openEdit(wrapper);
+    await fillEdit(wrapper, "13800138000", "");
+    await submitEdit(wrapper);
+
+    expect(updateMock).toHaveBeenCalledWith({
+      phone: "13800138000",
+      className: "",
+    });
+    expect(wrapper.text()).toContain("未填写");
+  });
+
+  it("rejects an empty phone before sending the request", async () => {
+    profileMock.mockResolvedValue(profile());
+    const wrapper = await mountSuspended(MePage);
+    await flushPromises();
+
+    await openEdit(wrapper);
+    await fillEdit(wrapper, "", "软件工程 1 班");
+    await submitEdit(wrapper);
+
+    expect(updateMock).not.toHaveBeenCalled();
+    expect(wrapper.text()).toContain("请填写手机号");
   });
 });

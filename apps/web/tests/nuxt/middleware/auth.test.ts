@@ -96,6 +96,18 @@ describe("auth route guard", () => {
       path: "/login",
       query: { returnTo: "/care/9" },
     });
+    expect(resolveAuthRedirect(target("/notifications"), anonymous)).toEqual({
+      path: "/login",
+      query: { returnTo: "/notifications" },
+    });
+    expect(resolveAuthRedirect(target("/feedback"), anonymous)).toEqual({
+      path: "/login",
+      query: { returnTo: "/feedback" },
+    });
+    expect(resolveAuthRedirect(target("/feedback/5"), anonymous)).toEqual({
+      path: "/login",
+      query: { returnTo: "/feedback/5" },
+    });
   });
 
   it("keeps lookalike paths public", () => {
@@ -106,6 +118,10 @@ describe("auth route guard", () => {
     expect(resolveAuthRedirect(target("/rewards-old"), anonymous)).toBeNull();
     expect(resolveAuthRedirect(target("/my-plantsx"), anonymous)).toBeNull();
     expect(resolveAuthRedirect(target("/care-old"), anonymous)).toBeNull();
+    expect(
+      resolveAuthRedirect(target("/notifications-old"), anonymous),
+    ).toBeNull();
+    expect(resolveAuthRedirect(target("/feedbackx"), anonymous)).toBeNull();
   });
 
   it("allows authenticated visitors into the plant and adoption routes", () => {
@@ -127,6 +143,13 @@ describe("auth route guard", () => {
       resolveAuthRedirect(target("/my-plants/10"), authenticated),
     ).toBeNull();
     expect(resolveAuthRedirect(target("/care/9"), authenticated)).toBeNull();
+    expect(
+      resolveAuthRedirect(target("/notifications"), authenticated),
+    ).toBeNull();
+    expect(resolveAuthRedirect(target("/feedback"), authenticated)).toBeNull();
+    expect(
+      resolveAuthRedirect(target("/feedback/5"), authenticated),
+    ).toBeNull();
   });
 
   it("sends unauthorized business pages to login", () => {
@@ -149,6 +172,14 @@ describe("auth route guard", () => {
     expect(resolveUnauthorizedRedirect(target("/rewards/orders/3"))).toEqual({
       path: "/login",
       query: { returnTo: "/rewards/orders/3" },
+    });
+    expect(resolveUnauthorizedRedirect(target("/notifications"))).toEqual({
+      path: "/login",
+      query: { returnTo: "/notifications" },
+    });
+    expect(resolveUnauthorizedRedirect(target("/feedback/5"))).toEqual({
+      path: "/login",
+      query: { returnTo: "/feedback/5" },
     });
     expect(resolveUnauthorizedRedirect(target("/unknown"))).toBeNull();
   });
