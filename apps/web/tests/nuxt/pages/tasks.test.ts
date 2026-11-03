@@ -110,7 +110,7 @@ describe("tasks page", () => {
     expect(wrapper.text()).toContain("校园垃圾分类宣传");
     expect(wrapper.text()).toContain("剩余名额");
     expect(wrapper.text()).toContain("38 / 50");
-    expect(wrapper.text()).toContain("10 PT");
+    expect(wrapper.text()).toContain("10 分");
     expect(wrapper.text()).toContain("进行中");
     expect(wrapper.findAll(".tasks-page__filter")).toHaveLength(4);
     expect(wrapper.get(".tasks-page__action").attributes("href")).toBe(

@@ -242,10 +242,9 @@ describe("notifications page", () => {
     expect(readAllMock).toHaveBeenCalled();
     expect(cacheMock).toHaveBeenCalled();
     expect(wrapper.text()).toContain("暂无未读");
-    expect(wrapper.findAll(".ui-stamp").map((stamp) => stamp.text())).toEqual([
-      "已读",
-      "已读",
-    ]);
+    expect(
+      wrapper.findAll(".ui-status-chip").map((chip) => chip.text()),
+    ).toEqual(["已读", "已读"]);
   });
 
   it("resolves a task notice to its task detail", async () => {

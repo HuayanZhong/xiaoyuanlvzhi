@@ -155,7 +155,7 @@ function resetForm() {
 <template>
   <section class="feedback-page">
     <UiPageHeader
-      eyebrow="问题反馈 · FEEDBACK"
+      eyebrow="问题反馈"
       title="问题反馈"
       subtitle="提交绿植、账号或奖励问题，管理员回复会显示在这里。"
       :meta="`${items.length} 条反馈`"
@@ -177,58 +177,26 @@ function resetForm() {
     </UiAlert>
 
     <form v-if="formOpen" class="feedback-page__form" @submit.prevent="submit">
-      <h2 class="feedback-page__heading">提交反馈</h2>
-
-      <UiField
-        v-slot="{ errorId, hintId }"
-        label="反馈类型"
-        control-id="feedback-type"
-        :error="typeError"
-        hint="必填。"
-      >
-        <select
-          id="feedback-type"
-          v-model="type"
-          class="ui-control"
-          :disabled="submitting"
-          :aria-invalid="typeError ? 'true' : undefined"
-          :aria-describedby="typeError ? errorId : hintId"
-        >
-          <option value="">请选择反馈类型</option>
-          <option
-            v-for="option in FEEDBACK_TYPE_OPTIONS"
-            :key="option.value"
-            :value="option.value"
+      <FolioSection title="提交反馈">
+        <div class="feedback-page__fields">
+          <UiField
+            v-slot="{ errorId, hintId }"
+            label="反馈类型"
+            control-id="feedback-type"
+            :error="typeError"
+            hint="必填。"
           >
-            {{ option.label }}
-          </option>
-        </select>
-      </UiField>
-
-      <UiTextArea
-        id="feedback-description"
-        v-model="description"
-        label="问题描述"
-        hint="5–500 字，说明遇到的问题和处理期望。"
-        :maxlength="500"
-        :error="descriptionError"
-        :disabled="submitting"
-      />
-
-      <div class="feedback-page__group">
-        <p class="feedback-page__group-label">关联记录（选填）</p>
-
-        <div class="feedback-page__related">
-          <UiField label="业务类型" control-id="feedback-related-type">
             <select
-              id="feedback-related-type"
-              v-model="relatedType"
+              id="feedback-type"
+              v-model="type"
               class="ui-control"
               :disabled="submitting"
+              :aria-invalid="typeError ? 'true' : undefined"
+              :aria-describedby="typeError ? errorId : hintId"
             >
-              <option value="">不关联</option>
+              <option value="">请选择反馈类型</option>
               <option
-                v-for="option in RELATED_TYPE_OPTIONS"
+                v-for="option in FEEDBACK_TYPE_OPTIONS"
                 :key="option.value"
                 :value="option.value"
               >
@@ -237,39 +205,75 @@ function resetForm() {
             </select>
           </UiField>
 
-          <UiTextInput
-            id="feedback-related-id"
-            v-model="relatedId"
-            label="编号"
-            hint="如申请编号、打卡编号或订单号。"
-            :maxlength="64"
+          <UiTextArea
+            id="feedback-description"
+            v-model="description"
+            label="问题描述"
+            hint="5–500 字，说明遇到的问题和处理期望。"
+            :maxlength="500"
+            :error="descriptionError"
             :disabled="submitting"
           />
+
+          <div class="feedback-page__group">
+            <p class="feedback-page__group-label">关联记录（选填）</p>
+
+            <div class="feedback-page__related">
+              <UiField label="业务类型" control-id="feedback-related-type">
+                <select
+                  id="feedback-related-type"
+                  v-model="relatedType"
+                  class="ui-control"
+                  :disabled="submitting"
+                >
+                  <option value="">不关联</option>
+                  <option
+                    v-for="option in RELATED_TYPE_OPTIONS"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                </select>
+              </UiField>
+
+              <UiTextInput
+                id="feedback-related-id"
+                v-model="relatedId"
+                label="编号"
+                hint="如申请编号、打卡编号或订单号。"
+                :maxlength="64"
+                :disabled="submitting"
+              />
+            </div>
+
+            <UiInlineError v-if="relatedError" :message="relatedError" />
+          </div>
+
+          <UiImagePicker
+            :key="formKey"
+            id="feedback-images"
+            v-model="imageIds"
+            label="问题照片（选填）"
+            hint="最多 3 张，单张不超过 5 MB，支持 JPG、PNG、WebP。"
+            :disabled="submitting"
+            @busy="uploading = $event"
+          />
+
+          <UiAlert v-if="submitError" tone="error">
+            <p class="feedback-page__message">{{ submitError }}</p>
+          </UiAlert>
+
+          <div class="feedback-page__actions">
+            <UiButton type="submit" :loading="submitting" :disabled="uploading">
+              提交反馈
+            </UiButton>
+            <p v-if="uploading" class="feedback-page__note">
+              图片上传中，请稍候
+            </p>
+          </div>
         </div>
-
-        <UiInlineError v-if="relatedError" :message="relatedError" />
-      </div>
-
-      <UiImagePicker
-        :key="formKey"
-        id="feedback-images"
-        v-model="imageIds"
-        label="问题照片（选填）"
-        hint="最多 3 张，单张不超过 5 MB，支持 JPG、PNG、WebP。"
-        :disabled="submitting"
-        @busy="uploading = $event"
-      />
-
-      <UiAlert v-if="submitError" tone="error">
-        <p class="feedback-page__message">{{ submitError }}</p>
-      </UiAlert>
-
-      <div class="feedback-page__actions">
-        <UiButton type="submit" :loading="submitting" :disabled="uploading">
-          提交反馈
-        </UiButton>
-        <p v-if="uploading" class="feedback-page__note">图片上传中，请稍候</p>
-      </div>
+      </FolioSection>
     </form>
 
     <UiLoading v-if="loading && !data" />
@@ -292,10 +296,12 @@ function resetForm() {
         <li v-for="item in items" :key="item.id">
           <NuxtLink :to="`/feedback/${item.id}`" class="feedback-page__item">
             <span class="feedback-page__head">
-              <span class="feedback-page__no">{{ item.feedbackNo }}</span>
-              <Stamp :tone="statusMeta(item).tone">
+              <span class="feedback-page__no">
+                编号 {{ item.feedbackNo }}
+              </span>
+              <UiStatusChip :tone="statusMeta(item).tone">
                 {{ statusMeta(item).label }}
-              </Stamp>
+              </UiStatusChip>
             </span>
 
             <span class="feedback-page__meta">
@@ -330,35 +336,32 @@ function resetForm() {
 
 .feedback-page__message {
   margin: 0 0 var(--space-3);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
 .feedback-page__link {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
-  color: var(--color-ink);
-  font-size: var(--font-size-sm);
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .feedback-page__form {
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border: var(--border-dashed);
+  border-radius: var(--radius-card);
+}
+
+.feedback-page__fields {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  padding: var(--space-4);
-  border: var(--border-ink);
-}
-
-.feedback-page__heading {
-  margin: 0;
-  color: var(--color-ink);
-  font-family: var(--font-serif);
-  font-size: var(--font-size-title-card);
-  font-weight: var(--font-weight-regular);
-  letter-spacing: var(--tracking-title-cn);
 }
 
 .feedback-page__group {
@@ -370,10 +373,10 @@ function resetForm() {
 .feedback-page__group-label {
   margin: 0;
   padding-top: var(--space-3);
-  border-top: var(--border-hairline);
-  color: var(--color-graphite);
+  border-top: var(--border-line);
+  color: var(--color-subtle);
   font-size: var(--font-size-label);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
   letter-spacing: var(--tracking-label);
 }
 
@@ -391,8 +394,8 @@ function resetForm() {
 
 .feedback-page__note {
   margin: 0;
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
 }
 
 .feedback-page__list {
@@ -400,7 +403,7 @@ function resetForm() {
   flex-direction: column;
   margin: 0;
   padding: 0;
-  border-top: var(--border-ink);
+  border-top: var(--border-line);
   list-style: none;
 }
 
@@ -409,10 +412,15 @@ function resetForm() {
   flex-direction: column;
   gap: var(--space-2);
   min-height: var(--touch-target);
-  padding: var(--space-4) 0;
-  border-bottom: var(--border-hairline);
+  padding: var(--space-4) var(--space-2);
+  border-bottom: var(--border-line);
   color: inherit;
   text-decoration: none;
+  transition: background-color var(--motion-color);
+}
+
+.feedback-page__item:hover {
+  background: var(--color-ink-wash);
 }
 
 .feedback-page__head {
@@ -424,23 +432,22 @@ function resetForm() {
 }
 
 .feedback-page__no {
-  color: var(--color-ink);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  letter-spacing: var(--tracking-code);
+  color: var(--color-subtle);
+  font-size: var(--font-size-label);
+  letter-spacing: var(--tracking-label);
 }
 
 .feedback-page__meta {
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
 }
 
 .feedback-page__description {
   display: -webkit-box;
   overflow: hidden;
   color: var(--color-ink);
-  font-size: var(--font-size-md);
-  line-height: var(--line-height-normal);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
   overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -452,9 +459,8 @@ function resetForm() {
   gap: var(--space-2) var(--space-4);
   justify-content: space-between;
   color: var(--color-subtle);
-  font-family: var(--font-mono);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-mono);
+  letter-spacing: var(--tracking-label);
 }
 
 @media (min-width: 48rem) {

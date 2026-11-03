@@ -76,8 +76,7 @@ const details = computed(() => {
     },
     {
       label: "打卡积分",
-      value: `${current.carePoints ?? 0}`,
-      code: "PT",
+      value: `${current.carePoints ?? 0} 分`,
       mono: true,
     },
     { label: "其他说明", value: current.otherDescription || "未填写" },
@@ -142,10 +141,10 @@ function load() {
 <template>
   <section class="plant-detail">
     <UiPageHeader
-      eyebrow="品种详情 · SPECIES FILE"
+      eyebrow="品种详情"
       :title="species?.name ?? '品种详情'"
       :subtitle="species ? '查看养护说明后提交领养申请。' : undefined"
-      :meta="species ? speciesCode(species.id) : undefined"
+      :meta="species ? `编号 ${speciesCode(species.id)}` : undefined"
     />
 
     <UiLoading v-if="loading && !data" />
@@ -156,26 +155,25 @@ function load() {
           :file-id="species.coverFileId"
           :alt="`${species.name}封面`"
           ratio="wide"
-          :caption="speciesCode(species.id)"
+          :caption="`编号 ${speciesCode(species.id)}`"
         />
 
         <div class="plant-detail__body">
-          <FolioSection index="01" title="养护说明" meta="CARE">
+          <FolioSection title="养护说明">
             <Ledger>
               <TagRow
                 v-for="row in details"
                 :key="row.label"
                 :label="row.label"
                 :value="row.value"
-                :code="row.code"
                 :mono="row.mono"
               />
             </Ledger>
           </FolioSection>
 
-          <FolioSection index="02" title="可领养数量" meta="STOCK">
+          <FolioSection title="可领养数量">
             <p class="plant-detail__stock">
-              {{ species.availableCount }}<span>PL</span>
+              {{ species.availableCount }}<span>株</span>
             </p>
             <p class="plant-detail__note">
               管理员确认申请后会通知线下领取方式，学生不选择具体单株。
@@ -285,25 +283,24 @@ function load() {
   align-items: baseline;
   margin: 0;
   color: var(--color-ink);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-variant-numeric: tabular-nums;
-  font-size: var(--font-size-measure);
-  line-height: var(--line-height-reading);
+  font-size: var(--font-size-reading);
+  line-height: var(--line-height-display);
 }
 
 .plant-detail__stock span {
-  color: var(--color-seal);
-  font-size: var(--font-size-sm);
-  letter-spacing: var(--tracking-code);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
 }
 
 .plant-detail__note {
   margin: var(--space-3) 0 0;
   padding-top: var(--space-3);
-  border-top: var(--border-hairline);
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  border-top: var(--border-line);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
 .plant-detail__actions {
@@ -312,7 +309,7 @@ function load() {
   gap: var(--space-3);
   align-items: center;
   padding-top: var(--space-4);
-  border-top: var(--border-hairline);
+  border-top: var(--border-line);
 }
 
 .plant-detail__action-link,
@@ -320,8 +317,9 @@ function load() {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
-  color: var(--color-ink);
-  font-size: var(--font-size-sm);
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -331,16 +329,18 @@ function load() {
   flex-direction: column;
   gap: var(--space-4);
   padding: var(--space-5);
-  border: var(--border-ink);
+  background: var(--color-surface);
+  border: var(--border-dashed);
+  border-radius: var(--radius-card);
 }
 
 .plant-detail__confirm-title {
   margin: 0;
   color: var(--color-ink);
-  font-family: var(--font-serif);
-  font-size: 1.5rem;
+  font-family: var(--font-kai);
+  font-size: var(--font-size-title);
   font-weight: var(--font-weight-regular);
-  letter-spacing: var(--tracking-title-cn);
+  letter-spacing: var(--tracking-display);
 }
 
 .plant-detail__confirm-row {
@@ -350,9 +350,9 @@ function load() {
   justify-content: space-between;
   margin: 0;
   padding-bottom: var(--space-2);
-  border-bottom: var(--border-hairline);
+  border-bottom: var(--border-line);
   color: var(--color-subtle);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-small);
 }
 
 .plant-detail__confirm-row strong {

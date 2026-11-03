@@ -8,11 +8,13 @@ const props = withDefaults(
     ratio?: "square" | "wide";
     caption?: string;
     emptyText?: string;
+    flat?: boolean;
   }>(),
   {
     fileId: null,
     ratio: "square",
     emptyText: "暂无封面",
+    flat: false,
   },
 );
 
@@ -20,20 +22,25 @@ const { url, loading, error, retry } = useFileUrl(() => props.fileId);
 </script>
 
 <template>
-  <figure class="ui-figure" :class="`ui-figure--${ratio}`">
+  <figure
+    class="ui-figure"
+    :class="[`ui-figure--${ratio}`, { 'ui-figure--flat': flat }]"
+  >
     <div class="ui-figure__frame">
       <img v-if="url" class="ui-figure__image" :src="url" :alt="alt" />
 
-      <p v-else-if="loading" class="ui-figure__status">载入中…</p>
-
       <div v-else-if="error" class="ui-figure__status">
+        <UiLeafMark name="leaf" :size="24" filled class="ui-figure__leaf" />
         <span>图片加载失败</span>
         <button type="button" class="ui-figure__retry" @click="retry">
           重试
         </button>
       </div>
 
-      <p v-else class="ui-figure__status">{{ emptyText }}</p>
+      <div v-else class="ui-figure__status">
+        <UiLeafMark name="leaf" :size="24" filled class="ui-figure__leaf" />
+        <span>{{ loading ? "载入中…" : emptyText }}</span>
+      </div>
     </div>
 
     <figcaption v-if="caption" class="ui-figure__caption">
@@ -44,16 +51,38 @@ const { url, loading, error, retry } = useFileUrl(() => props.fileId);
 
 <style scoped>
 .ui-figure {
-  margin: 0;
   min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  background: var(--color-surface);
+  border: var(--border-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-paper);
+}
+
+.ui-figure--flat {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.ui-figure--flat .ui-figure__frame {
+  border: var(--border-line);
+  border-radius: var(--radius-control);
+}
+
+.ui-figure--flat .ui-figure__caption {
+  border-top: 0;
 }
 
 .ui-figure__frame {
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: var(--color-ink-wash);
-  border: var(--border-hairline);
+  background-color: var(--color-paper);
+  background-image: var(--texture-paper);
+  background-size: var(--texture-paper-size);
 }
 
 .ui-figure--square .ui-figure__frame {
@@ -71,6 +100,11 @@ const { url, loading, error, retry } = useFileUrl(() => props.fileId);
   object-fit: cover;
 }
 
+.ui-figure__leaf {
+  color: var(--color-line-strong);
+  opacity: 0.7;
+}
+
 .ui-figure__status {
   display: flex;
   flex-direction: column;
@@ -80,28 +114,29 @@ const { url, loading, error, retry } = useFileUrl(() => props.fileId);
   margin: 0;
   padding: var(--space-3);
   color: var(--color-subtle);
-  font-family: var(--font-mono);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-code);
   text-align: center;
 }
 
 .ui-figure__retry {
   min-height: var(--touch-target);
   padding: 0 var(--space-3);
-  background: var(--color-sheet);
-  border: var(--border-interactive);
-  border-radius: var(--radius-none);
+  background: var(--color-surface);
+  border: var(--border-strong);
+  border-radius: var(--radius-chip);
   color: var(--color-ink);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-small);
+}
+
+.ui-figure__retry:hover {
+  background: var(--color-ink-wash);
 }
 
 .ui-figure__caption {
-  padding: var(--space-2) 0;
-  border-bottom: var(--border-hairline);
+  padding: var(--space-2) var(--space-3);
+  border-top: var(--border-line);
   color: var(--color-subtle);
-  font-family: var(--font-mono);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-code);
+  letter-spacing: var(--tracking-label);
 }
 </style>

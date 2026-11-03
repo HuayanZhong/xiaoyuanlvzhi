@@ -24,10 +24,10 @@ const { isDark, toggleTheme } = useTheme();
   min-height: var(--touch-target);
   padding: 0 var(--space-3);
   background: transparent;
-  border: var(--border-interactive);
+  border: var(--border-strong);
   border-radius: var(--radius-none);
   color: var(--color-ink);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: var(--font-size-label);
   letter-spacing: 0.12em;
   line-height: 1;
@@ -46,7 +46,7 @@ const { isDark, toggleTheme } = useTheme();
   height: 0.6875rem;
   background: linear-gradient(90deg, currentcolor 50%, transparent 50%);
   border: 1px solid currentcolor;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-chip);
 }
 
 .ui-theme-toggle__text {

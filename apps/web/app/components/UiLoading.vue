@@ -23,17 +23,17 @@ withDefaults(
   align-items: center;
   justify-content: center;
   padding: var(--space-6) var(--space-4);
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
 }
 
 .ui-loading__spinner {
-  width: 1rem;
-  height: 1rem;
-  border: 1.5px solid currentcolor;
+  width: var(--space-4);
+  height: var(--space-4);
+  border: 2px solid currentcolor;
   border-right-color: transparent;
-  border-radius: var(--radius-full);
-  animation: ui-loading-spin 700ms linear infinite;
+  border-radius: var(--radius-chip);
+  animation: ui-loading-spin var(--motion-spin);
 }
 
 @keyframes ui-loading-spin {

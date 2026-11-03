@@ -14,7 +14,7 @@ withDefaults(
     class="ui-alert"
     :class="`ui-alert--${tone}`"
     :role="tone === 'error' ? 'alert' : 'status'"
-    aria-live="polite"
+    :aria-live="tone === 'error' ? undefined : 'polite'"
   >
     <slot />
   </div>
@@ -23,32 +23,32 @@ withDefaults(
 <style scoped>
 .ui-alert {
   padding: var(--space-3) var(--space-4);
-  background: transparent;
   border: 1px solid transparent;
   border-left-width: 2px;
-  border-radius: var(--radius-none);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  border-radius: var(--radius-control);
+  color: var(--color-ink);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
 .ui-alert--error {
-  border-left-color: var(--color-danger);
-  color: var(--color-danger);
+  background: var(--color-blush-wash);
+  border-left-color: var(--color-blush);
 }
 
 .ui-alert--success {
-  border-left-color: var(--color-ink);
-  color: var(--color-ink);
+  background: var(--color-leaf-wash);
+  border-left-color: var(--color-leaf);
 }
 
 .ui-alert--info {
-  border-left-color: var(--color-rule-strong);
-  color: var(--color-graphite);
+  background: var(--color-ink-wash);
+  border-left-color: var(--color-line-strong);
+  color: var(--color-subtle);
 }
 
 .ui-alert--warning {
-  border: 1px dashed var(--color-seal);
-  border-left-width: 2px;
-  color: var(--color-seal);
+  background: var(--color-blush-wash);
+  border: 1px dashed var(--color-blush);
 }
 </style>

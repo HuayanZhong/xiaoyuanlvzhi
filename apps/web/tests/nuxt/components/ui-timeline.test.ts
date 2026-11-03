@@ -41,6 +41,6 @@ describe("UiTimeline", () => {
   it("explains an empty timeline", async () => {
     const wrapper = await mountSuspended(UiTimeline, { props: { items: [] } });
 
-    expect(wrapper.get(".ui-timeline__empty").text()).toBe("暂无状态记录");
+    expect(wrapper.get(".ui-empty__title").text()).toBe("暂无状态记录");
   });
 });

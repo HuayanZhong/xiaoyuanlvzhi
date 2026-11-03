@@ -36,16 +36,16 @@ const hintId = computed(() =>
 }
 
 .ui-field__label {
-  color: var(--color-graphite);
+  color: var(--color-subtle);
   font-size: var(--font-size-label);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
   letter-spacing: var(--tracking-label);
 }
 
 .ui-field__hint {
   margin: 0;
   color: var(--color-subtle);
-  font-size: var(--font-size-caption);
-  line-height: var(--line-height-normal);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 </style>

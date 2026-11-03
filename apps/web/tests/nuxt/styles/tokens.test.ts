@@ -47,28 +47,35 @@ function tokenReferences(
 
 type PaletteName =
   | "paper"
-  | "sheet"
+  | "surface"
   | "ink"
-  | "graphite"
-  | "muted"
-  | "rule-strong"
-  | "seal"
-  | "seal-deep";
+  | "subtle"
+  | "leaf"
+  | "blush"
+  | "soil"
+  | "sticker"
+  | "line-strong"
+  | "on-leaf"
+  | "on-sticker";
+
+const paletteNames: PaletteName[] = [
+  "paper",
+  "surface",
+  "ink",
+  "subtle",
+  "leaf",
+  "blush",
+  "soil",
+  "sticker",
+  "line-strong",
+  "on-leaf",
+  "on-sticker",
+];
 
 function readPalette(css: string): Record<PaletteName, string> {
-  const names: PaletteName[] = [
-    "paper",
-    "sheet",
-    "ink",
-    "graphite",
-    "muted",
-    "rule-strong",
-    "seal",
-    "seal-deep",
-  ];
   const palette = {} as Record<PaletteName, string>;
 
-  for (const name of names) {
+  for (const name of paletteNames) {
     const match = css.match(
       new RegExp(`--palette-${name}:\\s*(#[0-9a-f]{6})`, "i"),
     );
@@ -109,6 +116,10 @@ function contrast(foreground: string, background: string): number {
   const dark = Math.min(first, second);
 
   return (light + 0.05) / (dark + 0.05);
+}
+
+function fontSizeValue(line: string): string {
+  return line.match(/font-size\s*:\s*([^;]+)/)?.[1]?.trim() ?? "";
 }
 
 const appFiles = walk(appDir);
@@ -163,18 +174,54 @@ describe("student web design tokens", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("meets contrast thresholds for paper, ink and status roles", () => {
+  it("keeps raw font sizes inside tokens.css", () => {
+    const offenders: string[] = [];
+
+    for (const file of [...vueFiles, ...cssFiles]) {
+      styleSource(file)
+        .split(/\r?\n/)
+        .forEach((line, index) => {
+          const match = line.match(/font-size\s*:\s*([^;]+)/);
+
+          if (match && !match[1]?.trim().startsWith("var(")) {
+            offenders.push(
+              `${path.relative(appDir, file)}:${index + 1} ${line.trim()}`,
+            );
+          }
+        });
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("detects raw colors and font sizes in synthetic sources", () => {
+    const rawColor = /#[0-9a-f]{3,8}\b|\brgba?\(|\bhsla?\(/i;
+
+    expect(rawColor.test("color: #ff0000;")).toBe(true);
+    expect(rawColor.test("color: var(--color-ink);")).toBe(false);
+    expect(fontSizeValue("font-size: 1rem;").startsWith("var(")).toBe(false);
+    expect(
+      fontSizeValue("font-size: var(--font-size-body);").startsWith("var("),
+    ).toBe(true);
+  });
+
+  it("meets contrast thresholds for the light palette", () => {
     const palette = readPalette(tokensSource);
     const pairs: Array<[string, string, string, number]> = [
       ["ink on paper", palette.ink, palette.paper, 4.5],
-      ["ink on sheet", palette.ink, palette.sheet, 4.5],
-      ["graphite on paper", palette.graphite, palette.paper, 4.5],
-      ["muted on paper", palette.muted, palette.paper, 4.5],
-      ["seal on paper", palette.seal, palette.paper, 4.5],
-      ["seal-deep on paper", palette["seal-deep"], palette.paper, 4.5],
-      ["interactive border on sheet", palette["rule-strong"], palette.sheet, 3],
-      ["sheet on ink", palette.sheet, palette.ink, 4.5],
-      ["focus ink on paper", palette.ink, palette.paper, 3],
+      ["ink on surface", palette.ink, palette.surface, 4.5],
+      ["subtle on paper", palette.subtle, palette.paper, 4.5],
+      ["leaf on paper", palette.leaf, palette.paper, 4.5],
+      ["blush on paper", palette.blush, palette.paper, 4.5],
+      ["soil on paper", palette.soil, palette.paper, 4.5],
+      ["on-leaf on leaf", palette["on-leaf"], palette.leaf, 4.5],
+      ["on-sticker on sticker", palette["on-sticker"], palette.sticker, 4.5],
+      [
+        "interactive border on surface",
+        palette["line-strong"],
+        palette.surface,
+        3,
+      ],
     ];
 
     for (const [label, foreground, background, minimum] of pairs) {
@@ -195,11 +242,18 @@ describe("student web design tokens", () => {
     const palette = readPalette(block ?? "");
     const pairs: Array<[string, string, string, number]> = [
       ["ink on paper", palette.ink, palette.paper, 4.5],
-      ["graphite on paper", palette.graphite, palette.paper, 4.5],
-      ["muted on paper", palette.muted, palette.paper, 4.5],
-      ["seal on paper", palette.seal, palette.paper, 4.5],
-      ["seal-deep on paper", palette["seal-deep"], palette.paper, 4.5],
-      ["interactive border on sheet", palette["rule-strong"], palette.sheet, 3],
+      ["ink on surface", palette.ink, palette.surface, 4.5],
+      ["subtle on paper", palette.subtle, palette.paper, 4.5],
+      ["leaf on paper", palette.leaf, palette.paper, 4.5],
+      ["blush on paper", palette.blush, palette.paper, 4.5],
+      ["on-leaf on leaf", palette["on-leaf"], palette.leaf, 4.5],
+      ["on-sticker on sticker", palette["on-sticker"], palette.sticker, 4.5],
+      [
+        "interactive border on surface",
+        palette["line-strong"],
+        palette.surface,
+        3,
+      ],
     ];
 
     for (const [label, foreground, background, minimum] of pairs) {

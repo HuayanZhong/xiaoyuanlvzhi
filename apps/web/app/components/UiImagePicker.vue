@@ -214,9 +214,9 @@ watch(busy, (value) => {
 
 .ui-image-picker__counter {
   color: var(--color-subtle);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-code);
+  letter-spacing: var(--tracking-label);
 }
 
 .ui-image-picker__grid {
@@ -231,7 +231,10 @@ watch(busy, (value) => {
 .ui-image-picker__item {
   position: relative;
   min-width: 0;
-  border: var(--border-hairline);
+  overflow: hidden;
+  background: var(--color-surface);
+  border: var(--border-line);
+  border-radius: var(--radius-control);
 }
 
 .ui-image-picker__image {
@@ -246,11 +249,15 @@ watch(busy, (value) => {
   right: var(--space-1);
   bottom: var(--space-1);
   min-height: var(--touch-target);
-  padding: 0 var(--space-2);
-  background: var(--color-sheet);
-  border: var(--border-interactive);
-  border-radius: var(--radius-none);
+  padding: 0 var(--space-3);
+  background: var(--color-surface);
+  border: var(--border-strong);
+  border-radius: var(--radius-chip);
   color: var(--color-ink);
   font-size: var(--font-size-label);
+}
+
+.ui-image-picker__remove:hover {
+  background: var(--color-ink-wash);
 }
 </style>

@@ -88,7 +88,7 @@ describe("adoptions page", () => {
       .findAll(".adoptions-page__no")
       .map((item) => item.text());
 
-    expect(numbers).toEqual(["ADP-2", "ADP-1"]);
+    expect(numbers).toEqual(["编号 ADP-2", "编号 ADP-1"]);
     expect(wrapper.text()).toContain("已驳回");
     expect(wrapper.text()).toContain("养护条件不明确");
     expect(wrapper.text()).toContain("养护中");

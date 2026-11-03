@@ -1,7 +1,7 @@
 <script setup lang="ts">
 defineProps<{
-  index: string;
   title: string;
+  index?: string;
   meta?: string;
 }>();
 </script>
@@ -9,9 +9,10 @@ defineProps<{
 <template>
   <section class="ui-folio">
     <header class="ui-folio__head">
-      <span class="ui-folio__index">{{ index }}</span>
       <h2 class="ui-folio__title">{{ title }}</h2>
-      <span v-if="meta" class="ui-folio__meta">{{ meta }}</span>
+      <span v-if="meta || $slots.meta" class="ui-folio__meta">
+        <slot name="meta">{{ meta }}</slot>
+      </span>
     </header>
     <div class="ui-folio__body">
       <slot />
@@ -29,34 +30,26 @@ defineProps<{
   flex-wrap: wrap;
   gap: var(--space-2) var(--space-3);
   align-items: baseline;
-  padding-bottom: var(--space-3);
-  border-bottom: var(--border-ink);
-}
-
-.ui-folio__index {
-  color: var(--color-seal);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-code);
-  line-height: 1.2;
+  justify-content: space-between;
+  padding-bottom: var(--space-2);
+  border-bottom: var(--border-line);
 }
 
 .ui-folio__title {
   margin: 0;
   color: var(--color-ink);
-  font-family: var(--font-serif);
-  font-size: var(--font-size-title-card);
+  font-family: var(--font-kai);
+  font-size: var(--font-size-title);
   font-weight: var(--font-weight-regular);
-  letter-spacing: var(--tracking-title-cn);
-  line-height: 1.2;
+  letter-spacing: var(--tracking-display);
+  line-height: var(--line-height-title);
 }
 
 .ui-folio__meta {
   margin-left: auto;
   color: var(--color-subtle);
-  font-family: var(--font-mono);
-  font-size: 0.5625rem;
-  letter-spacing: var(--tracking-code);
+  font-size: var(--font-size-label);
+  letter-spacing: var(--tracking-label);
 }
 
 .ui-folio__body {

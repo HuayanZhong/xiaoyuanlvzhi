@@ -96,6 +96,52 @@ const blockedHint = computed(() => {
   return current.blockedReason || "当前不可打卡";
 });
 
+function addDays(iso: string, offset: number): string {
+  const [year, month, day] = iso.split("-").map(Number);
+  const date = new Date(
+    Date.UTC(year ?? 0, (month ?? 1) - 1, (day ?? 1) + offset),
+  );
+
+  return date.toISOString().slice(0, 10);
+}
+
+const doneDays = computed(
+  () =>
+    new Set(
+      history.value
+        .map((item) => item.createdAt?.slice(0, 10))
+        .filter((value): value is string => Boolean(value)),
+    ),
+);
+
+const calendarEnd = computed(
+  () =>
+    // oxlint-disable-next-line unicorn/no-array-sort -- 复制后排序，不修改集合本身
+    [...doneDays.value].sort().at(-1) ?? "",
+);
+
+const calendarItems = computed(() => {
+  const end = calendarEnd.value;
+
+  if (!end) {
+    return [];
+  }
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const iso = addDays(end, index - 6);
+
+    return {
+      key: iso,
+      label: iso.slice(8),
+      done: doneDays.value.has(iso),
+    };
+  });
+});
+
+const calendarCaption = computed(
+  () => `已打卡 ${calendarItems.value.filter((item) => item.done).length} 次`,
+);
+
 watch(note, () => {
   submitError.value = "";
 });
@@ -151,9 +197,11 @@ async function submit() {
 <template>
   <section class="plant-care-page">
     <UiPageHeader
-      eyebrow="植株养护 · CARE"
+      eyebrow="植株养护"
       :title="plant?.plantName || '植株养护'"
-      :subtitle="plant ? plant.plantCode : '查看本株养护信息和打卡记录。'"
+      :subtitle="
+        plant ? `编号 ${plant.plantCode}` : '查看本株养护信息和打卡记录。'
+      "
     >
       <template #meta>
         <NuxtLink to="/my-plants" class="plant-care-page__link">
@@ -180,7 +228,7 @@ async function submit() {
     </UiEmptyState>
 
     <template v-else>
-      <div class="plant-care-page__rows">
+      <Ledger class="plant-care-page__rows">
         <TagRow label="摆放位置" :value="plant.location || '未填写'" />
         <TagRow label="养护间隔" :value="`${plant.careIntervalDays} 天`" mono />
         <TagRow
@@ -193,7 +241,14 @@ async function submit() {
           :value="formatDateTime(plant.nextEligibleAt)"
           mono
         />
-      </div>
+      </Ledger>
+
+      <UiStreakCalendar
+        v-if="calendarItems.length"
+        title="打卡日历"
+        :items="calendarItems"
+        :caption="calendarCaption"
+      />
 
       <UiAlert v-if="!available" tone="info">
         <p class="plant-care-page__error">{{ blockedHint }}</p>
@@ -207,64 +262,69 @@ async function submit() {
       </UiAlert>
 
       <form v-else class="plant-care-page__form" @submit.prevent="submit">
-        <h2 class="plant-care-page__heading">提交养护打卡</h2>
+        <FolioSection title="提交养护打卡">
+          <div class="plant-care-page__fields">
+            <UiTextArea
+              id="care-note"
+              v-model="note"
+              label="打卡说明（选填）"
+              hint="最多 300 字；与凭证图片至少提供一项。"
+              :maxlength="300"
+              :error="noteError"
+              :disabled="submitting"
+            />
 
-        <UiTextArea
-          id="care-note"
-          v-model="note"
-          label="打卡说明（选填）"
-          hint="最多 300 字；与凭证图片至少提供一项。"
-          :maxlength="300"
-          :error="noteError"
-          :disabled="submitting"
-        />
+            <UiImagePicker
+              id="care-images"
+              v-model="imageIds"
+              label="凭证图片（选填）"
+              hint="最多 3 张，单张不超过 5 MB，支持 JPG、PNG、WebP。"
+              :disabled="submitting"
+              @busy="uploading = $event"
+            />
 
-        <UiImagePicker
-          id="care-images"
-          v-model="imageIds"
-          label="凭证图片（选填）"
-          hint="最多 3 张，单张不超过 5 MB，支持 JPG、PNG、WebP。"
-          :disabled="submitting"
-          @busy="uploading = $event"
-        />
+            <UiInlineError v-if="evidenceError" :message="evidenceError" />
 
-        <UiInlineError v-if="evidenceError" :message="evidenceError" />
+            <UiAlert v-if="submitError" tone="error">
+              <p class="plant-care-page__error">{{ submitError }}</p>
+            </UiAlert>
 
-        <UiAlert v-if="submitError" tone="error">
-          <p class="plant-care-page__error">{{ submitError }}</p>
-        </UiAlert>
-
-        <div class="plant-care-page__actions">
-          <UiButton type="submit" :loading="submitting" :disabled="uploading">
-            提交打卡
-          </UiButton>
-          <p v-if="uploading" class="plant-care-page__note">
-            图片上传中，请稍候
-          </p>
-        </div>
+            <div class="plant-care-page__actions">
+              <UiButton
+                type="submit"
+                :loading="submitting"
+                :disabled="uploading"
+              >
+                提交打卡
+              </UiButton>
+              <p v-if="uploading" class="plant-care-page__note">
+                图片上传中，请稍候
+              </p>
+            </div>
+          </div>
+        </FolioSection>
       </form>
 
-      <section class="plant-care-page__history">
-        <h2 class="plant-care-page__heading">本株打卡</h2>
+      <FolioSection title="本株打卡">
+        <UiEmptyState v-if="history.length === 0" title="暂无打卡记录" />
 
-        <p v-if="history.length === 0" class="plant-care-page__empty">
-          暂无打卡记录。
-        </p>
-
-        <ul v-else class="plant-care-page__list">
-          <li v-for="item in history" :key="item.id">
-            <NuxtLink :to="`/care/${item.id}`" class="plant-care-page__row">
-              <span class="plant-care-page__no">{{ item.checkinNo }}</span>
-              <span class="plant-care-page__date">
-                {{ formatDateTime(item.createdAt) }}
-              </span>
-              <Stamp :tone="statusMeta(item).tone">
-                {{ statusMeta(item).label }}
-              </Stamp>
-            </NuxtLink>
-          </li>
-        </ul>
-      </section>
+        <Ledger v-else>
+          <NuxtLink
+            v-for="item in history"
+            :key="item.id"
+            :to="`/care/${item.id}`"
+            class="plant-care-page__row"
+          >
+            <span class="plant-care-page__no"> 编号 {{ item.checkinNo }} </span>
+            <span class="plant-care-page__date">
+              {{ formatDateTime(item.createdAt) }}
+            </span>
+            <UiStatusChip :tone="statusMeta(item).tone">
+              {{ statusMeta(item).label }}
+            </UiStatusChip>
+          </NuxtLink>
+        </Ledger>
+      </FolioSection>
     </template>
   </section>
 </template>
@@ -281,16 +341,17 @@ async function submit() {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
-  color: var(--color-ink);
-  font-size: var(--font-size-sm);
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .plant-care-page__error {
   margin: 0 0 var(--space-2);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
 .plant-care-page__rows {
@@ -298,22 +359,17 @@ async function submit() {
   flex-direction: column;
 }
 
-.plant-care-page__form,
-.plant-care-page__history {
+.plant-care-page__form {
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border: var(--border-dashed);
+  border-radius: var(--radius-card);
+}
+
+.plant-care-page__fields {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  padding-top: var(--space-4);
-  border-top: var(--border-ink);
-}
-
-.plant-care-page__heading {
-  margin: 0;
-  color: var(--color-ink);
-  font-family: var(--font-serif);
-  font-size: 1.25rem;
-  font-weight: var(--font-weight-regular);
-  letter-spacing: var(--tracking-title-cn);
 }
 
 .plant-care-page__actions {
@@ -329,18 +385,6 @@ async function submit() {
   font-size: var(--font-size-label);
 }
 
-.plant-care-page__empty {
-  margin: 0;
-  color: var(--color-subtle);
-  font-size: var(--font-size-sm);
-}
-
-.plant-care-page__list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
 .plant-care-page__row {
   display: flex;
   flex-wrap: wrap;
@@ -349,26 +393,25 @@ async function submit() {
   justify-content: space-between;
   min-height: var(--touch-target);
   padding: var(--space-3) 0;
-  border-bottom: var(--border-hairline);
+  border-bottom: var(--border-line);
   color: var(--color-ink);
   text-decoration: none;
 }
 
 .plant-care-page__row:hover .plant-care-page__no {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  color: var(--color-leaf);
 }
 
 .plant-care-page__no {
-  font-family: var(--font-mono);
+  color: var(--color-subtle);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-code);
+  letter-spacing: var(--tracking-label);
+  transition: color var(--motion-color);
 }
 
 .plant-care-page__date {
   color: var(--color-subtle);
-  font-family: var(--font-mono);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-mono);
+  letter-spacing: var(--tracking-label);
 }
 </style>

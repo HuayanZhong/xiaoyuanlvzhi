@@ -118,7 +118,7 @@ function load() {
 <template>
   <section class="notices-page">
     <UiPageHeader
-      eyebrow="站内通知 · NOTICES"
+      eyebrow="站内通知"
       title="通知"
       subtitle="领养审核、养护打卡、环保任务和兑换的结果会记录在这里。"
       :meta="unreadCount > 0 ? `${unreadCount} 条未读` : '暂无未读'"
@@ -166,9 +166,9 @@ function load() {
               <span class="notices-page__type">
                 {{ notificationTypeLabel(item.businessType) }}
               </span>
-              <Stamp :tone="item.readAt ? 'neutral' : 'pending'">
+              <UiStatusChip :tone="item.readAt ? 'neutral' : 'pending'">
                 {{ item.readAt ? "已读" : "未读" }}
-              </Stamp>
+              </UiStatusChip>
             </span>
 
             <span class="notices-page__title">{{ item.title }}</span>
@@ -204,8 +204,8 @@ function load() {
 
 .notices-page__message {
   margin: 0 0 var(--space-3);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
 .notices-page__list {
@@ -213,7 +213,7 @@ function load() {
   flex-direction: column;
   margin: 0;
   padding: 0;
-  border-top: var(--border-ink);
+  border-top: var(--border-line);
   list-style: none;
 }
 
@@ -223,19 +223,26 @@ function load() {
   gap: var(--space-2);
   width: 100%;
   min-height: var(--touch-target);
-  padding: var(--space-4) 0;
+  padding: var(--space-4) var(--space-2);
   background: transparent;
   border: 0;
-  border-bottom: var(--border-hairline);
+  border-bottom: var(--border-line);
   color: var(--color-ink);
   font: inherit;
   text-align: left;
   cursor: pointer;
+  transition: background-color var(--motion-color);
+}
+
+.notices-page__item:not(:disabled):hover {
+  background: var(--color-ink-wash);
 }
 
 .notices-page__item:disabled {
+  background: var(--color-ink-wash);
+  color: var(--color-subtle);
   cursor: progress;
-  opacity: 0.7;
+  opacity: 1;
 }
 
 .notices-page__head {
@@ -247,28 +254,24 @@ function load() {
 }
 
 .notices-page__type {
-  color: var(--color-graphite);
-  font-family: var(--font-mono);
+  color: var(--color-subtle);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-code);
+  letter-spacing: var(--tracking-label);
 }
 
 .notices-page__title {
-  font-family: var(--font-serif);
-  font-size: 1.125rem;
-  letter-spacing: var(--tracking-title-cn);
-  line-height: 1.35;
+  font-family: var(--font-kai);
+  font-size: var(--font-size-title);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--line-height-title);
   overflow-wrap: anywhere;
 }
 
-.notices-page__item--unread .notices-page__title {
-  font-weight: var(--font-weight-medium);
-}
-
 .notices-page__summary {
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
   overflow-wrap: anywhere;
 }
 
@@ -279,14 +282,13 @@ function load() {
   align-items: center;
   justify-content: space-between;
   color: var(--color-subtle);
-  font-family: var(--font-mono);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-mono);
+  letter-spacing: var(--tracking-label);
 }
 
 @media (min-width: 48rem) {
   .notices-page__item {
-    padding-inline: var(--space-2);
+    padding-inline: var(--space-3);
   }
 }
 </style>

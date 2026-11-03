@@ -54,7 +54,7 @@ function load() {
 <template>
   <section class="points-page">
     <UiPageHeader
-      eyebrow="积分档案 · POINTS FILE"
+      eyebrow="积分"
       title="积分"
       subtitle="每一笔积分都对应一次审核通过或兑换扣减，可按流水核对。"
       :meta="`${entries.length} 笔流水`"
@@ -63,7 +63,7 @@ function load() {
     <UiLoading v-if="loading && !data" />
 
     <template v-else>
-      <FolioSection index="01" title="当前余额" meta="BALANCE">
+      <FolioSection title="当前余额">
         <UiAlert v-if="balanceError" tone="error">
           <p class="points-page__error">{{ balanceError }}</p>
           <UiButton variant="secondary" @click="load">重试</UiButton>
@@ -71,7 +71,7 @@ function load() {
 
         <div v-else class="points-page__balance">
           <p class="points-page__amount">
-            {{ balanceLabel }}<span class="points-page__unit">PT</span>
+            {{ balanceLabel }}<span class="points-page__unit">分</span>
           </p>
           <p class="points-page__note">
             积分来源包括养护打卡、环保任务与管理员调整。
@@ -86,7 +86,7 @@ function load() {
         </nav>
       </FolioSection>
 
-      <FolioSection index="02" title="积分流水" meta="LEDGER">
+      <FolioSection title="积分流水">
         <UiAlert v-if="ledgerError" tone="error">
           <p class="points-page__error">{{ ledgerError }}</p>
           <UiButton variant="secondary" @click="load">重试</UiButton>
@@ -98,8 +98,8 @@ function load() {
           description="养护打卡或环保任务审核通过后，这里会出现第一笔积分。"
         />
 
-        <ul v-else class="points-page__list">
-          <li
+        <Ledger v-else class="points-page__list">
+          <div
             v-for="entry in entries"
             :key="entry.id"
             class="points-page__entry"
@@ -126,10 +126,10 @@ function load() {
             </p>
 
             <p class="points-page__after">
-              变动后余额 {{ entry.balanceAfter }} PT
+              变动后余额 {{ entry.balanceAfter }} 分
             </p>
-          </li>
-        </ul>
+          </div>
+        </Ledger>
       </FolioSection>
     </template>
   </section>
@@ -145,8 +145,8 @@ function load() {
 
 .points-page__error {
   margin: 0 0 var(--space-3);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
 .points-page__balance {
@@ -161,24 +161,23 @@ function load() {
   align-items: baseline;
   margin: 0;
   color: var(--color-ink);
-  font-family: var(--font-mono);
-  font-size: 3rem;
+  font-size: var(--font-size-reading);
+  font-weight: var(--font-weight-bold);
   font-variant-numeric: tabular-nums;
-  letter-spacing: var(--tracking-mono);
-  line-height: 1;
+  line-height: var(--line-height-display);
 }
 
 .points-page__unit {
-  color: var(--color-subtle);
-  font-size: var(--font-size-sm);
-  letter-spacing: var(--tracking-code);
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
 }
 
 .points-page__note {
   margin: 0;
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
 .points-page__links {
@@ -187,15 +186,16 @@ function load() {
   gap: var(--space-3) var(--space-5);
   margin-top: var(--space-4);
   padding-top: var(--space-3);
-  border-top: var(--border-hairline);
+  border-top: var(--border-line);
 }
 
 .points-page__link {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
-  color: var(--color-ink);
-  font-size: var(--font-size-sm);
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -213,11 +213,7 @@ function load() {
   flex-direction: column;
   gap: var(--space-1);
   padding: var(--space-3) 0;
-  border-bottom: var(--border-hairline);
-}
-
-.points-page__entry:last-child {
-  border-bottom: 0;
+  border-bottom: var(--border-line);
 }
 
 .points-page__entry-head {
@@ -231,37 +227,36 @@ function load() {
 .points-page__source {
   margin: 0;
   color: var(--color-ink);
-  font-family: var(--font-serif);
-  font-size: 1.125rem;
-  letter-spacing: var(--tracking-title-cn);
+  font-family: var(--font-kai);
+  font-size: var(--font-size-title);
+  letter-spacing: var(--tracking-display);
   overflow-wrap: anywhere;
 }
 
 .points-page__delta {
   flex: none;
-  color: var(--color-status-alive);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-md);
+  color: var(--color-leaf);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body);
   font-variant-numeric: tabular-nums;
-  letter-spacing: var(--tracking-mono);
+  letter-spacing: var(--tracking-display);
 }
 
 .points-page__delta--minus {
-  color: var(--color-seal-deep);
+  color: var(--color-blush);
 }
 
 .points-page__meta {
   margin: 0;
   color: var(--color-subtle);
-  font-family: var(--font-mono);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-mono);
+  letter-spacing: var(--tracking-label);
   overflow-wrap: anywhere;
 }
 
 .points-page__after {
   margin: 0;
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
 }
 </style>

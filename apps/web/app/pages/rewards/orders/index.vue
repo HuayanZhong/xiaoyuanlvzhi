@@ -82,7 +82,7 @@ function load() {
 <template>
   <section class="orders-page">
     <UiPageHeader
-      eyebrow="兑换订单 · REDEMPTION ORDERS"
+      eyebrow="兑换订单"
       title="我的订单"
       subtitle="待领取订单可以取消，取消后积分退回、库存释放。"
       :meta="`${orders.length} 笔订单`"
@@ -114,19 +114,20 @@ function load() {
 
     <ul v-else-if="!errorMessage" class="orders-page__list">
       <li v-for="item in orders" :key="item.id" class="orders-page__card">
+        <span class="tape" aria-hidden="true"></span>
         <div class="orders-page__head">
           <NuxtLink :to="`/rewards/orders/${item.id}`" class="orders-page__no">
-            {{ item.orderNo }}
+            编号 {{ item.orderNo }}
           </NuxtLink>
-          <Stamp :tone="orderStatusMeta(item.status).tone">
+          <UiStatusChip :tone="orderStatusMeta(item.status).tone">
             {{ orderStatusMeta(item.status).label }}
-          </Stamp>
+          </UiStatusChip>
         </div>
 
         <p class="orders-page__reward">{{ item.rewardName }}</p>
 
-        <div class="orders-page__rows">
-          <TagRow label="消耗积分" :value="`${item.pointsCost} PT`" mono />
+        <Ledger class="orders-page__rows">
+          <TagRow label="消耗积分" :value="`${item.pointsCost} 分`" mono />
           <TagRow
             label="下单时间"
             :value="formatDateTime(item.createdAt)"
@@ -151,7 +152,7 @@ function load() {
             mono
           />
           <TagRow v-if="item.reason" label="处理原因" :value="item.reason" />
-        </div>
+        </Ledger>
 
         <p class="orders-page__hint">{{ orderStatusMeta(item.status).hint }}</p>
 
@@ -176,7 +177,7 @@ function load() {
       <div v-if="pending" class="orders-page__confirm">
         <TagRow label="订单号" :value="pending.orderNo" mono />
         <TagRow label="奖励" :value="pending.rewardName" />
-        <TagRow label="退回积分" :value="`${pending.pointsCost} PT`" mono />
+        <TagRow label="退回积分" :value="`${pending.pointsCost} 分`" mono />
       </div>
     </UiConfirmDialog>
   </section>
@@ -194,16 +195,17 @@ function load() {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
-  color: var(--color-ink);
-  font-size: var(--font-size-sm);
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .orders-page__error {
   margin: 0 0 var(--space-3);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
 .orders-page__list {
@@ -215,12 +217,15 @@ function load() {
 }
 
 .orders-page__card {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-4) 0;
-  border-top: var(--border-ink);
-  border-bottom: var(--border-hairline);
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-paper);
 }
 
 .orders-page__head {
@@ -235,22 +240,25 @@ function load() {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
-  color: var(--color-ink);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  letter-spacing: var(--tracking-mono);
+  color: var(--color-subtle);
+  font-size: var(--font-size-label);
+  letter-spacing: var(--tracking-label);
   overflow-wrap: anywhere;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
+.orders-page__no:hover {
+  color: var(--color-leaf);
+}
+
 .orders-page__reward {
   margin: 0;
   color: var(--color-ink);
-  font-family: var(--font-serif);
-  font-size: 1.375rem;
-  letter-spacing: var(--tracking-title-cn);
-  line-height: 1.3;
+  font-family: var(--font-kai);
+  font-size: var(--font-size-title);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--line-height-title);
   overflow-wrap: anywhere;
 }
 
@@ -261,9 +269,9 @@ function load() {
 
 .orders-page__hint {
   margin: 0;
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
 .orders-page__actions {

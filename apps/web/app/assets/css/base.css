@@ -15,11 +15,12 @@ body {
 
 body {
   min-height: 100vh;
-  background: var(--color-paper);
-  color: var(--color-text);
+  background-color: var(--color-paper);
+  background-image: var(--texture-paper);
+  background-size: var(--texture-paper-size);
+  color: var(--color-ink);
   font-family: var(--font-sans);
-  font-size: var(--font-size-md);
-  font-variant-numeric: tabular-nums;
+  font-size: var(--font-size-body);
   font-synthesis-weight: none;
   line-height: var(--line-height-body);
   text-rendering: optimizeLegibility;
@@ -33,24 +34,38 @@ h1,
 h2,
 h3 {
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-kai);
   font-weight: var(--font-weight-regular);
+  letter-spacing: var(--tracking-display);
+}
+
+h1 {
+  font-size: var(--font-size-display);
+  line-height: var(--line-height-display);
+}
+
+h2,
+h3 {
+  font-size: var(--font-size-title);
+  line-height: var(--line-height-title);
 }
 
 a {
-  color: var(--color-text);
+  color: var(--color-ink);
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
+  transition: color var(--motion-color);
 }
 
 a:hover {
+  color: var(--color-leaf);
   text-decoration-thickness: 2px;
 }
 
 ::selection {
-  background: var(--color-ink);
-  color: var(--color-on-ink);
+  background: var(--color-leaf);
+  color: var(--color-on-leaf);
 }
 
 img,
@@ -78,6 +93,45 @@ button {
 
 [hidden] {
   display: none !important;
+}
+
+/* Journal utilities: decorations always read their geometry from tokens. */
+.tape {
+  position: absolute;
+  top: -0.5rem;
+  left: 1.625rem;
+  width: 3.25rem;
+  height: 0.8125rem;
+  background: var(--color-tape-yellow);
+  border-radius: 2px;
+  opacity: 0.8;
+  transform: rotate(-3deg);
+}
+
+.tape--green {
+  background: var(--color-tape-green);
+  transform: rotate(2deg);
+}
+
+.tape--coral {
+  background: var(--color-tape-coral);
+}
+
+.paper-texture {
+  background-color: var(--color-paper);
+  background-image: var(--texture-paper);
+  background-size: var(--texture-paper-size);
+}
+
+.squig {
+  display: block;
+  width: 4rem;
+  height: 0.375rem;
+  margin-top: 0.375rem;
+  background: var(--color-sticker);
+  border-radius: 3px;
+  opacity: 0.85;
+  transform: rotate(-1deg);
 }
 
 @media (prefers-reduced-motion: reduce) {

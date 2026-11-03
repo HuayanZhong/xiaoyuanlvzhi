@@ -96,9 +96,9 @@ async function confirmCancel() {
 <template>
   <section class="order-detail">
     <UiPageHeader
-      eyebrow="兑换订单 · ORDER FILE"
+      eyebrow="兑换订单"
       :title="order?.rewardName || '订单详情'"
-      :subtitle="order ? `订单 ${order.orderNo}` : '查看兑换订单的处理结果。'"
+      :subtitle="order ? `编号 ${order.orderNo}` : '查看兑换订单的处理结果。'"
     >
       <template #meta>
         <NuxtLink to="/rewards/orders" class="order-detail__link">
@@ -126,7 +126,9 @@ async function confirmCancel() {
 
     <template v-else>
       <div class="order-detail__summary">
-        <Stamp :tone="statusMeta.tone">{{ statusMeta.label }}</Stamp>
+        <UiStatusChip :tone="statusMeta.tone">{{
+          statusMeta.label
+        }}</UiStatusChip>
         <p class="order-detail__hint">{{ statusMeta.hint }}</p>
       </div>
 
@@ -135,13 +137,11 @@ async function confirmCancel() {
         <UiButton variant="secondary" @click="refresh()">刷新订单</UiButton>
       </UiAlert>
 
-      <section class="order-detail__section">
-        <h2 class="order-detail__heading">订单档案</h2>
-
-        <div class="order-detail__rows">
+      <FolioSection title="订单档案">
+        <Ledger class="order-detail__rows">
           <TagRow label="订单号" :value="order.orderNo" mono />
           <TagRow label="奖励" :value="order.rewardName" />
-          <TagRow label="消耗积分" :value="`${order.pointsCost} PT`" mono />
+          <TagRow label="消耗积分" :value="`${order.pointsCost} 分`" mono />
           <TagRow label="领取地点" :value="order.location" />
           <TagRow
             label="领取截止"
@@ -170,8 +170,8 @@ async function confirmCancel() {
             label="取消或超时原因"
             :value="order.reason"
           />
-        </div>
-      </section>
+        </Ledger>
+      </FolioSection>
 
       <div v-if="canCancelOrder(order.status)" class="order-detail__actions">
         <UiButton variant="secondary" @click="openCancel"> 取消订单 </UiButton>
@@ -190,7 +190,7 @@ async function confirmCancel() {
         <div class="order-detail__confirm">
           <TagRow label="订单号" :value="order.orderNo" mono />
           <TagRow label="奖励" :value="order.rewardName" />
-          <TagRow label="退回积分" :value="`${order.pointsCost} PT`" mono />
+          <TagRow label="退回积分" :value="`${order.pointsCost} 分`" mono />
         </div>
       </UiConfirmDialog>
     </template>
@@ -209,16 +209,17 @@ async function confirmCancel() {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
-  color: var(--color-ink);
-  font-size: var(--font-size-sm);
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .order-detail__error {
   margin: 0 0 var(--space-3);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
 .order-detail__summary {
@@ -227,29 +228,14 @@ async function confirmCancel() {
   gap: var(--space-3);
   align-items: center;
   padding-bottom: var(--space-3);
-  border-bottom: var(--border-ink);
+  border-bottom: var(--border-line);
 }
 
 .order-detail__hint {
   margin: 0;
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
-}
-
-.order-detail__section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.order-detail__heading {
-  margin: 0;
-  color: var(--color-ink);
-  font-family: var(--font-serif);
-  font-size: 1.25rem;
-  font-weight: var(--font-weight-regular);
-  letter-spacing: var(--tracking-title-cn);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
 .order-detail__rows {

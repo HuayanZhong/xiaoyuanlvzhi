@@ -125,7 +125,7 @@ describe("rewards page", () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain("环保帆布袋");
-    expect(wrapper.text()).toContain("50 PT");
+    expect(wrapper.text()).toContain("50 分");
     expect(wrapper.text()).toContain("12 件");
     expect(wrapper.text()).toContain("学生活动中心 101");
     expect(wrapper.findAll(".ui-figure")).toHaveLength(0);
@@ -204,8 +204,8 @@ describe("rewards page", () => {
     const dialog = wrapper.get('[role="dialog"]');
     expect(dialog.text()).toContain("环保帆布袋");
     expect(dialog.text()).toContain("扣除积分");
-    expect(dialog.text()).toContain("50 PT");
-    expect(dialog.text()).toContain("332 PT");
+    expect(dialog.text()).toContain("50 分");
+    expect(dialog.text()).toContain("332 分");
     expect(dialog.text()).toContain("学生活动中心 101");
     expect(dialog.text()).toContain("7 天");
   });

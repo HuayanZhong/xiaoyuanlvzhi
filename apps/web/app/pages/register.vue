@@ -261,11 +261,10 @@ async function submit() {
 
 <template>
   <section class="register-page">
-    <UiPageHeader
-      eyebrow="学生入口 · STUDENT ACCESS"
-      title="注册"
-      subtitle="使用 QQ 邮箱验证后创建学生账号"
-    />
+    <header class="auth-page__head">
+      <h2 class="auth-page__heading">注册</h2>
+      <p class="auth-page__sub">使用 QQ 邮箱验证后创建学生账号</p>
+    </header>
 
     <UiAlert v-if="formError" tone="error">{{ formError }}</UiAlert>
 
@@ -387,6 +386,27 @@ async function submit() {
   gap: var(--space-4);
 }
 
+.auth-page__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.auth-page__heading {
+  margin: 0;
+  font-family: var(--font-kai);
+  font-size: var(--font-size-title);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--line-height-title);
+}
+
+.auth-page__sub {
+  margin: 0;
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
+}
+
 .register-page__form {
   display: flex;
   flex-direction: column;
@@ -401,23 +421,24 @@ async function submit() {
   margin: 0;
   padding: var(--space-5) 0 0;
   border: 0;
-  border-top: var(--border-hairline);
+  border-top: var(--border-line);
 }
 
 .register-page__legend {
   padding: 0;
   color: var(--color-ink);
-  font-family: var(--font-serif);
-  font-size: 1.125rem;
+  font-family: var(--font-kai);
+  font-size: var(--font-size-title);
   font-weight: var(--font-weight-regular);
-  letter-spacing: var(--tracking-title-cn);
+  letter-spacing: var(--tracking-display);
 }
 
 .register-page__hint,
 .register-page__switch {
   margin: 0;
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
+  text-align: center;
 }
 
 .register-page__switch {
@@ -430,7 +451,7 @@ async function submit() {
   min-height: var(--touch-target);
   padding: 0 var(--space-1);
   color: var(--color-ink);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 3px;
 }

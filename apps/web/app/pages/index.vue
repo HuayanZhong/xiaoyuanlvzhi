@@ -61,16 +61,6 @@ const displayName = computed(() => {
 });
 
 const activeCount = computed(() => profile.value?.activeAdoptionCount ?? 0);
-const archiveNo = computed(() => profile.value?.studentNumber || "—");
-const archivedOn = computed(() => formatDate(profile.value?.createdAt));
-
-function formatDate(value: string | null | undefined): string {
-  if (!value) {
-    return "—";
-  }
-
-  return value.slice(0, 10).replaceAll("-", ".");
-}
 
 function quotaLabel(task: EcoTask): string {
   const remaining = remainingQuota(task);
@@ -86,10 +76,8 @@ function load() {
 <template>
   <section class="home-page">
     <UiPageHeader
-      eyebrow="学生档案 · STUDENT FILE"
       :title="`你好，${displayName}`"
       subtitle="今天也来看看你的绿植吧"
-      :meta="archiveNo"
     />
 
     <UiLoading v-if="loading && !profile" />
@@ -101,17 +89,23 @@ function load() {
 
     <template v-else-if="profile">
       <div class="home-page__sheet">
-        <FolioSection index="01" title="我的绿植" meta="ADOPTIONS">
+        <FolioSection title="我的绿植">
           <NuxtLink
             v-if="activeCount > 0"
             to="/my-plants"
             class="home-page__record"
           >
-            <p class="home-page__record-label">在养数量</p>
-            <p class="home-page__record-value">
-              {{ activeCount }}<span class="home-page__unit">PL</span>
-            </p>
-            <Stamp tone="alive">在养中</Stamp>
+            <span class="tape" aria-hidden="true"></span>
+            <UiLeafMark
+              name="plants"
+              :size="30"
+              class="home-page__record-leaf"
+            />
+            <span class="home-page__record-value">
+              {{ activeCount }}<small>株在养</small>
+            </span>
+            <UiStatusChip tone="alive">在养中</UiStatusChip>
+            <span class="home-page__record-link">查看我的绿植 →</span>
           </NuxtLink>
 
           <UiEmptyState
@@ -123,13 +117,9 @@ function load() {
               去看看可领养品种
             </NuxtLink>
           </UiEmptyState>
-
-          <p v-if="activeCount === 0" class="home-page__note">
-            领养审核通过后，植株会登记在这里。
-          </p>
         </FolioSection>
 
-        <FolioSection index="02" title="待处理事项" meta="PENDING">
+        <FolioSection title="待处理事项">
           <UiAlert v-if="pendingError" tone="error">
             <p class="home-page__error-text">{{ pendingError }}</p>
             <UiButton variant="secondary" @click="refreshOverview()">
@@ -143,36 +133,32 @@ function load() {
             description="审核结果、驳回重提和待领取事项会出现在这里。"
           />
 
-          <ul v-else class="home-page__list">
-            <li v-for="group in pendingGroups" :key="group.key">
-              <NuxtLink :to="group.to" class="home-page__pending-row">
-                <span class="home-page__pending-label">
-                  {{ group.label }}
-                </span>
-                <span class="home-page__pending-record">
-                  {{ group.record }}
-                </span>
-                <span class="home-page__pending-count">
-                  {{ group.count }}
-                </span>
-              </NuxtLink>
-            </li>
-          </ul>
+          <Ledger v-else>
+            <NuxtLink
+              v-for="group in pendingGroups"
+              :key="group.key"
+              :to="group.to"
+              class="home-page__pending-row"
+            >
+              <span class="home-page__row-title">{{ group.label }}</span>
+              <span class="home-page__row-meta">{{ group.record }}</span>
+              <span class="home-page__row-count">{{ group.count }}</span>
+            </NuxtLink>
+          </Ledger>
         </FolioSection>
 
-        <FolioSection index="03" title="当前积分" meta="POINTS">
+        <FolioSection title="当前积分">
           <NuxtLink to="/points" class="home-page__points-link">
-            <div class="home-page__points">
-              <p class="home-page__points-value">
-                {{ profile.pointsBalance
-                }}<span class="home-page__unit">PT</span>
-              </p>
-              <p class="home-page__note">参与任务或兑换后，余额会更新。</p>
-            </div>
+            <span class="home-page__reading">
+              {{ profile.pointsBalance }}<small>分</small>
+            </span>
+            <span class="home-page__row-meta">
+              参与任务或兑换后，余额会更新。
+            </span>
           </NuxtLink>
         </FolioSection>
 
-        <FolioSection index="04" title="环保任务" meta="TASKS">
+        <FolioSection title="环保任务">
           <UiAlert v-if="tasksError" tone="error">
             <p class="home-page__error-text">{{ tasksError }}</p>
             <UiButton variant="secondary" @click="refreshOverview()">
@@ -190,16 +176,19 @@ function load() {
             </NuxtLink>
           </UiEmptyState>
 
-          <ul v-else class="home-page__list">
-            <li v-for="task in joinableTasks" :key="task.id">
-              <NuxtLink :to="`/tasks/${task.id}`" class="home-page__row">
-                <span class="home-page__row-title">{{ task.title }}</span>
-                <span class="home-page__row-meta">
-                  {{ task.pointsPerPerson }} PT · {{ quotaLabel(task) }}
-                </span>
-              </NuxtLink>
-            </li>
-          </ul>
+          <Ledger v-else>
+            <NuxtLink
+              v-for="task in joinableTasks"
+              :key="task.id"
+              :to="`/tasks/${task.id}`"
+              class="home-page__row"
+            >
+              <span class="home-page__row-title">{{ task.title }}</span>
+              <span class="home-page__row-meta">
+                {{ task.pointsPerPerson }} 分 · {{ quotaLabel(task) }}
+              </span>
+            </NuxtLink>
+          </Ledger>
 
           <NuxtLink
             v-if="!tasksError && joinableTasks.length > 0"
@@ -210,7 +199,7 @@ function load() {
           </NuxtLink>
         </FolioSection>
 
-        <FolioSection index="05" title="养护提醒" meta="CARE">
+        <FolioSection title="养护提醒">
           <UiAlert v-if="plantsError" tone="error">
             <p class="home-page__error-text">{{ plantsError }}</p>
             <UiButton variant="secondary" @click="refreshOverview()">
@@ -224,52 +213,35 @@ function load() {
             description="达到养护间隔的绿植会提醒你打卡。"
           />
 
-          <ul v-else class="home-page__list">
-            <li v-for="plant in duePlants" :key="plant.plantId">
-              <NuxtLink
-                :to="`/my-plants/${plant.plantId}`"
-                class="home-page__row"
-              >
-                <span class="home-page__row-title">{{ plant.plantName }}</span>
-                <span class="home-page__row-meta">
-                  {{ plant.location || "位置未填写" }} · 可打卡
-                </span>
-              </NuxtLink>
-            </li>
-          </ul>
+          <Ledger v-else>
+            <NuxtLink
+              v-for="plant in duePlants"
+              :key="plant.plantId"
+              :to="`/my-plants/${plant.plantId}`"
+              class="home-page__row"
+            >
+              <span class="home-page__row-title">{{ plant.plantName }}</span>
+              <span class="home-page__row-meta">
+                {{ plant.location || "位置未填写" }} · 可打卡
+              </span>
+            </NuxtLink>
+          </Ledger>
         </FolioSection>
 
-        <FolioSection index="06" title="消息" meta="NOTICES">
+        <FolioSection title="消息">
           <NuxtLink to="/notifications" class="home-page__message">
-            <span class="home-page__message-label">站内通知</span>
-            <span class="home-page__message-value">
+            <span class="home-page__row-title">站内通知</span>
+            <span class="home-page__row-meta">
               <template v-if="notificationError">消息暂时不可用</template>
               <template v-else-if="unreadCount > 0">
                 {{ unreadCount }} 条未读
               </template>
               <template v-else>暂无未读</template>
             </span>
-            <span class="home-page__message-action" aria-hidden="true">
-              查看 →
-            </span>
+            <span class="home-page__row-action">查看 →</span>
           </NuxtLink>
         </FolioSection>
       </div>
-
-      <dl class="home-page__strip">
-        <div class="home-page__strip-item">
-          <dt class="home-page__strip-label">档案编号</dt>
-          <dd class="home-page__strip-value">{{ archiveNo }}</dd>
-        </div>
-        <div class="home-page__strip-item">
-          <dt class="home-page__strip-label">建档日期</dt>
-          <dd class="home-page__strip-value">{{ archivedOn }}</dd>
-        </div>
-        <div class="home-page__strip-item">
-          <dt class="home-page__strip-label">档案状态</dt>
-          <dd class="home-page__strip-value">在册</dd>
-        </div>
-      </dl>
     </template>
   </section>
 </template>
@@ -284,8 +256,8 @@ function load() {
 
 .home-page__error-text {
   margin: 0 0 var(--space-3);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
 .home-page__sheet {
@@ -294,130 +266,90 @@ function load() {
 }
 
 .home-page__record {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
   align-items: flex-start;
-  padding: var(--space-1) 0 var(--space-3);
+  padding: var(--space-5) var(--space-4) var(--space-4);
   color: inherit;
+  background: var(--color-surface);
+  border: var(--border-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-paper);
   text-decoration: none;
 }
 
-.home-page__record:hover .home-page__record-value {
-  text-decoration: underline;
-  text-underline-offset: 4px;
+.home-page__record-leaf {
+  color: var(--color-leaf);
 }
 
-.home-page__record-label {
-  margin: 0;
-  color: var(--color-graphite);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-code);
-}
-
-.home-page__record-value,
-.home-page__points-value {
+.home-page__record-value {
   display: flex;
   gap: var(--space-2);
   align-items: baseline;
-  margin: 0;
   color: var(--color-ink);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-measure);
-  line-height: var(--line-height-reading);
+  font-size: var(--font-size-reading);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--line-height-display);
 }
 
-.home-page__unit {
-  color: var(--color-seal);
-  font-size: var(--font-size-sm);
-  letter-spacing: var(--tracking-code);
+.home-page__record-value small,
+.home-page__reading small {
+  color: var(--color-subtle);
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-semibold);
+}
+
+.home-page__record-link {
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+}
+
+.home-page__reading {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  color: var(--color-leaf);
+  font-size: var(--font-size-reading);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--line-height-display);
 }
 
 .home-page__points-link {
-  display: block;
-  color: inherit;
-  text-decoration: none;
-}
-
-.home-page__points {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-}
-
-.home-page__note {
-  margin: var(--space-4) 0 0;
-  padding-top: var(--space-3);
-  border-top: var(--border-hairline);
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
-}
-
-.home-page__browse {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--touch-target);
-  margin-top: var(--space-2);
-  color: var(--color-ink);
-  font-size: var(--font-size-sm);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.home-page__list {
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-  padding: 0;
-  border-top: var(--border-hairline);
-  list-style: none;
-}
-
-.home-page__list li {
-  border-bottom: var(--border-hairline);
-}
-
-.home-page__pending-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--space-1) var(--space-3);
-  align-items: baseline;
   min-height: var(--touch-target);
   padding: var(--space-3) 0;
   color: inherit;
   text-decoration: none;
 }
 
-.home-page__pending-label {
-  color: var(--color-ink);
-  font-size: var(--font-size-md);
+.home-page__browse,
+.home-page__more {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  margin-top: var(--space-2);
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-.home-page__pending-record {
-  grid-column: 1;
-  color: var(--color-subtle);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-code);
-  overflow-wrap: anywhere;
-}
-
-.home-page__pending-count {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-  align-self: center;
-  color: var(--color-seal);
-  font-family: var(--font-mono);
-  font-size: 1.5rem;
-  line-height: 1;
-}
-
-.home-page__row {
+.home-page__pending-row,
+.home-page__row,
+.home-page__message {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  align-items: baseline;
+  justify-content: space-between;
   min-height: var(--touch-target);
   padding: var(--space-3) 0;
   color: inherit;
@@ -426,81 +358,28 @@ function load() {
 
 .home-page__row-title {
   color: var(--color-ink);
-  font-size: var(--font-size-md);
-  line-height: var(--line-height-normal);
+  font-size: var(--font-size-body);
   overflow-wrap: anywhere;
 }
 
 .home-page__row-meta {
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
-}
-
-.home-page__more {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--touch-target);
-  color: var(--color-ink);
-  font-size: var(--font-size-sm);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.home-page__message {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-4);
-  align-items: center;
-  justify-content: space-between;
-  min-height: var(--touch-target);
-  color: var(--color-ink);
-  text-decoration: none;
-}
-
-.home-page__message-label {
-  color: var(--color-graphite);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-code);
-}
-
-.home-page__message-value {
-  font-family: var(--font-serif);
-  font-size: 1.125rem;
-  letter-spacing: var(--tracking-title-cn);
-}
-
-.home-page__message-action {
-  color: var(--color-seal);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-mono);
-}
-
-.home-page__strip {
-  display: grid;
-  margin: 0;
-  border-top: var(--border-ink);
-  border-bottom: var(--border-hairline);
-}
-
-.home-page__strip-item {
-  padding: var(--space-3) 0;
-}
-
-.home-page__strip-label {
   color: var(--color-subtle);
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
-  letter-spacing: var(--tracking-code);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
-.home-page__strip-value {
-  margin: var(--space-1) 0 0;
-  color: var(--color-ink);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
+.home-page__row-count {
+  color: var(--color-leaf);
+  font-size: var(--font-size-title);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.home-page__row-action {
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
 }
 
 @media (min-width: 48rem) {
@@ -508,22 +387,6 @@ function load() {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-7);
     align-items: start;
-  }
-
-  .home-page__strip {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .home-page__strip-item + .home-page__strip-item {
-    padding-left: var(--space-5);
-    border-left: var(--border-hairline);
-  }
-}
-
-@media (max-width: 30rem) {
-  .home-page__strip-item + .home-page__strip-item {
-    padding-top: var(--space-2);
-    border-top: var(--border-hairline);
   }
 }
 </style>

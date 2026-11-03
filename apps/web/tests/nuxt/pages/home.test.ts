@@ -164,7 +164,7 @@ describe("home page", () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain("暂无在养绿植");
-    expect(wrapper.text()).toContain("领养审核通过后，植株会登记在这里");
+    expect(wrapper.text()).toContain("领养一株后，这里会记录你的养护进度。");
     expect(wrapper.get(".home-page__browse").attributes("href")).toBe(
       "/plants",
     );
@@ -175,7 +175,9 @@ describe("home page", () => {
     const wrapper = await mountSuspended(HomePage);
     await flushPromises();
 
-    expect(wrapper.text()).not.toContain("领养审核通过后，植株会登记在这里");
+    expect(wrapper.text()).not.toContain(
+      "领养一株后，这里会记录你的养护进度。",
+    );
     expect(wrapper.get(".home-page__record").attributes("href")).toBe(
       "/my-plants",
     );
@@ -320,7 +322,7 @@ describe("home page", () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain("垃圾分类宣传");
-    expect(wrapper.text()).toContain("20 PT · 剩余 15 个名额");
+    expect(wrapper.text()).toContain("20 分 · 剩余 15 个名额");
     expect(
       wrapper.findAll(".home-page__row").map((item) => item.attributes("href")),
     ).toContain("/tasks/7");

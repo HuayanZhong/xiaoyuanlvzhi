@@ -96,7 +96,7 @@ describe("reward order detail page", () => {
 
     expect(wrapper.text()).toContain("RDM-1A2B3C4D");
     expect(wrapper.text()).toContain("环保帆布袋");
-    expect(wrapper.text()).toContain("50 PT");
+    expect(wrapper.text()).toContain("50 分");
     expect(wrapper.text()).toContain("学生活动中心 101");
     expect(wrapper.text()).toContain("已取消");
     expect(wrapper.text()).toContain("退分时间");

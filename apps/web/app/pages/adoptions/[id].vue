@@ -258,31 +258,31 @@ function load() {
 <template>
   <section class="adoption-detail">
     <UiPageHeader
-      eyebrow="申请档案 · APPLICATION FILE"
+      eyebrow="领养申请"
       :title="application?.speciesName ?? '申请详情'"
       :subtitle="
         application ? '查看申请状态、状态记录和当前可执行的操作。' : undefined
       "
-      :meta="application?.applicationNo"
+      :meta="application ? `编号 ${application.applicationNo}` : undefined"
     />
 
     <UiLoading v-if="loading && !data" />
 
     <template v-else-if="application">
       <div class="adoption-detail__status">
-        <Stamp :tone="meta.tone">{{ meta.label }}</Stamp>
+        <UiStatusChip :tone="meta.tone">{{ meta.label }}</UiStatusChip>
         <p class="adoption-detail__status-hint">{{ meta.hint }}</p>
       </div>
 
       <div class="adoption-detail__sheet">
         <section class="adoption-detail__column">
-          <FolioSection index="01" title="状态记录" meta="TIMELINE">
+          <FolioSection title="状态记录">
             <UiTimeline :items="timeline" />
           </FolioSection>
         </section>
 
         <section class="adoption-detail__column">
-          <FolioSection index="02" title="申请资料" meta="RECORD">
+          <FolioSection title="申请资料">
             <Ledger>
               <TagRow
                 v-for="row in rows"
@@ -294,12 +294,7 @@ function load() {
             </Ledger>
           </FolioSection>
 
-          <FolioSection
-            v-if="reasons.length"
-            index="03"
-            title="审核说明"
-            meta="NOTES"
-          >
+          <FolioSection v-if="reasons.length" title="审核说明">
             <Ledger>
               <TagRow
                 v-for="row in reasons"
@@ -445,13 +440,13 @@ function load() {
   gap: var(--space-3);
   align-items: center;
   padding-bottom: var(--space-4);
-  border-bottom: var(--border-hairline);
+  border-bottom: var(--border-line);
 }
 
 .adoption-detail__status-hint {
   margin: 0;
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
 }
 
 .adoption-detail__sheet {
@@ -472,21 +467,22 @@ function load() {
   flex-wrap: wrap;
   gap: var(--space-2);
   padding-top: var(--space-4);
-  border-top: var(--border-hairline);
+  border-top: var(--border-line);
 }
 
 .adoption-detail__readonly {
   margin: 0;
   color: var(--color-subtle);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-small);
 }
 
 .adoption-detail__care-link {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
-  color: var(--color-ink);
-  font-size: var(--font-size-sm);
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -496,7 +492,9 @@ function load() {
   flex-direction: column;
   gap: var(--space-4);
   padding: var(--space-5);
-  border: var(--border-ink);
+  background: var(--color-surface);
+  border: var(--border-dashed);
+  border-radius: var(--radius-card);
 }
 
 .adoption-detail__form-error {
@@ -513,8 +511,9 @@ function load() {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
-  color: var(--color-ink);
-  font-size: var(--font-size-sm);
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 3px;
 }

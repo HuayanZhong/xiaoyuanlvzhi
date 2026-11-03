@@ -30,21 +30,21 @@ const ordered = computed(() =>
 <template>
   <ol v-if="ordered.length" class="ui-timeline">
     <li v-for="(item, index) in ordered" :key="index" class="ui-timeline__item">
-      <span class="ui-timeline__node" aria-hidden="true" />
+      <UiLeafMark name="leaf" :size="14" filled class="ui-timeline__node" />
       <p class="ui-timeline__time">{{ formatDateTime(item.time) }}</p>
       <p class="ui-timeline__title">{{ item.title }}</p>
       <p v-if="item.note" class="ui-timeline__note">{{ item.note }}</p>
     </li>
   </ol>
 
-  <p v-else class="ui-timeline__empty">{{ emptyText }}</p>
+  <UiEmptyState v-else :title="emptyText" />
 </template>
 
 <style scoped>
 .ui-timeline {
   margin: 0;
-  padding: 0 0 0 var(--space-4);
-  border-left: var(--border-hairline);
+  padding: 0 0 0 var(--space-5);
+  border-left: var(--border-dashed);
   list-style: none;
 }
 
@@ -59,38 +59,31 @@ const ordered = computed(() =>
 
 .ui-timeline__node {
   position: absolute;
-  top: 0.45rem;
-  left: calc(-1 * var(--space-4) - 3px);
-  width: 6px;
-  height: 6px;
-  background: var(--color-ink);
+  top: 0.1rem;
+  left: calc(-1 * var(--space-5) - 7px);
+  color: var(--color-leaf);
+  background: var(--color-paper);
+  border-radius: 50%;
 }
 
 .ui-timeline__time {
   margin: 0;
   color: var(--color-subtle);
-  font-family: var(--font-mono);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-code);
+  letter-spacing: var(--tracking-label);
 }
 
 .ui-timeline__title {
   margin: var(--space-1) 0 0;
   color: var(--color-ink);
-  font-size: var(--font-size-md);
-  line-height: var(--line-height-normal);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
 }
 
 .ui-timeline__note {
   margin: var(--space-1) 0 0;
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
-}
-
-.ui-timeline__empty {
-  margin: 0;
   color: var(--color-subtle);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 </style>

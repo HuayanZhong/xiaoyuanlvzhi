@@ -290,7 +290,7 @@ async function join() {
 <template>
   <section class="task-detail">
     <UiPageHeader
-      eyebrow="环保任务 · ECO TASK"
+      eyebrow="环保任务"
       :title="task?.title || '任务详情'"
       :subtitle="windowLabel || '查看任务要求和凭证进度。'"
     >
@@ -316,7 +316,9 @@ async function join() {
 
     <template v-else>
       <div class="task-detail__summary">
-        <Stamp :tone="statusMeta.tone">{{ statusMeta.label }}</Stamp>
+        <UiStatusChip :tone="statusMeta.tone">{{
+          statusMeta.label
+        }}</UiStatusChip>
         <p class="task-detail__hint">{{ statusMeta.hint }}</p>
       </div>
 
@@ -327,89 +329,83 @@ async function join() {
         :alt="`${task.title}封面`"
       />
 
-      <section class="task-detail__section">
-        <h2 class="task-detail__heading">任务档案</h2>
-
+      <FolioSection title="任务档案">
         <p class="task-detail__details">{{ task.details }}</p>
 
-        <div class="task-detail__rows">
+        <Ledger class="task-detail__rows">
           <TagRow label="开放时间" :value="windowLabel" mono />
           <TagRow label="已报名" :value="participantLabel" mono />
           <TagRow label="剩余名额" :value="quotaLabel" mono />
-          <TagRow label="单人奖励" :value="`${task.pointsPerPerson} PT`" mono />
+          <TagRow label="单人奖励" :value="`${task.pointsPerPerson} 分`" mono />
           <TagRow label="凭证要求" :value="evidenceLabel" />
-        </div>
-      </section>
+        </Ledger>
+      </FolioSection>
 
-      <section class="task-detail__section">
-        <h2 class="task-detail__heading">我的参与</h2>
-
+      <FolioSection title="我的参与">
         <template v-if="participation && participationMeta">
           <div class="task-detail__summary">
-            <Stamp :tone="participationMeta.tone">
+            <UiStatusChip :tone="participationMeta.tone">
               {{ participationMeta.label }}
-            </Stamp>
+            </UiStatusChip>
             <p class="task-detail__hint">{{ participationMeta.hint }}</p>
           </div>
 
-          <div class="task-detail__rows">
+          <Ledger class="task-detail__rows">
             <TagRow
               label="报名时间"
               :value="formatDateTime(participation.joinedAt)"
               mono
             />
-          </div>
+          </Ledger>
 
-          <section class="task-detail__versions">
-            <h3 class="task-detail__subheading">凭证记录</h3>
-
-            <p
+          <FolioSection title="凭证记录">
+            <UiEmptyState
               v-if="participation.submissions.length === 0"
-              class="task-detail__hint"
-            >
-              还没有提交凭证。
-            </p>
+              title="还没有提交凭证"
+            />
 
-            <article
-              v-for="item in participation.submissions"
-              :key="item.id"
-              class="task-detail__version"
-            >
-              <header class="task-detail__version-head">
-                <p class="task-detail__version-no">
-                  第 {{ item.version }} 次提交
+            <div v-else class="task-detail__version-list">
+              <article
+                v-for="item in participation.submissions"
+                :key="item.id"
+                class="task-detail__version"
+              >
+                <header class="task-detail__version-head">
+                  <p class="task-detail__version-no">
+                    第 {{ item.version }} 次提交
+                  </p>
+                  <UiStatusChip :tone="submissionMeta(item).tone">
+                    {{ submissionMeta(item).label }}
+                  </UiStatusChip>
+                </header>
+
+                <p class="task-detail__time">
+                  {{ formatDateTime(item.submittedAt) }}
                 </p>
-                <Stamp :tone="submissionMeta(item).tone">
-                  {{ submissionMeta(item).label }}
-                </Stamp>
-              </header>
 
-              <p class="task-detail__time">
-                {{ formatDateTime(item.submittedAt) }}
-              </p>
+                <p v-if="item.note" class="task-detail__note">
+                  {{ item.note }}
+                </p>
+                <p v-else class="task-detail__note task-detail__note--empty">
+                  未填写说明
+                </p>
 
-              <p v-if="item.note" class="task-detail__note">
-                {{ item.note }}
-              </p>
-              <p v-else class="task-detail__note task-detail__note--empty">
-                未填写说明
-              </p>
+                <ul v-if="item.imageFileIds.length" class="task-detail__images">
+                  <li v-for="fileId in item.imageFileIds" :key="fileId">
+                    <UiFigure :file-id="fileId" alt="任务凭证图片" />
+                  </li>
+                </ul>
 
-              <ul v-if="item.imageFileIds.length" class="task-detail__images">
-                <li v-for="fileId in item.imageFileIds" :key="fileId">
-                  <UiFigure :file-id="fileId" alt="任务凭证图片" />
-                </li>
-              </ul>
+                <p v-if="item.reviewReason" class="task-detail__reason">
+                  审核意见：{{ item.reviewReason }}
+                </p>
 
-              <p v-if="item.reviewReason" class="task-detail__reason">
-                审核意见：{{ item.reviewReason }}
-              </p>
-
-              <p v-if="item.reviewedAt" class="task-detail__time">
-                审核时间：{{ formatDateTime(item.reviewedAt) }}
-              </p>
-            </article>
-          </section>
+                <p v-if="item.reviewedAt" class="task-detail__time">
+                  审核时间：{{ formatDateTime(item.reviewedAt) }}
+                </p>
+              </article>
+            </div>
+          </FolioSection>
 
           <p v-if="editable && !evidenceConfigured" class="task-detail__notice">
             该任务未配置凭证要求，暂时无法提交，请联系管理员。
@@ -420,41 +416,43 @@ async function join() {
             class="task-detail__form"
             @submit.prevent="submit"
           >
-            <h3 class="task-detail__subheading">{{ submitLabel }}</h3>
+            <FolioSection :title="submitLabel">
+              <div class="task-detail__fields">
+                <UiTextArea
+                  id="task-evidence-note"
+                  v-model="note"
+                  :label="noteLabel"
+                  hint="最多 500 字，是否必填以任务凭证要求为准。"
+                  :maxlength="500"
+                  :error="noteError"
+                  :disabled="submitting"
+                />
 
-            <UiTextArea
-              id="task-evidence-note"
-              v-model="note"
-              :label="noteLabel"
-              hint="最多 500 字，是否必填以任务凭证要求为准。"
-              :maxlength="500"
-              :error="noteError"
-              :disabled="submitting"
-            />
+                <UiImagePicker
+                  id="task-evidence-images"
+                  v-model="imageIds"
+                  :label="imageLabel"
+                  hint="最多 3 张，单张不超过 5 MB，支持 JPG、PNG、WebP。"
+                  :disabled="submitting"
+                  @busy="uploading = $event"
+                />
 
-            <UiImagePicker
-              id="task-evidence-images"
-              v-model="imageIds"
-              :label="imageLabel"
-              hint="最多 3 张，单张不超过 5 MB，支持 JPG、PNG、WebP。"
-              :disabled="submitting"
-              @busy="uploading = $event"
-            />
+                <UiInlineError v-if="evidenceError" :message="evidenceError" />
 
-            <UiInlineError v-if="evidenceError" :message="evidenceError" />
-
-            <div class="task-detail__actions">
-              <UiButton
-                type="submit"
-                :loading="submitting"
-                :disabled="uploading"
-              >
-                {{ submitLabel }}
-              </UiButton>
-              <p v-if="uploading" class="task-detail__time">
-                图片上传中，请稍候
-              </p>
-            </div>
+                <div class="task-detail__actions">
+                  <UiButton
+                    type="submit"
+                    :loading="submitting"
+                    :disabled="uploading"
+                  >
+                    {{ submitLabel }}
+                  </UiButton>
+                  <p v-if="uploading" class="task-detail__time">
+                    图片上传中，请稍候
+                  </p>
+                </div>
+              </div>
+            </FolioSection>
           </form>
 
           <UiAlert v-if="submitError" tone="error">
@@ -480,7 +478,7 @@ async function join() {
           <p class="task-detail__error">{{ joinError }}</p>
           <UiButton variant="secondary" @click="refresh()"> 刷新任务 </UiButton>
         </UiAlert>
-      </section>
+      </FolioSection>
     </template>
   </section>
 </template>
@@ -497,16 +495,17 @@ async function join() {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
-  color: var(--color-ink);
-  font-size: var(--font-size-sm);
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .task-detail__error {
   margin: 0 0 var(--space-3);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
 .task-detail__summary {
@@ -515,36 +514,21 @@ async function join() {
   gap: var(--space-3);
   align-items: center;
   padding-bottom: var(--space-3);
-  border-bottom: var(--border-ink);
+  border-bottom: var(--border-line);
 }
 
 .task-detail__hint {
   margin: 0;
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
-}
-
-.task-detail__section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.task-detail__heading {
-  margin: 0;
-  color: var(--color-ink);
-  font-family: var(--font-serif);
-  font-size: 1.25rem;
-  font-weight: var(--font-weight-regular);
-  letter-spacing: var(--tracking-title-cn);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
 .task-detail__details {
-  margin: 0;
-  color: var(--color-graphite);
-  font-size: var(--font-size-md);
-  line-height: var(--line-height-reading);
+  margin: 0 0 var(--space-3);
+  color: var(--color-subtle);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
   overflow-wrap: anywhere;
   white-space: pre-line;
 }
@@ -561,17 +545,20 @@ async function join() {
   align-items: center;
 }
 
-.task-detail__subheading {
-  margin: 0;
-  color: var(--color-ink);
-  font-family: var(--font-serif);
-  font-size: 1rem;
-  font-weight: var(--font-weight-regular);
-  letter-spacing: var(--tracking-title-cn);
+.task-detail__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
-.task-detail__versions,
 .task-detail__form {
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border: var(--border-dashed);
+  border-radius: var(--radius-card);
+}
+
+.task-detail__version-list {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -581,8 +568,11 @@ async function join() {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-3) 0;
-  border-top: var(--border-hairline);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-paper);
 }
 
 .task-detail__version-head {
@@ -595,25 +585,23 @@ async function join() {
 
 .task-detail__version-no {
   margin: 0;
-  color: var(--color-ink);
-  font-family: var(--font-mono);
+  color: var(--color-subtle);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-code);
+  letter-spacing: var(--tracking-label);
 }
 
 .task-detail__time {
   margin: 0;
   color: var(--color-subtle);
-  font-family: var(--font-mono);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-mono);
+  letter-spacing: var(--tracking-label);
 }
 
 .task-detail__note {
   margin: 0;
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
   overflow-wrap: anywhere;
 }
 
@@ -633,18 +621,20 @@ async function join() {
 .task-detail__reason {
   margin: 0;
   padding: var(--space-2) 0 var(--space-2) var(--space-3);
-  border-left: 2px solid var(--color-seal-deep);
-  color: var(--color-seal-deep);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  border-left: 2px solid var(--color-blush);
+  color: var(--color-blush);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
 .task-detail__notice {
   margin: 0;
   padding: var(--space-3);
+  background: var(--color-surface);
   border: var(--border-dashed);
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  border-radius: var(--radius-control);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 </style>

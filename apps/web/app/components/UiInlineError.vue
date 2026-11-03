@@ -12,8 +12,8 @@ defineProps<{
 <style scoped>
 .ui-inline-error {
   margin: 0;
-  color: var(--color-crimson);
-  font-size: var(--font-size-caption);
-  line-height: var(--line-height-normal);
+  color: var(--color-blush);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 </style>

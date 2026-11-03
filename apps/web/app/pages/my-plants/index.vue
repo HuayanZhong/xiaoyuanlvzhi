@@ -43,7 +43,7 @@ function load() {
 <template>
   <section class="my-plants-page">
     <UiPageHeader
-      eyebrow="在养绿植 · MY PLANTS"
+      eyebrow="在养绿植"
       title="我的绿植"
       subtitle="养护打卡按品种的养护间隔开放，审核通过后按积分规则发放积分。"
     >
@@ -77,13 +77,13 @@ function load() {
         :key="plant.plantId"
         class="my-plants-page__card"
       >
+        <span class="tape" aria-hidden="true"></span>
         <div class="my-plants-page__head">
-          <p class="my-plants-page__code">{{ plant.plantCode }}</p>
+          <p class="my-plants-page__code">编号 {{ plant.plantCode }}</p>
           <h2 class="my-plants-page__name">{{ plant.plantName }}</h2>
-          <p class="my-plants-page__hint">{{ hintFor(plant) }}</p>
         </div>
 
-        <div class="my-plants-page__rows">
+        <Ledger class="my-plants-page__rows">
           <TagRow label="摆放位置" :value="plant.location || '未填写'" />
           <TagRow
             label="养护间隔"
@@ -100,10 +100,12 @@ function load() {
             :value="formatDateTime(plant.nextEligibleAt)"
             mono
           />
-        </div>
+        </Ledger>
 
         <div class="my-plants-page__foot">
-          <Stamp :tone="stampTone(plant)">{{ hintFor(plant) }}</Stamp>
+          <UiStatusChip :tone="stampTone(plant)">{{
+            hintFor(plant)
+          }}</UiStatusChip>
 
           <NuxtLink
             v-if="plant.pendingCheckinId"
@@ -142,8 +144,9 @@ function load() {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
-  color: var(--color-ink);
-  font-size: var(--font-size-sm);
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -161,12 +164,15 @@ function load() {
 }
 
 .my-plants-page__card {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-4) 0;
-  border-top: var(--border-ink);
-  border-bottom: var(--border-hairline);
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-paper);
 }
 
 .my-plants-page__head {
@@ -176,26 +182,18 @@ function load() {
 .my-plants-page__code {
   margin: 0;
   color: var(--color-subtle);
-  font-family: var(--font-mono);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-code);
+  letter-spacing: var(--tracking-label);
 }
 
 .my-plants-page__name {
   margin: var(--space-2) 0 0;
   color: var(--color-ink);
-  font-family: var(--font-serif);
-  font-size: 1.5rem;
+  font-family: var(--font-kai);
+  font-size: var(--font-size-title);
   font-weight: var(--font-weight-regular);
-  letter-spacing: var(--tracking-title-cn);
-  line-height: 1.3;
-}
-
-.my-plants-page__hint {
-  margin: var(--space-2) 0 0;
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--line-height-title);
 }
 
 .my-plants-page__rows {
@@ -215,8 +213,9 @@ function load() {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
-  color: var(--color-ink);
-  font-size: var(--font-size-sm);
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -224,8 +223,7 @@ function load() {
 .my-plants-page__wait {
   margin: 0;
   color: var(--color-subtle);
-  font-family: var(--font-mono);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-mono);
+  letter-spacing: var(--tracking-label);
 }
 </style>

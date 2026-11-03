@@ -146,7 +146,7 @@ describe("task detail page", () => {
     expect(wrapper.text()).toContain("进行中");
     expect(wrapper.text()).toContain("12 人");
     expect(wrapper.text()).toContain("38 个");
-    expect(wrapper.text()).toContain("10 PT");
+    expect(wrapper.text()).toContain("10 分");
     expect(wrapper.text()).toContain("文字说明");
   });
 

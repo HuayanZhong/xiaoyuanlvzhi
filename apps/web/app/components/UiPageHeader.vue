@@ -10,11 +10,9 @@ defineProps<{
 <template>
   <header class="ui-page-header">
     <div class="ui-page-header__body">
-      <p v-if="eyebrow" class="ui-page-header__eyebrow">
-        <span class="ui-page-header__mark" aria-hidden="true" />
-        {{ eyebrow }}
-      </p>
+      <p v-if="eyebrow" class="ui-page-header__eyebrow">{{ eyebrow }}</p>
       <h1 class="ui-page-header__title">{{ title }}</h1>
+      <span class="squig" aria-hidden="true" />
       <p v-if="subtitle" class="ui-page-header__subtitle">{{ subtitle }}</p>
     </div>
 
@@ -32,11 +30,10 @@ defineProps<{
 <style scoped>
 .ui-page-header {
   display: flex;
-  gap: var(--space-6);
-  align-items: flex-end;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: flex-start;
   padding: 0 0 var(--space-5);
-  border-bottom: var(--border-anchor);
 }
 
 .ui-page-header__body {
@@ -44,76 +41,62 @@ defineProps<{
 }
 
 .ui-page-header__eyebrow {
-  display: flex;
-  gap: var(--space-2);
-  align-items: center;
-  margin: 0 0 var(--space-3);
-  color: var(--color-graphite);
-  font-family: var(--font-mono);
+  margin: 0 0 var(--space-2);
+  color: var(--color-subtle);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-code);
-  text-transform: uppercase;
-}
-
-.ui-page-header__mark {
-  width: 0.375rem;
-  height: 0.375rem;
-  background: var(--color-seal);
+  letter-spacing: var(--tracking-label);
 }
 
 .ui-page-header__title {
   margin: 0;
   color: var(--color-ink);
-  font-family: var(--font-serif);
+  font-family: var(--font-kai);
   font-size: var(--font-size-display);
   font-weight: var(--font-weight-regular);
-  letter-spacing: var(--tracking-title-cn);
+  letter-spacing: var(--tracking-display);
   line-height: var(--line-height-display);
   overflow-wrap: anywhere;
 }
 
 .ui-page-header__subtitle {
   max-width: var(--layout-reading-width);
-  margin: var(--space-3) 0 0;
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  margin: var(--space-2) 0 0;
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
 .ui-page-header__aside {
   display: flex;
-  flex-direction: column;
-  flex: none;
-  gap: var(--space-2);
-  align-items: flex-end;
-  padding-bottom: var(--space-1);
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
 }
 
 .ui-page-header__meta {
   margin: 0;
   color: var(--color-subtle);
-  font-family: var(--font-mono);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-mono);
-  text-align: right;
+  letter-spacing: var(--tracking-label);
 }
 
-@media (max-width: 47.99rem) {
+@media (min-width: 48rem) {
   .ui-page-header {
-    flex-direction: column;
-    gap: var(--space-3);
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-6);
   }
 
   .ui-page-header__aside {
-    flex-direction: row;
-    gap: var(--space-3);
-    align-items: center;
-    padding-bottom: 0;
+    flex-direction: column;
+    flex: none;
+    align-items: flex-end;
+    padding-bottom: var(--space-1);
   }
 
   .ui-page-header__meta {
-    text-align: left;
+    text-align: right;
   }
 }
 </style>

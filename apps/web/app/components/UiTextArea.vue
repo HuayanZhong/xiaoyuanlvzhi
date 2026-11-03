@@ -63,16 +63,16 @@ function handleInput(event: Event) {
 .ui-text-area__input {
   min-height: 7rem;
   font-family: inherit;
-  line-height: var(--line-height-normal);
+  line-height: var(--line-height-body);
   resize: vertical;
 }
 
 .ui-text-area__counter {
   margin: 0;
   color: var(--color-subtle);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-code);
+  letter-spacing: var(--tracking-label);
   text-align: right;
 }
 </style>

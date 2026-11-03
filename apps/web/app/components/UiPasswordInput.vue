@@ -81,18 +81,26 @@ function handleInput(event: Event) {
   min-width: var(--touch-target);
   min-height: var(--control-height);
   padding: 0 var(--space-2);
-  background: var(--color-sheet);
-  border: var(--border-interactive);
-  border-radius: var(--radius-none);
+  background: var(--color-surface);
+  border: var(--border-strong);
+  border-radius: var(--radius-control);
   color: var(--color-ink);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-tight);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-title);
+  transition:
+    background-color var(--motion-color),
+    border-color var(--motion-color);
+}
+
+.ui-password__toggle:not(:disabled):hover {
+  background: var(--color-ink-wash);
+  border-color: var(--color-ink);
 }
 
 .ui-password__toggle:disabled {
   background: var(--color-ink-wash);
   border: var(--border-dashed);
-  color: var(--color-text-disabled);
+  color: var(--color-subtle);
   cursor: not-allowed;
 }
 </style>

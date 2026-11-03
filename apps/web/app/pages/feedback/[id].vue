@@ -107,13 +107,14 @@ async function close() {
 <template>
   <section class="feedback-record">
     <UiPageHeader
-      eyebrow="问题反馈 · FEEDBACK RECORD"
-      :title="feedback?.feedbackNo || '反馈详情'"
+      eyebrow="问题反馈"
+      title="反馈详情"
       :subtitle="
         feedback
           ? `${feedbackTypeLabel(feedback.type)} · ${formatDateTime(feedback.createdAt)}`
           : '查看处理进度和管理员回复。'
       "
+      :meta="feedback ? `编号 ${feedback.feedbackNo}` : undefined"
     >
       <template #meta>
         <NuxtLink to="/feedback" class="feedback-record__link">
@@ -141,11 +142,13 @@ async function close() {
 
     <template v-else>
       <div class="feedback-record__summary">
-        <Stamp :tone="statusMeta.tone">{{ statusMeta.label }}</Stamp>
+        <UiStatusChip :tone="statusMeta.tone">{{
+          statusMeta.label
+        }}</UiStatusChip>
         <p class="feedback-record__hint">{{ statusMeta.hint }}</p>
       </div>
 
-      <div class="feedback-record__rows">
+      <Ledger class="feedback-record__rows">
         <TagRow label="反馈编号" :value="feedback.feedbackNo" mono />
         <TagRow label="反馈类型" :value="feedbackTypeLabel(feedback.type)" />
         <TagRow
@@ -163,10 +166,9 @@ async function close() {
           :value="formatDateTime(feedback.handledAt)"
           mono
         />
-      </div>
+      </Ledger>
 
-      <section class="feedback-record__section">
-        <h2 class="feedback-record__heading">问题描述</h2>
+      <FolioSection title="问题描述">
         <p class="feedback-record__text">{{ feedback.description }}</p>
 
         <ul v-if="feedback.imageFileIds.length" class="feedback-record__images">
@@ -174,17 +176,15 @@ async function close() {
             <UiFigure :file-id="fileId" alt="反馈图片" />
           </li>
         </ul>
-      </section>
+      </FolioSection>
 
-      <section v-if="feedback.adminReply" class="feedback-record__section">
-        <h2 class="feedback-record__heading">管理员回复</h2>
+      <FolioSection v-if="feedback.adminReply" title="管理员回复">
         <p class="feedback-record__text">{{ feedback.adminReply }}</p>
-      </section>
+      </FolioSection>
 
-      <section class="feedback-record__section">
-        <h2 class="feedback-record__heading">处理记录</h2>
-        <UiTimeline :items="timeline" order="oldest-first" />
-      </section>
+      <FolioSection title="处理记录">
+        <UiTimeline :items="timeline" />
+      </FolioSection>
 
       <UiAlert v-if="actionError" tone="error">
         <p class="feedback-record__message">{{ actionError }}</p>
@@ -225,16 +225,17 @@ async function close() {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
-  color: var(--color-ink);
-  font-size: var(--font-size-sm);
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .feedback-record__message {
   margin: 0 0 var(--space-3);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
 .feedback-record__summary {
@@ -246,9 +247,9 @@ async function close() {
 
 .feedback-record__hint {
   margin: 0;
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
 .feedback-record__rows {
@@ -256,28 +257,11 @@ async function close() {
   flex-direction: column;
 }
 
-.feedback-record__section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.feedback-record__heading {
-  margin: 0;
-  padding-bottom: var(--space-2);
-  border-bottom: var(--border-ink);
-  color: var(--color-ink);
-  font-family: var(--font-serif);
-  font-size: var(--font-size-title-card);
-  font-weight: var(--font-weight-regular);
-  letter-spacing: var(--tracking-title-cn);
-}
-
 .feedback-record__text {
   margin: 0;
   color: var(--color-ink);
-  font-size: var(--font-size-md);
-  line-height: var(--line-height-normal);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
@@ -298,12 +282,12 @@ async function close() {
   align-items: center;
   justify-content: space-between;
   padding-top: var(--space-4);
-  border-top: var(--border-hairline);
+  border-top: var(--border-line);
 }
 
 .feedback-record__note {
   margin: 0;
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
 }
 </style>

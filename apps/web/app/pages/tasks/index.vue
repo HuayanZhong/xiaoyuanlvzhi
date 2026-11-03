@@ -101,7 +101,7 @@ function load() {
 <template>
   <section class="tasks-page">
     <UiPageHeader
-      eyebrow="环保任务 · ECO TASKS"
+      eyebrow="环保任务"
       title="任务"
       subtitle="报名后提交完成凭证，审核通过按任务奖励发放积分。"
       :meta="`${allTasks.length} 项任务`"
@@ -141,11 +141,13 @@ function load() {
         class="tasks-page__card"
         :class="{ 'tasks-page__card--covered': task.coverFileId }"
       >
+        <span class="tape" aria-hidden="true"></span>
         <UiFigure
           v-if="task.coverFileId"
           class="tasks-page__cover"
           :file-id="task.coverFileId"
           :alt="`${task.title}封面`"
+          flat
         />
 
         <div class="tasks-page__body">
@@ -155,17 +157,17 @@ function load() {
                 {{ task.title }}
               </NuxtLink>
             </h2>
-            <Stamp :tone="taskStatusMeta(task.status).tone">
+            <UiStatusChip :tone="taskStatusMeta(task.status).tone">
               {{ taskStatusMeta(task.status).label }}
-            </Stamp>
+            </UiStatusChip>
           </div>
 
-          <div class="tasks-page__rows">
+          <Ledger class="tasks-page__rows">
             <TagRow label="开放时间" :value="windowLabel(task)" mono />
             <TagRow label="剩余名额" :value="quotaLabel(task)" mono />
             <TagRow
               label="奖励积分"
-              :value="`${task.pointsPerPerson} PT`"
+              :value="`${task.pointsPerPerson} 分`"
               mono
             />
             <TagRow
@@ -179,7 +181,7 @@ function load() {
               :value="`${task.participantCount} 人`"
               mono
             />
-          </div>
+          </Ledger>
 
           <div class="tasks-page__foot">
             <NuxtLink :to="`/tasks/${task.id}`" class="tasks-page__action">
@@ -205,23 +207,28 @@ function load() {
   flex-wrap: wrap;
   gap: var(--space-2);
   padding-bottom: var(--space-3);
-  border-bottom: var(--border-hairline);
+  border-bottom: var(--border-line);
 }
 
 .tasks-page__filter {
   min-height: var(--touch-target);
-  padding: 0 var(--space-3);
-  background: transparent;
-  border: var(--border-interactive);
-  border-radius: var(--radius-none);
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
-  letter-spacing: var(--tracking-label);
+  padding: 0 var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-strong);
+  border-radius: var(--radius-chip);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+  transition:
+    background-color var(--motion-color),
+    border-color var(--motion-color),
+    color var(--motion-color);
 }
 
 .tasks-page__filter--active {
-  border: var(--border-anchor);
-  color: var(--color-ink);
+  background: var(--color-leaf);
+  border-color: var(--color-leaf);
+  color: var(--color-on-leaf);
 }
 
 .tasks-page__error {
@@ -237,11 +244,14 @@ function load() {
 }
 
 .tasks-page__card {
+  position: relative;
   display: grid;
   gap: var(--space-4);
-  padding: var(--space-4) 0;
-  border-top: var(--border-ink);
-  border-bottom: var(--border-hairline);
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-paper);
 }
 
 .tasks-page__cover {
@@ -265,21 +275,21 @@ function load() {
 
 .tasks-page__title {
   margin: 0;
-  font-family: var(--font-serif);
-  font-size: 1.5rem;
+  font-family: var(--font-kai);
+  font-size: var(--font-size-title);
   font-weight: var(--font-weight-regular);
-  letter-spacing: var(--tracking-title-cn);
-  line-height: 1.3;
+  letter-spacing: var(--tracking-display);
+  line-height: var(--line-height-title);
 }
 
 .tasks-page__link {
   color: var(--color-ink);
   text-decoration: none;
+  transition: color var(--motion-color);
 }
 
 .tasks-page__link:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  color: var(--color-leaf);
 }
 
 .tasks-page__rows {
@@ -298,8 +308,9 @@ function load() {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
-  color: var(--color-ink);
-  font-size: var(--font-size-sm);
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 3px;
 }

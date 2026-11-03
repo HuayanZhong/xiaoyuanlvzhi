@@ -104,15 +104,13 @@ const dataRows = computed<ProfileRow[]>(() => {
   return [
     {
       label: "当前积分",
-      value: String(current?.pointsBalance ?? 0),
-      code: "PT",
+      value: `${current?.pointsBalance ?? 0} 分`,
       mono: true,
       to: "/points",
     },
     {
       label: "在养绿植",
-      value: activeCount > 0 ? String(activeCount) : "暂无在养绿植",
-      code: "PL",
+      value: activeCount > 0 ? `${activeCount} 株` : "暂无在养绿植",
       stamp: activeCount > 0 ? "在养中" : undefined,
       stampTone: "alive",
       mono: activeCount > 0,
@@ -215,10 +213,12 @@ async function confirmLogout() {
 <template>
   <section class="me-page">
     <UiPageHeader
-      eyebrow="持档人档案 · HOLDER FILE"
+      eyebrow="我的账号"
       :title="pageTitle"
       subtitle="账号资料与登录状态"
-      :meta="profile?.studentNumber || undefined"
+      :meta="
+        profile?.studentNumber ? `编号 ${profile.studentNumber}` : undefined
+      "
     />
 
     <UiLoading v-if="loading && !profile" />
@@ -231,23 +231,23 @@ async function confirmLogout() {
     <template v-else-if="profile">
       <div class="me-page__sheet">
         <aside class="me-page__identity">
-          <p class="me-page__identity-label">持档人 · HOLDER</p>
-          <p class="me-page__identity-name">{{ displayName }}</p>
+          <span class="tape" aria-hidden="true"></span>
+          <p class="me-page__identity-label">学生</p>
           <dl class="me-page__identity-meta">
             <div>
-              <dt>档案编号</dt>
+              <dt>学号</dt>
               <dd>{{ placeholder(profile.studentNumber) }}</dd>
             </div>
             <div>
-              <dt>建档日期</dt>
+              <dt>加入时间</dt>
               <dd>{{ formatDate(profile.createdAt) }}</dd>
             </div>
           </dl>
-          <Stamp tone="alive">在册</Stamp>
+          <UiStatusChip tone="alive">在读</UiStatusChip>
         </aside>
 
         <div class="me-page__record">
-          <FolioSection index="01" title="登记资料" meta="RECORD">
+          <FolioSection title="登记资料">
             <Ledger>
               <TagRow
                 v-for="row in recordRows"
@@ -315,7 +315,7 @@ async function confirmLogout() {
             </UiButton>
           </FolioSection>
 
-          <FolioSection index="02" title="积分与领养" meta="POINTS">
+          <FolioSection title="积分与领养">
             <Ledger>
               <template v-for="row in dataRows" :key="row.label">
                 <NuxtLink v-if="row.to" :to="row.to" class="me-page__row-link">
@@ -345,7 +345,7 @@ async function confirmLogout() {
             </NuxtLink>
           </FolioSection>
 
-          <FolioSection index="03" title="账号服务" meta="SERVICES">
+          <FolioSection title="账号服务">
             <Ledger>
               <NuxtLink to="/notifications" class="me-page__row-link">
                 <TagRow label="通知" :value="notificationValue" />
@@ -407,37 +407,26 @@ async function confirmLogout() {
 .me-page__identity {
   position: relative;
   padding: var(--space-5);
-  border: var(--border-ink);
-  box-shadow:
-    inset 0 0 0 3px var(--color-paper),
-    inset 0 0 0 4px var(--color-rule);
+  background: var(--color-surface);
+  border: var(--border-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-paper);
 }
 
 .me-page__identity-label {
   margin: 0;
-  color: var(--color-seal);
-  font-family: var(--font-mono);
+  color: var(--color-subtle);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-code);
-}
-
-.me-page__identity-name {
-  margin: var(--space-3) 0 var(--space-5);
-  color: var(--color-ink);
-  font-family: var(--font-serif);
-  font-size: 2.5rem;
-  letter-spacing: var(--tracking-title-cn);
-  line-height: 1.1;
-  overflow-wrap: anywhere;
+  letter-spacing: var(--tracking-label);
 }
 
 .me-page__identity-meta {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  margin: 0 0 var(--space-5);
+  margin: var(--space-4) 0 var(--space-4);
   padding-top: var(--space-3);
-  border-top: var(--border-hairline);
+  border-top: var(--border-line);
 }
 
 .me-page__identity-meta div {
@@ -449,16 +438,14 @@ async function confirmLogout() {
 
 .me-page__identity-meta dt {
   color: var(--color-subtle);
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
-  letter-spacing: var(--tracking-code);
+  font-size: var(--font-size-label);
+  letter-spacing: var(--tracking-label);
 }
 
 .me-page__identity-meta dd {
   margin: 0;
   color: var(--color-ink);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-small);
 }
 
 .me-page__record {
@@ -474,13 +461,18 @@ async function confirmLogout() {
   text-decoration: none;
 }
 
+.me-page__row-link:hover :deep(.ui-tag-row__value) {
+  color: var(--color-leaf);
+}
+
 .me-page__care-link {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
   margin-top: var(--space-3);
-  color: var(--color-ink);
-  font-size: var(--font-size-sm);
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -491,7 +483,7 @@ async function confirmLogout() {
   gap: var(--space-3);
   margin-top: var(--space-4);
   padding-top: var(--space-4);
-  border-top: var(--border-hairline);
+  border-top: var(--border-line);
 }
 
 .me-page__edit-actions {
@@ -503,8 +495,8 @@ async function confirmLogout() {
 
 .me-page__notice {
   margin: 0;
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
 .me-page__actions {
@@ -514,26 +506,20 @@ async function confirmLogout() {
   align-items: center;
   justify-content: space-between;
   padding-top: var(--space-4);
-  border-top: var(--border-hairline);
+  border-top: var(--border-line);
 }
 
 .me-page__actions-note {
   max-width: 26rem;
   margin: 0;
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
 }
 
 @media (min-width: 48rem) {
   .me-page__sheet {
     grid-template-columns: minmax(16rem, 4fr) minmax(0, 8fr);
     gap: var(--space-8);
-  }
-}
-
-@media (max-width: 30rem) {
-  .me-page__identity-name {
-    font-size: 2rem;
   }
 }
 </style>

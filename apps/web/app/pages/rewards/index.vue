@@ -60,7 +60,7 @@ const afterBalance = computed(() => {
 });
 
 const afterBalanceLabel = computed(() =>
-  afterBalance.value === null ? "—" : `${afterBalance.value} PT`,
+  afterBalance.value === null ? "—" : `${afterBalance.value} 分`,
 );
 
 function check(reward: Reward) {
@@ -120,7 +120,7 @@ function load() {
 <template>
   <section class="rewards-page">
     <UiPageHeader
-      eyebrow="奖励兑换 · REWARDS"
+      eyebrow="奖励兑换"
       title="奖励商城"
       subtitle="用积分兑换校园奖励，兑换后到领取地点线下领取。"
       :meta="`${rewards.length} 件奖励`"
@@ -138,7 +138,7 @@ function load() {
       <div class="rewards-page__balance">
         <p class="rewards-page__balance-label">当前积分</p>
         <p class="rewards-page__balance-value">
-          {{ balanceLabel }}<span class="rewards-page__unit">PT</span>
+          {{ balanceLabel }}<span class="rewards-page__unit">分</span>
         </p>
         <UiAlert v-if="balanceError" tone="error">
           <p class="rewards-page__error">{{ balanceError }}</p>
@@ -182,21 +182,22 @@ function load() {
           :key="reward.id"
           class="rewards-page__card"
         >
+          <span class="tape" aria-hidden="true"></span>
           <UiFigure
             v-if="coverId(reward)"
             class="rewards-page__cover"
-            ratio="wide"
             :file-id="coverId(reward)"
             :alt="`${reward.name}图片`"
+            flat
           />
 
           <div class="rewards-page__body">
             <h2 class="rewards-page__title">{{ reward.name }}</h2>
 
-            <div class="rewards-page__rows">
+            <Ledger class="rewards-page__rows">
               <TagRow
                 label="所需积分"
-                :value="`${reward.pointsCost} PT`"
+                :value="`${reward.pointsCost} 分`"
                 mono
               />
               <TagRow
@@ -205,7 +206,7 @@ function load() {
                 mono
               />
               <TagRow label="领取地点" :value="reward.location" />
-            </div>
+            </Ledger>
 
             <p v-if="reward.description" class="rewards-page__description">
               {{ reward.description }}
@@ -236,7 +237,7 @@ function load() {
     >
       <div v-if="selected" class="rewards-page__confirm">
         <TagRow label="奖励" :value="selected.name" />
-        <TagRow label="扣除积分" :value="`${selected.pointsCost} PT`" mono />
+        <TagRow label="扣除积分" :value="`${selected.pointsCost} 分`" mono />
         <TagRow label="兑换后余额" :value="afterBalanceLabel" mono />
         <TagRow label="领取地点" :value="selected.location" />
         <TagRow label="领取期限" :value="`${selected.pickupDays} 天`" mono />
@@ -257,8 +258,9 @@ function load() {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
-  color: var(--color-ink);
-  font-size: var(--font-size-sm);
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -268,14 +270,16 @@ function load() {
   flex-wrap: wrap;
   gap: var(--space-2) var(--space-4);
   align-items: baseline;
-  padding: var(--space-4) 0;
-  border-top: var(--border-ink);
-  border-bottom: var(--border-hairline);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-paper);
 }
 
 .rewards-page__balance-label {
   margin: 0;
-  color: var(--color-graphite);
+  color: var(--color-subtle);
   font-size: var(--font-size-label);
   letter-spacing: var(--tracking-label);
 }
@@ -286,22 +290,22 @@ function load() {
   align-items: baseline;
   margin: 0;
   color: var(--color-ink);
-  font-family: var(--font-mono);
-  font-size: 2rem;
+  font-size: var(--font-size-reading);
+  font-weight: var(--font-weight-bold);
   font-variant-numeric: tabular-nums;
-  letter-spacing: var(--tracking-mono);
-  line-height: 1;
+  line-height: var(--line-height-display);
 }
 
 .rewards-page__unit {
-  color: var(--color-subtle);
-  font-size: var(--font-size-sm);
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
 }
 
 .rewards-page__error {
   margin: 0 0 var(--space-3);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
 }
 
 .rewards-page__list {
@@ -313,12 +317,15 @@ function load() {
 }
 
 .rewards-page__card {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-4) 0;
-  border-top: var(--border-ink);
-  border-bottom: var(--border-hairline);
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-paper);
 }
 
 .rewards-page__cover {
@@ -335,11 +342,11 @@ function load() {
 .rewards-page__title {
   margin: 0;
   color: var(--color-ink);
-  font-family: var(--font-serif);
-  font-size: 1.375rem;
+  font-family: var(--font-kai);
+  font-size: var(--font-size-title);
   font-weight: var(--font-weight-regular);
-  letter-spacing: var(--tracking-title-cn);
-  line-height: 1.3;
+  letter-spacing: var(--tracking-display);
+  line-height: var(--line-height-title);
   overflow-wrap: anywhere;
 }
 
@@ -350,9 +357,9 @@ function load() {
 
 .rewards-page__description {
   margin: 0;
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
   overflow-wrap: anywhere;
 }
 

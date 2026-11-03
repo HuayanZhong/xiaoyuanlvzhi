@@ -79,7 +79,7 @@ function load() {
 <template>
   <section class="plants-page">
     <UiPageHeader
-      eyebrow="品种目录 · SPECIES CATALOG"
+      eyebrow="品种目录"
       title="绿植"
       subtitle="浏览当前可领养的品种，提交申请后由管理员安排线下交接。"
     >
@@ -139,10 +139,12 @@ function load() {
     <ul v-else class="plants-page__grid">
       <li v-for="species in speciesList" :key="species.id">
         <NuxtLink :to="`/plants/${species.id}`" class="plants-page__plate">
+          <span class="tape" aria-hidden="true"></span>
           <UiFigure
             :file-id="species.coverFileId"
             :alt="`${species.name}封面`"
-            :caption="speciesCode(species.id)"
+            :caption="`编号 ${speciesCode(species.id)}`"
+            flat
           />
 
           <div class="plants-page__body">
@@ -155,7 +157,7 @@ function load() {
               <div>
                 <dt>可领养</dt>
                 <dd class="plants-page__count">
-                  {{ species.availableCount }}<span>PL</span>
+                  {{ species.availableCount }} 株
                 </dd>
               </div>
             </dl>
@@ -179,8 +181,9 @@ function load() {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
-  color: var(--color-ink);
-  font-size: var(--font-size-sm);
+  color: var(--color-leaf);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -189,8 +192,10 @@ function load() {
   display: grid;
   gap: var(--space-4);
   align-items: end;
-  padding-bottom: var(--space-5);
-  border-bottom: var(--border-hairline);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-dashed);
+  border-radius: var(--radius-card);
 }
 
 .plants-page__filter-actions {
@@ -212,26 +217,32 @@ function load() {
 }
 
 .plants-page__plate {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  padding: var(--space-5) var(--space-4) var(--space-4);
   color: var(--color-ink);
+  background: var(--color-surface);
+  border: var(--border-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-paper);
   text-decoration: none;
 }
 
 .plants-page__plate:hover .plants-page__name {
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  color: var(--color-leaf);
 }
 
 .plants-page__name {
   margin: 0;
   color: var(--color-ink);
-  font-family: var(--font-serif);
-  font-size: 1.5rem;
+  font-family: var(--font-kai);
+  font-size: var(--font-size-title);
   font-weight: var(--font-weight-regular);
-  letter-spacing: var(--tracking-title-cn);
-  line-height: 1.25;
+  letter-spacing: var(--tracking-display);
+  line-height: var(--line-height-title);
+  transition: color var(--motion-color);
 }
 
 .plants-page__facts {
@@ -239,7 +250,7 @@ function load() {
   gap: var(--space-5);
   margin: var(--space-3) 0 0;
   padding-top: var(--space-3);
-  border-top: var(--border-hairline);
+  border-top: var(--border-line);
 }
 
 .plants-page__facts div {
@@ -256,21 +267,13 @@ function load() {
 
 .plants-page__facts dd {
   margin: 0;
-  color: var(--color-graphite);
-  font-size: var(--font-size-sm);
+  color: var(--color-subtle);
+  font-size: var(--font-size-small);
 }
 
 .plants-page__count {
   color: var(--color-ink);
-  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-}
-
-.plants-page__count span {
-  margin-left: var(--space-1);
-  color: var(--color-seal);
-  font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-code);
 }
 
 @media (min-width: 48rem) {

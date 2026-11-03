@@ -1,18 +1,19 @@
-/* Shared printed-form control. Components add structure, not color. */
+/* Shared journal form control. Components add structure, not color. */
 .ui-control {
   width: 100%;
   min-width: 0;
   min-height: var(--control-height);
   padding: var(--space-2) var(--space-3);
-  background: var(--color-sheet);
-  border: var(--border-interactive);
-  border-radius: var(--radius-none);
+  background: var(--color-surface);
+  border: var(--border-strong);
+  border-radius: var(--radius-control);
   color: var(--color-ink);
-  font-size: var(--font-size-md);
-  line-height: var(--line-height-tight);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-title);
   transition:
     border-color var(--motion-color),
-    background-color var(--motion-color);
+    background-color var(--motion-color),
+    box-shadow var(--motion-color);
 }
 
 .ui-control::placeholder {
@@ -20,21 +21,24 @@
 }
 
 .ui-control:focus {
-  border-color: var(--color-ink);
+  background: var(--color-leaf-wash);
+  border-color: var(--color-leaf);
+  box-shadow: 0 0 0 2px var(--color-leaf);
 }
 
 .ui-control[aria-invalid="true"] {
-  border: var(--border-danger-control);
+  border-color: var(--color-blush);
+  box-shadow: 0 0 0 1px var(--color-blush);
 }
 
 .ui-control:disabled {
   background: var(--color-ink-wash);
   border: var(--border-dashed);
-  color: var(--color-text-disabled);
+  color: var(--color-subtle);
   cursor: not-allowed;
   opacity: 1;
 }
 
 .ui-control--code {
-  letter-spacing: var(--tracking-code);
+  letter-spacing: var(--tracking-label);
 }
