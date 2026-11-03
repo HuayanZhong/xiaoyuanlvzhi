@@ -15,6 +15,7 @@ export default function ThemeTokenBridge() {
     root.style.setProperty("--app-color-surface", token.colorBgContainer);
     root.style.setProperty("--app-color-ink", token.colorText);
     root.style.setProperty("--app-color-line", token.colorBorderSecondary);
+    root.style.setProperty("--app-color-dot", token.colorTextTertiary);
     root.style.setProperty("--app-color-muted", token.colorTextSecondary);
     root.style.setProperty("--app-color-primary", token.colorPrimary);
   }, [token]);

@@ -215,6 +215,22 @@ export default function ArticlesPage() {
     </Empty>
   );
 
+  const stats = [
+    { label: "全部资讯", value: articles.length },
+    {
+      label: "已发布资讯",
+      value: articles.filter((item) => item.status === "PUBLISHED").length,
+    },
+    {
+      label: "草稿资讯",
+      value: articles.filter((item) => item.status === "DRAFT").length,
+    },
+    {
+      label: "已撤回资讯",
+      value: articles.filter((item) => item.status === "WITHDRAWN").length,
+    },
+  ];
+
   return (
     <ModulePage
       extra={
@@ -222,6 +238,7 @@ export default function ArticlesPage() {
           新增资讯
         </Button>
       }
+      stats={stats}
       title="资讯管理"
     >
       <Flex gap={16} vertical>

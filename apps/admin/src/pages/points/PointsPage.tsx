@@ -115,6 +115,16 @@ export default function PointsPage() {
     },
   ];
 
+  const stats = [
+    { label: "积分规则", value: rules.length },
+    {
+      label: "启用规则",
+      value: rules.filter((item) => item.enabled).length,
+    },
+    { label: "积分流水", value: ledger.length },
+    { label: "学生人数", value: students.length },
+  ];
+
   return (
     <ModulePage
       extra={
@@ -128,6 +138,7 @@ export default function PointsPage() {
           </Button>
         ) : null
       }
+      stats={stats}
       title="积分规则与流水"
     >
       <Tabs activeKey={activeTab} items={tabs} onChange={setActiveTab} />

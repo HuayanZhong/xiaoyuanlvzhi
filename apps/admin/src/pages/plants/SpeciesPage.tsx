@@ -235,6 +235,16 @@ export default function SpeciesPage() {
     },
   ];
 
+  const stats = [
+    { label: "全部品种", value: species.length },
+    { label: "已启用", value: species.filter((item) => item.enabled).length },
+    { label: "已停用", value: species.filter((item) => !item.enabled).length },
+    {
+      label: "可领养单株",
+      value: species.reduce((total, item) => total + item.availableCount, 0),
+    },
+  ];
+
   return (
     <ModulePage
       extra={
@@ -242,6 +252,7 @@ export default function SpeciesPage() {
           新增品种
         </Button>
       }
+      stats={stats}
       title="品种档案"
     >
       {failed ? (

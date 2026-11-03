@@ -10,11 +10,18 @@ import { useTableScrollY } from "@/hooks/useTableScrollY";
 export default function AdminTable<T extends Record<string, any>>(
   props: TableProps<T>,
 ) {
-  const { containerRef, scrollY } = useTableScrollY();
+  const { containerRef, scrollY } = useTableScrollY(
+    props.dataSource?.length ?? 0,
+  );
+  const scroll = { ...props.scroll };
+
+  if (scrollY !== null) {
+    scroll.y = scrollY;
+  }
 
   return (
     <div className="admin-table-scroll" ref={containerRef}>
-      <Table<T> {...props} scroll={{ ...props.scroll, y: scrollY }} />
+      <Table<T> {...props} scroll={scroll} />
     </div>
   );
 }

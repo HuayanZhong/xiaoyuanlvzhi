@@ -229,8 +229,28 @@ export default function StudentsPage() {
     </Empty>
   );
 
+  const stats = [
+    { label: "全部学生", value: students.length },
+    {
+      label: "正常账号",
+      value: students.filter((item) => item.status === "ACTIVE").length,
+    },
+    {
+      label: "已禁用账号",
+      value: students.filter((item) => item.status === "DISABLED").length,
+    },
+    {
+      label: "班级数",
+      value: new Set(
+        students
+          .map((item) => item.className)
+          .filter((value): value is string => Boolean(value)),
+      ).size,
+    },
+  ];
+
   return (
-    <ModulePage title="学生管理">
+    <ModulePage stats={stats} title="学生管理">
       <Flex gap={16} vertical>
         <Flex align="center" gap={12} wrap>
           <Input

@@ -249,6 +249,22 @@ export default function TasksPage() {
     },
   ];
 
+  const stats = [
+    { label: "全部任务", value: tasks.length },
+    {
+      label: "进行中",
+      value: tasks.filter((item) => item.status === "ONGOING").length,
+    },
+    {
+      label: "未开始",
+      value: tasks.filter((item) => item.status === "UPCOMING").length,
+    },
+    {
+      label: "已结束",
+      value: tasks.filter((item) => item.status === "ENDED").length,
+    },
+  ];
+
   return (
     <ModulePage
       extra={
@@ -258,6 +274,7 @@ export default function TasksPage() {
           </Button>
         ) : null
       }
+      stats={stats}
       title="环保任务"
     >
       <Tabs activeKey={activeTab} items={tabs} onChange={handleTabChange} />

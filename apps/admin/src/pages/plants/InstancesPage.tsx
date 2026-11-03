@@ -321,6 +321,22 @@ export default function InstancesPage() {
     ...species.map((item) => ({ value: item.id, label: item.name })),
   ];
 
+  const stats = [
+    { label: "全部单株", value: individuals.length },
+    {
+      label: "可领养单株",
+      value: individuals.filter((item) => item.status === "AVAILABLE").length,
+    },
+    {
+      label: "养护中单株",
+      value: individuals.filter((item) => item.status === "ACTIVE").length,
+    },
+    {
+      label: "维护中单株",
+      value: individuals.filter((item) => item.status === "MAINTENANCE").length,
+    },
+  ];
+
   return (
     <ModulePage
       extra={
@@ -328,6 +344,7 @@ export default function InstancesPage() {
           新增单株
         </Button>
       }
+      stats={stats}
       title="单株库存"
     >
       {failed ? (

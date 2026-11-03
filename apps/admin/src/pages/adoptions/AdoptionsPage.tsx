@@ -282,8 +282,26 @@ export default function AdoptionsPage() {
     },
   ];
 
+  const stats = [
+    { label: "全部申请", value: adoptions.length },
+    {
+      label: "待审核申请",
+      value: adoptions.filter((item) => item.status === "PENDING_REVIEW")
+        .length,
+    },
+    {
+      label: "待领取申请",
+      value: adoptions.filter((item) => item.status === "WAITING_PICKUP")
+        .length,
+    },
+    {
+      label: "养护中申请",
+      value: adoptions.filter((item) => item.status === "ACTIVE").length,
+    },
+  ];
+
   return (
-    <ModulePage title="领养管理">
+    <ModulePage stats={stats} title="领养管理">
       {failed ? (
         <LoadFailure message="领养申请加载失败，请稍后重试" onRetry={retry} />
       ) : (

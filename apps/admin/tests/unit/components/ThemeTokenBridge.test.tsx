@@ -8,6 +8,7 @@ const variables = [
   "--app-color-surface",
   "--app-color-ink",
   "--app-color-line",
+  "--app-color-dot",
   "--app-color-muted",
   "--app-color-primary",
 ];
@@ -39,6 +40,7 @@ describe("ThemeTokenBridge", () => {
       "--app-color-canvas": "#f5f5f5",
       "--app-color-surface": "#ffffff",
       "--app-color-line": "#f0f0f0",
+      "--app-color-dot": "rgba(0,0,0,0.45)",
     });
   });
 
@@ -53,6 +55,7 @@ describe("ThemeTokenBridge", () => {
       "--app-color-canvas": "#000000",
       "--app-color-surface": "#141414",
       "--app-color-line": "#303030",
+      "--app-color-dot": "rgba(255,255,255,0.45)",
     });
   });
 });

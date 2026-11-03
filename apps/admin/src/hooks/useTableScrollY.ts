@@ -4,14 +4,15 @@ const TABLE_RESERVED_HEIGHT = 156;
 const MIN_BODY_HEIGHT = 200;
 
 /**
- * 计算表格主体在视口内的可用高度。
+ * 计算表格主体的可用高度，并让短表格贴合内容高度。
  *
- * <p>表格上方有页面标题和筛选区，下方有分页和内容区留白；使用表格容器的
- * 文档顶部位置计算，避免页面滚动后高度跳变。
+ * <p>可用高度按表格在页面中的实际位置计算；行数很少时不再用空白撑满
+ * 视口，内容较多时仍限制在可用高度内，由表格主体滚动。
  */
-export function useTableScrollY() {
+export function useTableScrollY(rowCount: number) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [scrollY, setScrollY] = useState(MIN_BODY_HEIGHT);
+  const [availableHeight, setAvailableHeight] = useState(MIN_BODY_HEIGHT);
+  const [contentHeight, setContentHeight] = useState(0);
 
   useEffect(() => {
     const measure = () => {
@@ -22,7 +23,7 @@ export function useTableScrollY() {
       }
 
       const top = container.getBoundingClientRect().top + window.scrollY;
-      setScrollY(
+      setAvailableHeight(
         Math.max(
           MIN_BODY_HEIGHT,
           Math.floor(window.innerHeight - top - TABLE_RESERVED_HEIGHT),
@@ -37,5 +38,27 @@ export function useTableScrollY() {
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  return { containerRef, scrollY };
+  useEffect(() => {
+    const container = containerRef.current;
+
+    if (!container) {
+      return;
+    }
+
+    const body = container.querySelector<HTMLElement>(".ant-table-tbody");
+    setContentHeight(
+      rowCount === 0
+        ? 0
+        : body
+          ? Math.ceil(body.getBoundingClientRect().height) + 2
+          : 0,
+    );
+  }, [rowCount]);
+
+  const fitsViewport = contentHeight > 0 && contentHeight <= availableHeight;
+
+  return {
+    containerRef,
+    scrollY: fitsViewport ? null : availableHeight,
+  };
 }

@@ -44,6 +44,26 @@
   }
 }
 
+/* 磨砂表面：卡片与侧栏半透明，让点阵背景透出来。 */
+:root {
+  --app-surface-glass: color-mix(
+    in srgb,
+    var(--app-color-surface) 60%,
+    transparent
+  );
+  --app-surface-glass-strong: color-mix(
+    in srgb,
+    var(--app-color-surface) 82%,
+    transparent
+  );
+  --app-sider-glass: color-mix(
+    in srgb,
+    var(--app-color-surface) 72%,
+    transparent
+  );
+  --app-glass-filter: blur(3px) saturate(1.04);
+}
+
 .dark {
   color-scheme: dark;
 }
@@ -134,10 +154,73 @@
   }
 }
 
+/* 页面与卡片进入：短暂、轻微上移，只提示内容切换。 */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: page-enter 220ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.page-stats__item {
+  animation: page-enter 260ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+/* 交互反馈：可点击卡片轻微抬升，表面与表格行颜色平滑过渡。 */
+.admin-content .ant-card {
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.admin-content .ant-card-hoverable:hover {
+  transform: translateY(-2px);
+}
+
+.admin-content .ant-table-tbody > tr > td {
+  transition: background-color 160ms ease;
+}
+
+.admin-shell .ant-layout-sider,
+.admin-shell > .ant-layout,
+body {
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .app-toast,
-  .app-toast.is-leaving {
+  .app-toast.is-leaving,
+  .page-enter,
+  .page-stats__item {
     animation: none;
+  }
+
+  .admin-content .ant-card {
+    transition: none;
+  }
+
+  .admin-content .ant-card-hoverable:hover {
+    transform: none;
+  }
+
+  .admin-content .ant-table-tbody > tr > td,
+  .admin-shell .ant-layout-sider,
+  .admin-shell > .ant-layout,
+  body {
+    transition: none;
   }
 }
 
@@ -147,6 +230,36 @@
 
 .admin-shell > .ant-layout {
   min-height: 0;
+  background-color: var(--app-color-canvas);
+  background-image: radial-gradient(
+    circle,
+    var(--app-color-dot) 1.2px,
+    transparent 1.4px
+  );
+  background-size: 22px 22px;
+}
+
+/* 内容表面改用半透明磨砂，点阵从背后透出。 */
+.admin-content .ant-card,
+.admin-shell .ant-layout-sider {
+  backdrop-filter: var(--app-glass-filter);
+  -webkit-backdrop-filter: var(--app-glass-filter);
+}
+
+.admin-content .ant-card {
+  background-color: var(--app-surface-glass);
+}
+
+.admin-shell .ant-layout-sider {
+  background-color: var(--app-sider-glass);
+}
+
+.admin-content .ant-table {
+  background-color: transparent;
+}
+
+.admin-content .ant-table-thead > tr > th {
+  background-color: var(--app-surface-glass-strong);
 }
 
 .admin-shell .admin-content {
@@ -154,6 +267,11 @@
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-gutter: stable;
+}
+
+.admin-shell .ant-layout-sider-children {
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .admin-table-scroll .ant-table-body {

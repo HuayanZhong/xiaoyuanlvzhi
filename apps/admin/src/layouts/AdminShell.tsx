@@ -5,11 +5,10 @@ import {
 } from "@ant-design/icons";
 import { Flex, Layout } from "antd";
 import { useState } from "react";
-import { Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
 import BrandMark from "@/components/BrandMark";
 import HeaderActions from "@/components/layout/HeaderActions";
 import HeaderButton from "@/components/layout/HeaderButton";
-import HeaderNav from "@/components/layout/HeaderNav";
 import MobileNavDrawer from "@/components/layout/MobileNavDrawer";
 import SideNav from "@/components/layout/SideNav";
 import { useIsMobile } from "@/hooks/useIsMobile";
@@ -20,6 +19,7 @@ const { Content, Header, Sider } = Layout;
 
 export default function AdminShell() {
   const { group, item } = usePageMeta();
+  const location = useLocation();
   const isMobile = useIsMobile();
   const sidebarCollapsed = useAppStore((state) => state.sidebarCollapsed);
   const toggleSidebar = useAppStore((state) => state.toggleSidebar);
@@ -60,7 +60,6 @@ export default function AdminShell() {
               title={toggleLabel}
             />
             {!isMobile && <BrandMark tone="dark" />}
-            {!isMobile && <HeaderNav activeGroupKey={group?.key} />}
           </Flex>
           <HeaderActions />
         </Flex>
@@ -74,18 +73,20 @@ export default function AdminShell() {
             collapsible
             theme="light"
             trigger={null}
-            width={208}
+            width={232}
           >
             <SideNav
+              activeGroupKey={group?.key}
               collapsed={sidebarCollapsed}
-              group={group}
               selectedItemKey={item?.key}
             />
           </Sider>
         )}
 
         <Content className="admin-content" style={{ padding: 24 }}>
-          <Outlet />
+          <div className="page-enter" key={location.pathname}>
+            <Outlet />
+          </div>
         </Content>
       </Layout>
 

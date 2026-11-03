@@ -30,6 +30,7 @@ import {
   type StatisticsRange,
   type StatisticsView,
 } from "@/api/statistics";
+import AnimatedNumber from "@/components/common/AnimatedNumber";
 import LoadFailure from "@/components/common/LoadFailure";
 import ModulePage from "@/components/common/ModulePage";
 import { useIsMobile } from "@/hooks/useIsMobile";
@@ -320,22 +321,31 @@ export default function StatisticsPage() {
       ) : (
         <Flex gap={16} vertical>
           <Row gutter={[16, 16]}>
-            {METRIC_CARDS.map((card) => (
-              <Col key={card.key} lg={12} sm={12} xl={6} xs={24}>
-                <Card data-testid="metric-card">
-                  <Flex gap={8} vertical>
-                    <Statistic
-                      styles={{ content: { fontSize: 28, fontWeight: 600 } }}
-                      title={card.label}
-                      value={data[card.key]}
-                    />
-                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                      {card.note}
-                    </Typography.Text>
-                  </Flex>
-                </Card>
-              </Col>
-            ))}
+            {METRIC_CARDS.map((card) => {
+              const value = data[card.key];
+
+              return (
+                <Col key={card.key} lg={12} sm={12} xl={6} xs={24}>
+                  <Card data-testid="metric-card">
+                    <Flex gap={8} vertical>
+                      <Statistic
+                        // oxlint-disable-next-line react/no-unstable-nested-components -- formatter 是 antd 的渲染回调
+                        formatter={() => <AnimatedNumber value={value} />}
+                        styles={{ content: { fontSize: 28, fontWeight: 600 } }}
+                        title={card.label}
+                        value={value}
+                      />
+                      <Typography.Text
+                        type="secondary"
+                        style={{ fontSize: 12 }}
+                      >
+                        {card.note}
+                      </Typography.Text>
+                    </Flex>
+                  </Card>
+                </Col>
+              );
+            })}
           </Row>
 
           <Row gutter={[16, 16]}>

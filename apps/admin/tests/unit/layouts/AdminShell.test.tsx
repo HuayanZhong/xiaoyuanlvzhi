@@ -103,26 +103,29 @@ describe("AdminShell", () => {
     expect(screen.getByTestId("page")).toHaveTextContent("工作台内容");
   });
 
-  it("switches the side menu when a top-level group is clicked", async () => {
+  it("expands a group without navigating, then opens its item", async () => {
     renderShell();
 
     fireEvent.click(screen.getByRole("menuitem", { name: /资源/ }));
 
-    expect(await screen.findByTestId("page")).toHaveTextContent("品种档案内容");
     expect(
       await screen.findByRole("menuitem", { name: /品种档案/ }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("menuitem", { name: /单株库存/ }),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("page")).toHaveTextContent("工作台内容");
+
+    fireEvent.click(screen.getByRole("menuitem", { name: /品种档案/ }));
+
+    expect(await screen.findByTestId("page")).toHaveTextContent("品种档案内容");
   });
 
   it("selects the group and item from a deep link", () => {
     renderShell("/plants/instances");
 
-    expect(screen.getByRole("menuitem", { name: /资源/ })).toHaveClass(
-      "ant-menu-item-selected",
-    );
+    expect(
+      screen
+        .getByRole("menuitem", { name: /资源/ })
+        .closest(".ant-menu-submenu"),
+    ).toHaveClass("ant-menu-submenu-selected");
     expect(screen.getByRole("menuitem", { name: /单株库存/ })).toHaveClass(
       "ant-menu-item-selected",
     );

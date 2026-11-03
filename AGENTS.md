@@ -119,8 +119,8 @@ Routing (`src/router/index.tsx`):
 
 Admin shell (`src/layouts/AdminShell.tsx`):
 
-- `Layout.Header` holds the collapse/drawer button, `BrandMark`, `HeaderNav` (5 groups) and `HeaderActions` (theme toggle + account menu).
-- `Layout.Sider` (208px, 64px collapsed, light theme) shows `SideNav` for the active group. Below 992px the header nav and sider collapse into `MobileNavDrawer`; no horizontal scrolling is allowed.
+- `Layout.Header` holds the collapse/drawer button, `BrandMark` and `HeaderActions` (theme toggle + account menu); top-level navigation lives in the sider.
+- `Layout.Sider` (232px, 64px collapsed, light theme) renders `SideNav`: the five groups are expandable submenus and their page items are the second level; the active group opens automatically. Below 992px the sider collapses into `MobileNavDrawer`; no horizontal scrolling is allowed.
 - `HeaderButton` wraps antd `Button type="dashed"` in a local `darkAlgorithm` because the header stays dark in both themes. Keep the dark algorithm scoped to buttons so portals such as `Dropdown` keep the global theme.
 - `src/config/navigation.ts` is the single source of nav groups, paths, icons and breadcrumbs; `src/hooks/usePageMeta.ts` derives the active group, item and breadcrumb from the URL. Add a page by adding its item there and its route in the router.
 
@@ -129,7 +129,8 @@ Styling:
 - Use antd default colors only. There is no `src/config/theme.ts` and no custom brand seed or accent.
 - Color tokens in `src/styles/global.css` are `@theme inline` aliases of the `--app-color-*` variables that `src/components/ThemeTokenBridge.tsx` writes from antd tokens at runtime. Components must use semantic token classes, not raw hex or arbitrary pixel values.
 - `src/components/BrandMark.tsx` is a text wordmark (product name plus a compact subtitle), not an icon.
-- `Layout.Content` uses `padding: 24`; page cards fill the content area with no fixed max-width, so all four gutters stay 24px.
+- `Layout.Content` uses `padding: 24`; page cards fill the content area with no fixed max-width, so all four gutters stay 24px. `src/App.tsx` wraps the router in `src/components/ClickSpark.tsx` with document-level listening, so clicks anywhere (including portals) spark; it disables itself under `prefers-reduced-motion`. The workspace uses a token-colored dot grid; content cards and the sider are semi-transparent frosted surfaces (`--app-surface-glass`, `--app-sider-glass`) so the grid shows through.
+- Module pages share `src/components/common/ModulePage.tsx`: optional `PageStats` tiles summarize the real list, short tables hug their content instead of stretching an empty body, and a footer links sibling pages in the same nav group. Route changes play a 220ms fade/rise, stats tiles stagger at 40ms, and numbers count up from 0 over 700ms (`AnimatedNumber`); `prefers-reduced-motion` disables all of these and the hover transitions.
 - `.dark` in `global.css` only sets `color-scheme`. The auth shell is full-bleed, with the login drawer flush to the viewport's right edge.
 
 State: `src/stores/app.ts` holds `sidebarCollapsed` (wired into the desktop `Sider`) and persisted `themeMode` (`toggleTheme`).

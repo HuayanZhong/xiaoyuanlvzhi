@@ -34,6 +34,7 @@ import {
   type DashboardView,
 } from "@/api/dashboard";
 import { getStatistics, type StatisticsView } from "@/api/statistics";
+import AnimatedNumber from "@/components/common/AnimatedNumber";
 import LoadFailure from "@/components/common/LoadFailure";
 import ModulePage from "@/components/common/ModulePage";
 import { formatDateTime } from "@/lib/format";
@@ -361,6 +362,8 @@ export default function DashboardPage() {
                   >
                     <Flex align="flex-start" gap={8} justify="space-between">
                       <Statistic
+                        // oxlint-disable-next-line react/no-unstable-nested-components -- formatter 是 antd 的渲染回调
+                        formatter={() => <AnimatedNumber value={value} />}
                         styles={{ content: { fontSize: 28, fontWeight: 600 } }}
                         title={card.label}
                         value={value}

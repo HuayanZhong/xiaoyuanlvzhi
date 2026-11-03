@@ -380,8 +380,24 @@ export default function OrdersPage({ now: nowProp }: OrdersPageProps) {
     </Empty>
   );
 
+  const stats = [
+    { label: "全部订单", value: orders.length },
+    {
+      label: "待领取订单",
+      value: orders.filter((item) => item.status === "WAITING_PICKUP").length,
+    },
+    {
+      label: "已领取订单",
+      value: orders.filter((item) => item.status === "CLAIMED").length,
+    },
+    {
+      label: "已取消订单",
+      value: orders.filter((item) => item.status === "CANCELLED").length,
+    },
+  ];
+
   return (
-    <ModulePage title="兑换订单">
+    <ModulePage stats={stats} title="兑换订单">
       <Flex gap={16} vertical>
         {studentsFailed && (
           <Alert

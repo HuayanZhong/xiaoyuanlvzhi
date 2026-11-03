@@ -360,8 +360,24 @@ export default function CareReviewsPage() {
     </Empty>
   );
 
+  const stats = [
+    { label: "全部打卡", value: checkins.length },
+    {
+      label: "待审核打卡",
+      value: checkins.filter((item) => item.status === "PENDING_REVIEW").length,
+    },
+    {
+      label: "已通过打卡",
+      value: checkins.filter((item) => item.status === "APPROVED").length,
+    },
+    {
+      label: "已驳回打卡",
+      value: checkins.filter((item) => item.status === "REJECTED").length,
+    },
+  ];
+
   return (
-    <ModulePage title="养护审核">
+    <ModulePage stats={stats} title="养护审核">
       {failed ? (
         <LoadFailure message="养护打卡加载失败，请稍后重试" onRetry={retry} />
       ) : (

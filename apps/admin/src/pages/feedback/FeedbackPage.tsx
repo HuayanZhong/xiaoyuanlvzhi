@@ -344,8 +344,20 @@ export default function FeedbackPage() {
     </Empty>
   );
 
+  const stats = useMemo(() => {
+    const countByStatus = (status: string) =>
+      feedback.filter((item) => item.status === status).length;
+
+    return [
+      { label: "全部反馈", value: feedback.length },
+      { label: "待处理反馈", value: countByStatus("PENDING") },
+      { label: "处理中反馈", value: countByStatus("IN_PROGRESS") },
+      { label: "已关闭反馈", value: countByStatus("CLOSED") },
+    ];
+  }, [feedback]);
+
   return (
-    <ModulePage title="问题反馈">
+    <ModulePage stats={stats} title="问题反馈">
       <Flex gap={16} vertical>
         {studentsFailed && (
           <Alert

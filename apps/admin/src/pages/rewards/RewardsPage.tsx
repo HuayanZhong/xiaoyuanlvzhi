@@ -298,6 +298,22 @@ export default function RewardsPage() {
     </Empty>
   );
 
+  const stats = [
+    { label: "全部商品", value: rewards.length },
+    {
+      label: "上架商品",
+      value: rewards.filter((item) => item.enabled).length,
+    },
+    {
+      label: "下架商品",
+      value: rewards.filter((item) => !item.enabled).length,
+    },
+    {
+      label: "可用库存",
+      value: rewards.reduce((total, item) => total + item.availableStock, 0),
+    },
+  ];
+
   return (
     <ModulePage
       extra={
@@ -305,6 +321,7 @@ export default function RewardsPage() {
           新增奖励
         </Button>
       }
+      stats={stats}
       title="奖励商品"
     >
       <Flex align="center" gap={12} wrap>
