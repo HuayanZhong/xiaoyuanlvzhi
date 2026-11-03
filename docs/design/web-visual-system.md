@@ -123,8 +123,10 @@
 
 只解释状态变化：按下 `scale(0.98)` 120ms、颜色 160ms、浮层进入 160ms / 退出
 120ms、贴纸「盖上」落定 240ms（仅打卡成功）。总时长 ≤240ms，位移 ≤8px。
-禁止数字滚动、进度环、庆祝、抖动、骨架脉冲与持续装饰动画；全部使用 CSS
-transition，自动继承 `prefers-reduced-motion`。
+内容区点击火花是唯一的装饰例外：叶绿/贴纸黄短线，最多 8 根、360ms、无发光与
+光环；由 `ClickSpark` 组件绘制，`prefers-reduced-motion` 下完全关闭。
+禁止数字滚动、进度环、抖动、骨架脉冲、庆祝与持续装饰动画；除点击火花外全部使用
+CSS transition，自动继承 `prefers-reduced-motion`。
 
 ## 明确不做
 

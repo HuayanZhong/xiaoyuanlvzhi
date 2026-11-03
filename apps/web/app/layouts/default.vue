@@ -4,6 +4,16 @@ import { isNavItemActive, STUDENT_NAV } from "~/utils/navigation";
 const navItems = STUDENT_NAV;
 const route = useRoute();
 
+// 点击火花保持克制：叶绿/贴纸黄短线，短暂、无发光，减少动态时由组件自行关闭。
+const clickSparkOptions = {
+  sparkCount: 8,
+  sparkSize: 6,
+  sparkWidth: 1.5,
+  sparkRadius: 24,
+  duration: 120,
+  randomness: 0.35,
+} as const;
+
 function isActive(to: string) {
   const item = navItems.find((entry) => entry.to === to);
 
@@ -57,7 +67,9 @@ function isActive(to: string) {
     </header>
 
     <main id="main" class="app-shell__content">
-      <slot />
+      <ClickSpark v-bind="clickSparkOptions">
+        <slot />
+      </ClickSpark>
     </main>
 
     <footer class="app-shell__footer">
