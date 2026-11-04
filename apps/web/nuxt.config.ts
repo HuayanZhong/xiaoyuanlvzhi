@@ -7,8 +7,17 @@ export default defineNuxtConfig({
     port: env.WEB_PORT,
   },
   app: {
+    pageTransition: { name: "page" },
     head: {
+      title: "校园绿植 · 学生端",
       htmlAttrs: { lang: "zh-CN" },
+      meta: [
+        {
+          name: "description",
+          content:
+            "校园绿植领养与环保激励系统学生端：领养绿植、养护打卡、参与环保任务、积累积分并兑换奖励。",
+        },
+      ],
       script: [
         {
           key: "theme-init",

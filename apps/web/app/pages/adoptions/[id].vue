@@ -23,7 +23,7 @@ const {
   data,
   status: loadStatus,
   refresh,
-} = await useAsyncData(
+} = await usePageData(
   () => `adoption-detail:${applicationId.value}`,
   async () => {
     try {

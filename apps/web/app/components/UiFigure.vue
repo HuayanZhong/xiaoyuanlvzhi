@@ -18,11 +18,45 @@ const props = withDefaults(
   },
 );
 
-const { url, loading, error, retry } = useFileUrl(() => props.fileId);
+const figureRef = ref<HTMLElement | null>(null);
+const visible = ref(false);
+let observer: IntersectionObserver | null = null;
+
+const { url, loading, error, retry } = useFileUrl(() => props.fileId, {
+  enabled: visible,
+});
+
+onMounted(() => {
+  if (!props.fileId || typeof IntersectionObserver === "undefined") {
+    visible.value = true;
+    return;
+  }
+
+  observer = new IntersectionObserver(
+    (entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        visible.value = true;
+        observer?.disconnect();
+        observer = null;
+      }
+    },
+    { rootMargin: "200px 0px" },
+  );
+
+  if (figureRef.value) {
+    observer.observe(figureRef.value);
+  }
+});
+
+onBeforeUnmount(() => {
+  observer?.disconnect();
+  observer = null;
+});
 </script>
 
 <template>
   <figure
+    ref="figureRef"
     class="ui-figure"
     :class="[`ui-figure--${ratio}`, { 'ui-figure--flat': flat }]"
   >
@@ -98,6 +132,13 @@ const { url, loading, error, retry } = useFileUrl(() => props.fileId);
   width: 100%;
   height: 100%;
   object-fit: cover;
+  animation: ui-figure-in var(--motion-enter);
+}
+
+@keyframes ui-figure-in {
+  from {
+    opacity: 0;
+  }
 }
 
 .ui-figure__leaf {

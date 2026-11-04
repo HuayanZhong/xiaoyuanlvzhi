@@ -18,7 +18,7 @@ const {
   data,
   status: loadStatus,
   refresh,
-} = await useAsyncData(
+} = await usePageData(
   () => `care-checkin:${checkinId.value}`,
   async () => {
     try {

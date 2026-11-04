@@ -12,7 +12,7 @@ const {
   data,
   status: loadStatus,
   refresh,
-} = await useAsyncData("points", async () => {
+} = await usePageData("points", async () => {
   const [balanceResult, ledgerResult] = await Promise.allSettled([
     getPointsBalance(),
     listPointLedger(),

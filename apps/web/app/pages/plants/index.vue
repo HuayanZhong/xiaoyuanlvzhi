@@ -19,7 +19,7 @@ const {
   data,
   status: loadStatus,
   refresh,
-} = await useAsyncData(
+} = await usePageData(
   "plants-catalog",
   async () => {
     try {

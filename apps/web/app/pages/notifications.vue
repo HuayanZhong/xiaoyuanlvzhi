@@ -18,7 +18,7 @@ const {
   data,
   status: loadStatus,
   refresh,
-} = await useAsyncData("notifications", loadNotificationSnapshot);
+} = await usePageData("notifications", loadNotificationSnapshot);
 
 const items = computed<NotificationItem[]>(() => data.value?.items ?? []);
 const unreadCount = computed(() => data.value?.unreadCount ?? 0);

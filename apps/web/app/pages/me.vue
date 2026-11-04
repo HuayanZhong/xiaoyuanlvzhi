@@ -11,7 +11,7 @@ const {
   data,
   status: loadStatus,
   refresh,
-} = await useAsyncData("me-profile", async () => {
+} = await usePageData("me-profile", async () => {
   try {
     return { profile: await getStudentProfile(), errorMessage: "" };
   } catch (error) {
@@ -25,7 +25,7 @@ const errorMessage = computed(() => data.value?.errorMessage ?? "");
 const confirming = ref(false);
 const loggingOut = ref(false);
 
-const { data: notificationData } = await useAsyncData(
+const { data: notificationData } = await usePageData(
   "notifications",
   loadNotificationSnapshot,
 );

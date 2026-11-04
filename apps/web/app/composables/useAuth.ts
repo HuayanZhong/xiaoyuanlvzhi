@@ -10,6 +10,7 @@ import {
   type StudentAccount,
 } from "~/utils/auth-api";
 import { ApiError } from "~/utils/api";
+import { clearFileCache } from "~/composables/useFileUrl";
 import { clearToken, getToken, setToken } from "~/utils/token";
 
 export type AuthStatus = "checking" | "anonymous" | "authenticated" | "error";
@@ -73,6 +74,8 @@ export function clearAuth(): void {
   clearToken();
   statusState().value = "anonymous";
   accountState().value = null;
+  clearNuxtData();
+  clearFileCache();
   clearProfileData();
 }
 
@@ -214,6 +217,9 @@ async function acceptSession(
   setToken(accessToken);
   statusState().value = "authenticated";
   accountState().value = current;
+  // 换账号后不复用上一个会话的页面数据与图片缓存。
+  clearNuxtData();
+  clearFileCache();
 }
 
 /** 非学生令牌从未写入持久化存储，注销时显式带上请求头即可。 */

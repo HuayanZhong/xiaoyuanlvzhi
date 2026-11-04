@@ -2,7 +2,10 @@ import { flushPromises } from "@vue/test-utils";
 import { mountSuspended } from "@nuxt/test-utils/runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { defineComponent, h, ref } from "vue";
-import { useFileUrl } from "../../../app/composables/useFileUrl";
+import {
+  useFileUrl,
+  clearFileCache,
+} from "../../../app/composables/useFileUrl";
 
 const requestBlob = vi.hoisted(() => vi.fn());
 
@@ -46,6 +49,7 @@ describe("useFileUrl", () => {
     revokeObjectURL.mockClear();
     URL.createObjectURL = createObjectURL;
     URL.revokeObjectURL = revokeObjectURL;
+    clearFileCache();
   });
 
   it("loads a file into an object URL", async () => {
@@ -89,17 +93,17 @@ describe("useFileUrl", () => {
     expect(wrapper.get(".error").text()).toBe("false");
   });
 
-  it("revokes the previous object URL when the file changes", async () => {
+  it("reuses cached object URLs for the same file", async () => {
     requestBlob.mockResolvedValue(new Blob(["c"], { type: "image/png" }));
 
-    const wrapper = await mountSuspended(harness(6));
+    await mountSuspended(harness(6));
     await flushPromises();
 
-    await wrapper.get(".next").trigger("click");
+    const second = await mountSuspended(harness(6));
     await flushPromises();
 
-    expect(requestBlob).toHaveBeenLastCalledWith("files/8");
-    expect(revokeObjectURL).toHaveBeenCalledTimes(1);
+    expect(requestBlob).toHaveBeenCalledTimes(1);
+    expect(second.get(".url").text()).toBe("blob:first");
   });
 
   it("does not request anything without a file id", async () => {

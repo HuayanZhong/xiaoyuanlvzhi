@@ -34,7 +34,7 @@ const {
   data,
   status: loadStatus,
   refresh,
-} = await useAsyncData(
+} = await usePageData(
   () => `task:${taskId.value}`,
   async () => {
     try {

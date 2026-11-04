@@ -5,6 +5,7 @@ import { onBeforeUnmount, onMounted, ref } from "vue";
  * 点击火花层（ClickSpark 的 Vue 移植）。
  *
  * 默认插槽是应用内容；在内容区域点击时，于点击处播放一次画布火花。
+ * 传 `global` 时监听整页点击（顶栏、导航、弹层等），不再限于插槽区域。
  * 颜色默认读取 `--color-leaf` / `--color-sticker`，因此明暗主题切换后仍然正确；
  * `prefers-reduced-motion: reduce` 下不注册监听，完全关闭装饰动画。
  *
@@ -97,6 +98,8 @@ const props = withDefaults(
     layer?: "front" | "back";
     extraScale?: number;
     disabled?: boolean;
+    /** 监听整页点击（含顶栏、底部导航和 portal 弹层），默认只监听包裹区域。 */
+    global?: boolean;
   }>(),
   {
     shape: "line",
@@ -115,6 +118,7 @@ const props = withDefaults(
     layer: "front",
     extraScale: 1,
     disabled: false,
+    global: false,
   },
 );
 
@@ -581,8 +585,13 @@ onMounted(() => {
     if (!recent) spawn(event.clientX, event.clientY);
   }
 
-  root.addEventListener("pointerdown", onPointerDown);
-  root.addEventListener("click", onClick);
+  if (props.global) {
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("click", onClick);
+  } else {
+    root.addEventListener("pointerdown", onPointerDown);
+    root.addEventListener("click", onClick);
+  }
 
   engine = {
     spark: (x, y) => {
@@ -595,8 +604,13 @@ onMounted(() => {
   };
 
   cleanup = () => {
-    root.removeEventListener("pointerdown", onPointerDown);
-    root.removeEventListener("click", onClick);
+    if (props.global) {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("click", onClick);
+    } else {
+      root.removeEventListener("pointerdown", onPointerDown);
+      root.removeEventListener("click", onClick);
+    }
     cancelAnimationFrame(raf);
     while (bursts.length > 0) {
       const burst = bursts[0];

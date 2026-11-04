@@ -19,7 +19,7 @@ const {
   data,
   status: loadStatus,
   refresh,
-} = await useAsyncData("feedback", async () => {
+} = await usePageData("feedback", async () => {
   try {
     return { items: await listFeedback(), errorMessage: "" };
   } catch (error) {

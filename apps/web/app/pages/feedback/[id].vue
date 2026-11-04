@@ -22,7 +22,7 @@ const {
   data,
   status: loadStatus,
   refresh,
-} = await useAsyncData(
+} = await usePageData(
   () => `feedback:${feedbackId.value}`,
   async () => {
     try {

@@ -14,7 +14,7 @@ const {
   data,
   status: loadStatus,
   refresh,
-} = await useAsyncData("rewards-orders", async () => {
+} = await usePageData("rewards-orders", async () => {
   try {
     return { orders: await listOrders(), errorMessage: "" };
   } catch (error) {

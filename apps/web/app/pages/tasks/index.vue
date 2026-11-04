@@ -29,7 +29,7 @@ const {
   data,
   status: loadStatus,
   refresh,
-} = await useAsyncData("tasks", async () => {
+} = await usePageData("tasks", async () => {
   try {
     const [tasks, participations] = await Promise.all([
       listTasks(),

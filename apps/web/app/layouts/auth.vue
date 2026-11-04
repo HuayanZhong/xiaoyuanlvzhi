@@ -30,7 +30,7 @@
       <p class="auth-layout__brand-foot">校园绿植领养与环保激励系统</p>
     </aside>
 
-    <main class="auth-layout__panel">
+    <main class="auth-layout__panel" tabindex="-1">
       <div class="auth-layout__panel-inner">
         <slot />
       </div>

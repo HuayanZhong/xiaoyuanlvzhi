@@ -134,6 +134,28 @@ button {
   transform: rotate(-1deg);
 }
 
+/* 路由切换：短促淡入上移，减少动态时由全局规则关闭。 */
+.page-enter-active,
+.page-leave-active {
+  transition:
+    opacity var(--motion-enter),
+    transform var(--motion-enter);
+}
+
+.page-leave-active {
+  transition-duration: 120ms;
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+main:focus {
+  outline: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

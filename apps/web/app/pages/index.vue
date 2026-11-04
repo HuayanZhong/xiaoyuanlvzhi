@@ -11,7 +11,7 @@ const {
   data,
   status: loadStatus,
   refresh,
-} = await useAsyncData("home-profile", async () => {
+} = await usePageData("home-profile", async () => {
   try {
     return { profile: await getStudentProfile(), errorMessage: "" };
   } catch (error) {
@@ -23,7 +23,7 @@ const profile = computed(() => data.value?.profile ?? null);
 const loading = computed(() => loadStatus.value === "pending");
 const errorMessage = computed(() => data.value?.errorMessage ?? "");
 
-const { data: notificationData } = await useAsyncData(
+const { data: notificationData } = await usePageData(
   "notifications",
   loadNotificationSnapshot,
 );
@@ -33,7 +33,7 @@ const notificationError = computed(
   () => notificationData.value?.errorMessage ?? "",
 );
 
-const { data: overview, refresh: refreshOverview } = await useAsyncData(
+const { data: overview, refresh: refreshOverview } = await usePageData(
   "home-overview",
   loadHomeOverview,
 );

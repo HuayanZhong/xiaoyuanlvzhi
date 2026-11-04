@@ -25,7 +25,7 @@ const {
   data,
   status: loadStatus,
   refresh,
-} = await useAsyncData(
+} = await usePageData(
   () => `plant-care:${plantId.value}`,
   async () => {
     try {

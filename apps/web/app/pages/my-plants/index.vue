@@ -7,7 +7,7 @@ const {
   data,
   status: loadStatus,
   refresh,
-} = await useAsyncData("my-plants", async () => {
+} = await usePageData("my-plants", async () => {
   try {
     return { plants: await listEligiblePlants(), errorMessage: "" };
   } catch (error) {

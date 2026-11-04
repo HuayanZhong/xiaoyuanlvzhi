@@ -11,7 +11,7 @@ const {
   data,
   status: loadStatus,
   refresh,
-} = await useAsyncData("adoptions-list", async () => {
+} = await usePageData("adoptions-list", async () => {
   try {
     return { applications: await listApplications(), errorMessage: "" };
   } catch (error) {
