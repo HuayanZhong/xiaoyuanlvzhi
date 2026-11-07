@@ -1,4 +1,4 @@
-import type { KyInstance } from "@repo/http-client";
+import type { $Fetch } from "nitropack";
 import { describe, expect, it, vi } from "vitest";
 import { createApiClient } from "../../../app/utils/api";
 import {
@@ -7,20 +7,23 @@ import {
 } from "../../../app/utils/auth-events";
 import { createUnauthorizedHandler } from "../../../app/utils/auth-session";
 
-function jsonResponse(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
+function rawResponse(body: unknown, status = 200) {
+  return {
     status,
-    headers: { "content-type": "application/json" },
-  });
+    ok: status >= 200 && status < 300,
+    _data: body,
+  };
 }
 
 function unauthorizedClient(code: string) {
-  return vi.fn(async () =>
-    jsonResponse(
-      { success: false, data: null, error: { code, message: "失败" } },
-      401,
+  return {
+    raw: vi.fn(async () =>
+      rawResponse(
+        { success: false, data: null, error: { code, message: "失败" } },
+        401,
+      ),
     ),
-  ) as unknown as KyInstance;
+  } as unknown as $Fetch;
 }
 
 describe("auth events", () => {
@@ -79,8 +82,7 @@ describe("auth events", () => {
       }),
     );
     const api = createApiClient({
-      baseUrl: "/api/v1/",
-      client: unauthorizedClient("INVALID_CREDENTIALS"),
+      fetch: unauthorizedClient("INVALID_CREDENTIALS"),
       onUnauthorized: emitUnauthorized,
     });
 
@@ -103,8 +105,7 @@ describe("auth events", () => {
       }),
     );
     const api = createApiClient({
-      baseUrl: "/api/v1/",
-      client: unauthorizedClient("UNAUTHORIZED"),
+      fetch: unauthorizedClient("UNAUTHORIZED"),
       onUnauthorized: emitUnauthorized,
     });
 

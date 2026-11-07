@@ -35,6 +35,7 @@ const emit = defineEmits<{
 const drafts = ref<DraftImage[]>([]);
 const uploading = ref(0);
 const localError = ref("");
+const dragging = ref(false);
 const input = ref<HTMLInputElement | null>(null);
 let nextKey = 0;
 
@@ -63,6 +64,10 @@ async function handleChange(event: Event) {
   const target = event.target as HTMLInputElement;
   const files = Array.from(target.files ?? []);
   target.value = "";
+  await handleFiles(files);
+}
+
+async function handleFiles(files: File[]) {
   localError.value = "";
 
   for (const file of files) {
@@ -102,6 +107,16 @@ async function handleChange(event: Event) {
       uploading.value -= 1;
     }
   }
+}
+
+function handleDrop(event: DragEvent) {
+  dragging.value = false;
+
+  if (props.disabled) {
+    return;
+  }
+
+  void handleFiles(Array.from(event.dataTransfer?.files ?? []));
 }
 
 function remove(key: number) {
@@ -149,7 +164,15 @@ watch(busy, (value) => {
       @change="handleChange"
     />
 
-    <div class="ui-image-picker__body">
+    <div
+      class="ui-image-picker__body"
+      :class="{ 'ui-image-picker__body--dragging': dragging }"
+      data-supermouse-ignore
+      @dragenter.prevent="dragging = true"
+      @dragover.prevent="dragging = true"
+      @dragleave.prevent="dragging = false"
+      @drop.prevent="handleDrop"
+    >
       <div class="ui-image-picker__actions">
         <UiButton
           variant="secondary"
@@ -201,8 +224,19 @@ watch(busy, (value) => {
 .ui-image-picker__body {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 0.75rem;
   min-width: 0;
+  padding: 0.75rem;
+  border: 1px dashed transparent;
+  border-radius: var(--radius-card);
+  transition:
+    background-color var(--motion-color),
+    border-color var(--motion-color);
+}
+
+.ui-image-picker__body--dragging {
+  background: var(--color-leaf-wash);
+  border-color: var(--color-leaf);
 }
 
 .ui-image-picker__actions {
@@ -248,16 +282,27 @@ watch(busy, (value) => {
   position: absolute;
   right: var(--space-1);
   bottom: var(--space-1);
-  min-height: var(--touch-target);
+  min-height: 2rem;
   padding: 0 var(--space-3);
   background: var(--color-surface);
   border: var(--border-strong);
-  border-radius: var(--radius-chip);
+  border-radius: var(--radius-control);
   color: var(--color-ink);
   font-size: var(--font-size-label);
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity var(--motion-color),
+    transform var(--motion-color);
 }
 
 .ui-image-picker__remove:hover {
   background: var(--color-ink-wash);
+}
+
+.ui-image-picker__item:hover .ui-image-picker__remove,
+.ui-image-picker__remove:focus-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 </style>

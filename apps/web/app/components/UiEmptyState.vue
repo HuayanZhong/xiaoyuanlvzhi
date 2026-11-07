@@ -25,9 +25,14 @@ withDefaults(
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-5);
-  background: var(--color-surface);
-  border: var(--border-dashed);
+  overflow: hidden;
+  padding: 2rem;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-sage) 34%, var(--color-surface)),
+    var(--color-surface) 64%
+  );
+  border: 1px solid color-mix(in srgb, var(--color-line) 72%, transparent);
   border-radius: var(--radius-card);
   text-align: left;
 }
@@ -36,15 +41,16 @@ withDefaults(
   margin: 0;
   color: var(--color-subtle);
   font-size: var(--font-size-label);
+  font-weight: var(--font-weight-semibold);
   letter-spacing: var(--tracking-label);
 }
 
 .ui-empty__title {
   margin: 0;
   color: var(--color-ink);
-  font-family: var(--font-kai);
+  font-family: var(--font-display);
   font-size: var(--font-size-title);
-  font-weight: var(--font-weight-regular);
+  font-weight: 600;
   letter-spacing: var(--tracking-display);
   line-height: var(--line-height-title);
 }

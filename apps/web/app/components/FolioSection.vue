@@ -31,16 +31,16 @@ defineProps<{
   gap: var(--space-2) var(--space-3);
   align-items: baseline;
   justify-content: space-between;
-  padding-bottom: var(--space-2);
+  padding: 0 0 var(--space-3);
   border-bottom: var(--border-line);
 }
 
 .ui-folio__title {
   margin: 0;
   color: var(--color-ink);
-  font-family: var(--font-kai);
+  font-family: var(--font-display);
   font-size: var(--font-size-title);
-  font-weight: var(--font-weight-regular);
+  font-weight: var(--font-weight-semibold);
   letter-spacing: var(--tracking-display);
   line-height: var(--line-height-title);
 }

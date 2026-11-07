@@ -11,7 +11,6 @@ import {
 } from "~/utils/auth-api";
 import { ApiError } from "~/utils/api";
 import { clearFileCache } from "~/composables/useFileUrl";
-import { clearToken, getToken, setToken } from "~/utils/token";
 
 export type AuthStatus = "checking" | "anonymous" | "authenticated" | "error";
 
@@ -71,7 +70,6 @@ export function clearAuth(): void {
 
   session.attempt += 1;
   session.promise = null;
-  clearToken();
   statusState().value = "anonymous";
   accountState().value = null;
   clearNuxtData();
@@ -85,7 +83,6 @@ export function resetAuthForTests(): void {
 
   session.attempt += 1;
   session.promise = null;
-  clearToken();
   statusState().value = "checking";
   accountState().value = null;
   clearProfileData();
@@ -105,11 +102,6 @@ function restore(): Promise<void> {
 
   status.value = "checking";
   account.value = null;
-
-  if (!getToken()) {
-    status.value = "anonymous";
-    return Promise.resolve();
-  }
 
   const promise = restoreSession({
     attempt,
@@ -186,7 +178,7 @@ async function login(email: string, password: string): Promise<void> {
 
   const result = await loginWithEmail(email, password);
 
-  await acceptSession(result.accessToken, result.account);
+  acceptSession(result.account);
 }
 
 async function register(payload: RegisterPayload): Promise<void> {
@@ -197,40 +189,25 @@ async function register(payload: RegisterPayload): Promise<void> {
 
   const result = await registerStudent(payload);
 
-  await acceptSession(result.accessToken, result.account);
+  acceptSession(result.account);
 }
 
-async function acceptSession(
-  accessToken: string,
-  current: StudentAccount,
-): Promise<void> {
+function acceptSession(current: StudentAccount): void {
   if (current.role !== "STUDENT") {
-    await discardToken(accessToken);
+    clearAuth();
     throw new ApiError("NOT_STUDENT", "仅学生账号可登录学生端", 403);
   }
 
   if (current.status !== "ACTIVE") {
-    await discardToken(accessToken);
+    clearAuth();
     throw new ApiError("ACCOUNT_DISABLED", "账号暂不可用，请联系管理员", 403);
   }
 
-  setToken(accessToken);
   statusState().value = "authenticated";
   accountState().value = current;
   // 换账号后不复用上一个会话的页面数据与图片缓存。
   clearNuxtData();
   clearFileCache();
-}
-
-/** 非学生令牌从未写入持久化存储，注销时显式带上请求头即可。 */
-async function discardToken(accessToken: string): Promise<void> {
-  try {
-    await logoutStudent(accessToken);
-  } catch {
-    // best-effort：本地状态不会保存该令牌。
-  }
-
-  clearAuth();
 }
 
 async function logout(): Promise<{ revokeFailed: boolean }> {
@@ -239,10 +216,11 @@ async function logout(): Promise<{ revokeFailed: boolean }> {
   session.attempt += 1;
   session.promise = null;
 
-  let revokeFailed = false;
+  let revokeFailed: boolean;
 
   try {
-    await logoutStudent();
+    const result = await logoutStudent();
+    revokeFailed = result.revokeFailed;
   } catch (error) {
     revokeFailed = !isUnauthorized(error);
   }

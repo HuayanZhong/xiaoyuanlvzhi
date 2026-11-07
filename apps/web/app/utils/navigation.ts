@@ -9,7 +9,7 @@ export type NavItem = {
 export const STUDENT_NAV: NavItem[] = [
   { label: "首页", to: "/" },
   { label: "绿植", to: "/plants" },
-  { label: "任务", to: "/tasks" },
+  { label: "行动", to: "/tasks" },
   { label: "积分", to: "/points", match: ["/rewards"] },
   { label: "我的", to: "/me" },
 ];

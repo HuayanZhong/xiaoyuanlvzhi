@@ -45,7 +45,12 @@ export type HomeOverview = {
   tasksError: string;
   plants: CareEligiblePlant[];
   plantsError: string;
+  recentCheckins: CareCheckin[];
 };
+
+function looksLikeTestData(value: string): boolean {
+  return /测试|验收|e2e/i.test(value);
+}
 
 /** 把四类记录汇总为待处理分类，数量为 0 的分类不返回。 */
 export function buildPendingGroups(source: PendingSource): PendingGroup[] {
@@ -126,7 +131,14 @@ export function buildPendingGroups(source: PendingSource): PendingGroup[] {
 
 /** 当前可报名的任务，最多 3 个。 */
 export function selectJoinableTasks(tasks: EcoTask[]): EcoTask[] {
-  return tasks.filter((task) => canJoin(task)).slice(0, 3);
+  return tasks
+    .filter(
+      (task) =>
+        canJoin(task) &&
+        !looksLikeTestData(task.title) &&
+        !looksLikeTestData(task.details ?? ""),
+    )
+    .slice(0, 3);
 }
 
 /** 已到养护间隔且没有待审核打卡的植株，最多 3 株。 */
@@ -175,5 +187,7 @@ export async function loadHomeOverview(): Promise<HomeOverview> {
     plants: plants.status === "fulfilled" ? selectDuePlants(plants.value) : [],
     plantsError:
       plants.status === "rejected" ? resolveRequestError(plants.reason) : "",
+    recentCheckins:
+      checkins.status === "fulfilled" ? checkins.value.slice(0, 3) : [],
   };
 }

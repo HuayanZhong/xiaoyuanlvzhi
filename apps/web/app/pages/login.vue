@@ -80,8 +80,9 @@ async function submit() {
 <template>
   <section class="auth-page">
     <header class="auth-page__head">
-      <h2 class="auth-page__heading">登录</h2>
-      <p class="auth-page__sub">使用 QQ 邮箱和密码进入学生端</p>
+      <p class="auth-page__eyebrow">WELCOME BACK</p>
+      <h2 class="auth-page__heading">欢迎回来</h2>
+      <p class="auth-page__sub">使用 QQ 邮箱继续照料你的植物。</p>
     </header>
 
     <UiAlert v-if="notice" tone="info">{{ notice }}</UiAlert>
@@ -132,22 +133,32 @@ async function submit() {
 .auth-page {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: 1.25rem;
 }
 
 .auth-page__head {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.auth-page__eyebrow {
+  margin: 0;
+  color: var(--color-leaf);
+  font-family: var(--font-journal);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-journal);
 }
 
 .auth-page__heading {
   margin: 0;
-  font-family: var(--font-kai);
-  font-size: var(--font-size-title);
-  font-weight: var(--font-weight-regular);
-  letter-spacing: var(--tracking-display);
-  line-height: var(--line-height-title);
+  font-family: var(--font-display);
+  font-size: var(--font-size-auth-heading);
+  font-weight: var(--font-weight-display);
+  letter-spacing: 0;
+  line-height: 1.04;
 }
 
 .auth-page__sub {
@@ -159,7 +170,9 @@ async function submit() {
 .auth-page__form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: 1.25rem;
+  padding-top: 1.5rem;
+  border-top: var(--border-line);
 }
 
 .auth-page__alert-text {
@@ -186,7 +199,7 @@ async function submit() {
   align-items: center;
   min-height: var(--touch-target);
   padding: 0 var(--space-1);
-  color: var(--color-ink);
+  color: var(--color-leaf);
   font-weight: var(--font-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 3px;

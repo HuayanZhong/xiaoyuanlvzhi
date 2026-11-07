@@ -3,13 +3,14 @@ import { mountSuspended } from "@nuxt/test-utils/runtime";
 import { clearNuxtData } from "#app";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "~/utils/api";
-import type { CareEligiblePlant } from "~/utils/care-api";
+import type { CareCheckin, CareEligiblePlant } from "~/utils/care-api";
 import {
   loadHomeOverview,
   type HomeOverview,
   type PendingGroup,
 } from "~/utils/home-overview";
 import { loadNotificationSnapshot } from "~/utils/notification-api";
+import { listPointLedger, type PointLedgerEntry } from "~/utils/point-api";
 import { getStudentProfile, type StudentProfile } from "~/utils/profile-api";
 import type { EcoTask } from "~/utils/task-api";
 import HomePage from "../../../app/pages/index.vue";
@@ -26,9 +27,14 @@ vi.mock("~/utils/home-overview", () => ({
   loadHomeOverview: vi.fn(),
 }));
 
+vi.mock("~/utils/point-api", () => ({
+  listPointLedger: vi.fn(),
+}));
+
 const profileMock = vi.mocked(getStudentProfile);
 const notificationMock = vi.mocked(loadNotificationSnapshot);
 const overviewMock = vi.mocked(loadHomeOverview);
+const pointLedgerMock = vi.mocked(listPointLedger);
 
 function profile(overrides: Partial<StudentProfile> = {}): StudentProfile {
   return {
@@ -57,6 +63,7 @@ function overview(overrides: Partial<HomeOverview> = {}): HomeOverview {
     tasksError: "",
     plants: [],
     plantsError: "",
+    recentCheckins: [],
     ...overrides,
   };
 }
@@ -111,17 +118,56 @@ function plant(overrides: Partial<CareEligiblePlant> = {}): CareEligiblePlant {
   };
 }
 
+function pointEntry(
+  overrides: Partial<PointLedgerEntry> = {},
+): PointLedgerEntry {
+  return {
+    id: 8,
+    accountId: 2,
+    studentEmail: "student@qq.com",
+    deltaPoints: 10,
+    balanceAfter: 120,
+    sourceType: "ECO_TASK",
+    sourceId: "7",
+    reason: "环保任务凭证审核通过",
+    actorEmail: null,
+    createdAt: "2026-10-31T02:31:58",
+    ...overrides,
+  };
+}
+
+function checkin(overrides: Partial<CareCheckin> = {}): CareCheckin {
+  return {
+    id: 6,
+    checkinNo: "CARE-001",
+    studentId: 2,
+    studentEmail: "student@qq.com",
+    plantId: 10,
+    plantCode: "PLANT-001",
+    plantName: "绿萝 · PLANT-001",
+    location: "图书馆一楼",
+    status: "APPROVED",
+    latestVersion: 1,
+    createdAt: "2026-10-30T12:58:23",
+    updatedAt: "2026-10-30T12:58:23",
+    submissions: [],
+    ...overrides,
+  };
+}
+
 describe("home page", () => {
   beforeEach(() => {
     profileMock.mockReset();
     notificationMock.mockReset();
     overviewMock.mockReset();
+    pointLedgerMock.mockReset();
     notificationMock.mockResolvedValue({
       items: [],
       unreadCount: 0,
       errorMessage: "",
     });
     overviewMock.mockResolvedValue(overview());
+    pointLedgerMock.mockResolvedValue([]);
     clearNuxtData();
   });
 
@@ -133,29 +179,22 @@ describe("home page", () => {
     expect(wrapper.text()).toContain("你好，张三");
     expect(wrapper.text()).toContain("120");
     expect(wrapper.text()).toContain("2");
-    expect(wrapper.get(".home-page__record").attributes("href")).toBe(
-      "/my-plants",
-    );
-    expect(wrapper.get(".home-page__points-link").attributes("href")).toBe(
-      "/points",
-    );
+    expect(wrapper.get(".plant-ledger").attributes("href")).toBe("/my-plants");
+    expect(wrapper.get(".points-card a").attributes("href")).toBe("/points");
   });
 
-  it("renders the six home sections in order", async () => {
+  it("renders the new asymmetric home sections", async () => {
     profileMock.mockResolvedValue(profile());
     const wrapper = await mountSuspended(HomePage);
     await flushPromises();
 
-    expect(
-      wrapper.findAll(".ui-folio__title").map((item) => item.text()),
-    ).toEqual([
-      "我的绿植",
-      "待处理事项",
-      "当前积分",
-      "环保任务",
-      "养护提醒",
-      "消息",
-    ]);
+    expect(wrapper.get(".home-panel--care").text()).toContain(
+      "你的植物今天需要什么",
+    );
+    expect(wrapper.get(".home-panel--tasks").text()).toContain(
+      "让今天多一点绿色行动",
+    );
+    expect(wrapper.get(".home-panel--plants").text()).toContain("我的绿植");
   });
 
   it("explains an empty plant count instead of showing a bare zero", async () => {
@@ -163,11 +202,9 @@ describe("home page", () => {
     const wrapper = await mountSuspended(HomePage);
     await flushPromises();
 
-    expect(wrapper.text()).toContain("暂无在养绿植");
-    expect(wrapper.text()).toContain("领养一株后，这里会记录你的养护进度。");
-    expect(wrapper.get(".home-page__browse").attributes("href")).toBe(
-      "/plants",
-    );
+    expect(wrapper.text()).toContain("还没有在养绿植");
+    expect(wrapper.text()).toContain("从一株适合你的植物开始。");
+    expect(wrapper.get(".care-empty").attributes("href")).toBe("/plants");
   });
 
   it("hides the zero-value note when the student has active plants", async () => {
@@ -175,12 +212,8 @@ describe("home page", () => {
     const wrapper = await mountSuspended(HomePage);
     await flushPromises();
 
-    expect(wrapper.text()).not.toContain(
-      "领养一株后，这里会记录你的养护进度。",
-    );
-    expect(wrapper.get(".home-page__record").attributes("href")).toBe(
-      "/my-plants",
-    );
+    expect(wrapper.text()).not.toContain("从一株适合你的植物开始。");
+    expect(wrapper.get(".plant-ledger").attributes("href")).toBe("/my-plants");
   });
 
   it("falls back to the student number when the name is empty", async () => {
@@ -213,7 +246,26 @@ describe("home page", () => {
   it("shows the unread notification count and links to notifications", async () => {
     profileMock.mockResolvedValue(profile());
     notificationMock.mockResolvedValue({
-      items: [],
+      items: [
+        {
+          id: 1,
+          title: "环保任务已完成",
+          summary: "任务凭证审核通过，获得 10 积分。",
+          businessType: "TASK",
+          businessId: "7",
+          readAt: null,
+          createdAt: "2026-10-31T02:31:58",
+        },
+        {
+          id: 2,
+          title: "养护打卡已通过",
+          summary: "绿萝的养护记录已经更新。",
+          businessType: "CARE",
+          businessId: "6",
+          readAt: "2026-10-30T12:00:00",
+          createdAt: "2026-10-30T12:00:00",
+        },
+      ],
       unreadCount: 3,
       errorMessage: "",
     });
@@ -221,9 +273,12 @@ describe("home page", () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain("3 条未读");
-    expect(wrapper.get(".home-page__message").attributes("href")).toBe(
+    expect(wrapper.get(".message-row").attributes("href")).toBe(
       "/notifications",
     );
+    expect(wrapper.findAll(".notification-preview__row")).toHaveLength(2);
+    expect(wrapper.text()).toContain("环保任务已完成");
+    expect(wrapper.text()).toContain("养护打卡已通过");
   });
 
   it("keeps the home summary when notifications fail", async () => {
@@ -237,7 +292,7 @@ describe("home page", () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain("你好，张三");
-    expect(wrapper.text()).toContain("消息暂时不可用");
+    expect(wrapper.text()).toContain("暂时不可用");
   });
 
   it("explains when there are no unread notifications", async () => {
@@ -271,18 +326,18 @@ describe("home page", () => {
     expect(wrapper.text()).toContain("CARE-1A2B3C4D");
     expect(wrapper.text()).toContain("待重提 · 任务");
     const links = wrapper
-      .findAll(".home-page__pending-row")
+      .findAll(".pending-row")
       .map((item) => item.attributes("href"));
 
     expect(links).toEqual(["/care/12", "/tasks/7"]);
   });
 
-  it("shows an empty state without pending items", async () => {
+  it("does not render a pending panel when there are no pending items", async () => {
     profileMock.mockResolvedValue(profile());
     const wrapper = await mountSuspended(HomePage);
     await flushPromises();
 
-    expect(wrapper.text()).toContain("暂无待处理事项");
+    expect(wrapper.find(".home-panel--pending").exists()).toBe(false);
   });
 
   it("retries the overview after a pending error", async () => {
@@ -323,10 +378,31 @@ describe("home page", () => {
 
     expect(wrapper.text()).toContain("垃圾分类宣传");
     expect(wrapper.text()).toContain("20 分 · 剩余 15 个名额");
-    expect(
-      wrapper.findAll(".home-page__row").map((item) => item.attributes("href")),
-    ).toContain("/tasks/7");
-    expect(wrapper.text()).toContain("全部任务");
+    expect(wrapper.get(".home-panel--tasks").text()).toContain("垃圾分类宣传");
+    expect(wrapper.findAll(".task-preview")).toHaveLength(3);
+    expect(wrapper.get(".task-preview").attributes("href")).toBe("/tasks/7");
+  });
+
+  it("shows recent point changes while hiding test adjustments", async () => {
+    profileMock.mockResolvedValue(profile());
+    pointLedgerMock.mockResolvedValue([
+      pointEntry({ id: 9, sourceType: "ADJUSTMENT", reason: "验收回滚" }),
+      pointEntry(),
+      pointEntry({
+        id: 7,
+        deltaPoints: -20,
+        sourceType: "REDEMPTION",
+        reason: "兑换奖励",
+      }),
+    ]);
+    const wrapper = await mountSuspended(HomePage);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("环保任务");
+    expect(wrapper.text()).toContain("+10");
+    expect(wrapper.text()).toContain("兑换扣减");
+    expect(wrapper.text()).toContain("-20");
+    expect(wrapper.text()).not.toContain("验收回滚");
   });
 
   it("shows a task empty state with a list link", async () => {
@@ -334,7 +410,7 @@ describe("home page", () => {
     const wrapper = await mountSuspended(HomePage);
     await flushPromises();
 
-    expect(wrapper.text()).toContain("暂无可报名任务");
+    expect(wrapper.text()).toContain("让今天多一点绿色行动");
     expect(
       wrapper.findAll("a").map((item) => item.attributes("href")),
     ).toContain("/tasks");
@@ -354,10 +430,27 @@ describe("home page", () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain("绿萝 · PLANT-001");
-    expect(wrapper.text()).toContain("图书馆一楼 · 可打卡");
-    expect(
-      wrapper.findAll(".home-page__row").map((item) => item.attributes("href")),
-    ).toContain("/my-plants/10");
+    expect(wrapper.text()).toContain("现在可以完成一次养护打卡");
+    expect(wrapper.get(".care-feature").attributes("href")).toBe(
+      "/my-plants/10",
+    );
+  });
+
+  it("shows recent care records in the plant panel", async () => {
+    profileMock.mockResolvedValue(profile());
+    overviewMock.mockResolvedValue(
+      overview({
+        plants: [plant()],
+        recentCheckins: [checkin()],
+      }),
+    );
+    const wrapper = await mountSuspended(HomePage);
+    await flushPromises();
+
+    expect(wrapper.get(".plant-history").text()).toContain("已通过");
+    expect(wrapper.get(".plant-history__row").attributes("href")).toBe(
+      "/care/6",
+    );
   });
 
   it("shows a care reminder empty state", async () => {
@@ -365,7 +458,7 @@ describe("home page", () => {
     const wrapper = await mountSuspended(HomePage);
     await flushPromises();
 
-    expect(wrapper.text()).toContain("暂无到期养护");
+    expect(wrapper.text()).toContain("今天没有到期养护。");
   });
 
   it("keeps pending items when the task request fails", async () => {

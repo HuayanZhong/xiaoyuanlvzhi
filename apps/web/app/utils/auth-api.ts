@@ -13,8 +13,6 @@ export type StudentAccount = {
 };
 
 export type AuthResult = {
-  tokenType: string;
-  accessToken: string;
   expiresAt: string;
   account: StudentAccount;
 };
@@ -44,7 +42,7 @@ export function sendRegistrationCode(email: string) {
   });
 }
 
-/** 注册并直接获得登录态。 */
+/** 注册并由 Nitro 建立 HttpOnly 会话。 */
 export function registerStudent(payload: RegisterPayload) {
   return useApi().request<AuthResult>("auth/register", {
     method: "POST",
@@ -52,7 +50,7 @@ export function registerStudent(payload: RegisterPayload) {
   });
 }
 
-/** 使用 QQ 邮箱和密码登录。 */
+/** 使用 QQ 邮箱和密码登录；令牌不会返回浏览器。 */
 export function loginWithEmail(email: string, password: string) {
   return useApi().request<AuthResult>("auth/login", {
     method: "POST",
@@ -65,16 +63,9 @@ export function getCurrentAccount() {
   return useApi().request<StudentAccount>("auth/me");
 }
 
-/**
- * 注销当前令牌。
- *
- * `token` 用于尚未持久化的令牌（例如非学生账号登录后的清理）；
- * 不传时由适配层读取当前登录态。401 视为令牌已失效。
- */
-export function logoutStudent(token?: string) {
-  return useApi().request<null>("auth/logout", {
+/** 注销当前 HttpOnly 会话。 */
+export function logoutStudent() {
+  return useApi().request<{ revokeFailed: boolean }>("auth/logout", {
     method: "POST",
-    token,
-    expectData: false,
   });
 }

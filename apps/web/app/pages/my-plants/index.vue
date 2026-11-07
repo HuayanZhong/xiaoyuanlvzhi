@@ -77,7 +77,6 @@ function load() {
         :key="plant.plantId"
         class="my-plants-page__card"
       >
-        <span class="tape" aria-hidden="true"></span>
         <div class="my-plants-page__head">
           <p class="my-plants-page__code">编号 {{ plant.plantCode }}</p>
           <h2 class="my-plants-page__name">{{ plant.plantName }}</h2>

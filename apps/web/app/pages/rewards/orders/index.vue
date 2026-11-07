@@ -114,7 +114,6 @@ function load() {
 
     <ul v-else-if="!errorMessage" class="orders-page__list">
       <li v-for="item in orders" :key="item.id" class="orders-page__card">
-        <span class="tape" aria-hidden="true"></span>
         <div class="orders-page__head">
           <NuxtLink :to="`/rewards/orders/${item.id}`" class="orders-page__no">
             编号 {{ item.orderNo }}

@@ -33,9 +33,9 @@ Turborepo + pnpm 多应用工作区。
 
 ## web 页面
 
-- `/login`：QQ 邮箱 + 密码登录；登录成功后保存 accessToken，并回到 `returnTo` 指定的站内路径或首页。登录页提示忘记密码需联系管理员。
+- `/login`：QQ 邮箱 + 密码登录；Nitro 在校验成功后写入 HttpOnly `student-session` Cookie，并回到 `returnTo` 指定的站内路径或首页。
 - `/register`：QQ 邮箱 + 6 位验证码注册，验证码 60 秒重发冷却；填写姓名、学号、院系、班级、手机号和密码后直接登录并进入首页。邮箱、学号或手机号冲突会在对应字段提示。
-- `/`：六区块首页，依次为我的绿植、待处理事项、当前积分、环保任务、养护提醒和消息；展示在养数量、待办分类计数、可报名任务、到期养护植株和未读通知数，各区块独立容错并可重试。
+- `/`：品牌化植物账户首页，包含当前植株主视觉、今日照料、环保行动、积分、消息和待处理事项，各模块独立容错并可重试。
 - `/plants`：可领养品种目录，支持关键词和位置筛选；`/plants/{id}` 展示品种详情、养护说明和领取地点，并进入领养申请确认。
 - `/adoptions`：我的领养申请，按更新时间倒序展示状态和最近处理意见；`/adoptions/{id}` 展示申请时间线、分配单株和领取信息，并按状态提供撤回、修改重提、取消和申请归还。
 - `/tasks`：环保任务列表，按可报名、已参加和已结束筛选；`/tasks/{id}` 展示任务要求、名额和奖励，支持报名、提交凭证、查看参与记录并在驳回后重提。
@@ -47,11 +47,13 @@ Turborepo + pnpm 多应用工作区。
 - `/me`：展示姓名、学号、院系、班级、手机号、邮箱、积分和在养绿植数，支持修改手机号和班级、进入通知与问题反馈，以及退出登录。
 - `[...slug]`：未知路径显示带返回入口的 404 页面。
 - 未登录访问业务路由会先进入 `/login?returnTo=...`；已登录访问登录/注册页会回到首页。
-- 主导航为首页、绿植、任务、积分、我的，宽屏显示在顶栏，窄屏显示为底部导航；通知、反馈和养护不进入主导航。
+- 主导航为首页、绿植、行动、积分、我的；学生端只设计桌面布局，不提供移动端底部导航。
 
-认证通过 `GET /api/v1/auth/me` 在启动时恢复，accessToken 保存在同源 `student-auth-token` Cookie（`SameSite=Lax`，7 天）中，服务端渲染时也能读取；账号对象不持久化。业务请求统一经过 `@repo/http-client` 适配层，解析 Spring 信封、注入 Bearer、处理 401 并区分网络/超时错误。
+认证通过 `GET /api/v1/auth/me` 在启动时恢复。登录、注册和注销由 Nitro server routes 处理，Spring accessToken 只保存在 HttpOnly `student-session` Cookie（`SameSite=Lax`，生产环境 `Secure`，7 天）中；浏览器脚本和 Nuxt payload 都接触不到令牌。
 
-页面使用纯 CSS 语义 token，不引入 UI 组件库；移动优先，底部导航遵循安全区，交互控件至少 44px。`/api/v1/` 是默认 API base；浏览器请求始终同源，由 Nitro 的 `server/api/[...path].ts` 在开发和生产的服务端转发到 `SPRING_API_ORIGIN`，SSR 阶段则直接访问 Spring。业务页面通过 `useAsyncData` 在服务端取数，首屏 HTML 已包含内容。
+学生端使用自有语义 token、Reka UI 无样式可访问原语、Motion for Vue 和 Lucide 图标。浏览器与 SSR 都只请求同源 `/api/v1/`，由 `server/api/v1/[...path].ts` 从 HttpOnly Cookie 生成 Bearer 后转发到私有 `springApiOrigin`。简单读取使用 `useApiFetch`，聚合读取使用 `useAsyncData`，事件型写操作使用 Nuxt `$fetch`；SSR 首屏 HTML 包含完整业务数据。
+
+设计源：`docs/design/web-visual-system.md`。鼠标效果使用 `@supermousejs/core`、`dot`、`ring`，仅在精细指针设备、未开启减弱动效且用户偏好开启时初始化。
 
 运行 web 测试：
 

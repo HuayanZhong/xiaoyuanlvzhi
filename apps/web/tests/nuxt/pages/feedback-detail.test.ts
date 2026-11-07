@@ -142,7 +142,7 @@ describe("feedback detail page", () => {
     await flushPromises();
 
     await clickText(wrapper, "关闭反馈");
-    const dialog = wrapper.get('[role="dialog"]');
+    const dialog = wrapper.get('[role="alertdialog"]');
     await clickText(wrapper, "确认关闭", dialog);
 
     expect(closeMock).toHaveBeenCalledWith(5);
@@ -159,7 +159,7 @@ describe("feedback detail page", () => {
     await flushPromises();
 
     await clickText(wrapper, "关闭反馈");
-    const dialog = wrapper.get('[role="dialog"]');
+    const dialog = wrapper.get('[role="alertdialog"]');
     await clickText(wrapper, "确认关闭", dialog);
 
     expect(wrapper.text()).toContain("该反馈当前不能关闭");

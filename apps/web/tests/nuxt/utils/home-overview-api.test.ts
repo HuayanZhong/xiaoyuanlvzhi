@@ -92,6 +92,7 @@ describe("load home overview", () => {
     expect(overview.tasks.map((item) => item.id)).toEqual([7]);
     expect(overview.plantsError).toBe("");
     expect(overview.plants.map((item) => item.plantId)).toEqual([10]);
+    expect(overview.recentCheckins.map((item) => item.id)).toEqual([12]);
   });
 
   it("isolates a pending request failure", async () => {

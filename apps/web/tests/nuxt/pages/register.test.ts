@@ -8,7 +8,6 @@ import {
 } from "~/utils/auth-api";
 import { ApiError } from "~/utils/api";
 import { resetAuthForTests } from "~/composables/useAuth";
-import { getToken } from "~/utils/token";
 import RegisterPage from "../../../app/pages/register.vue";
 
 vi.mock("~/utils/auth-api", () => ({
@@ -50,8 +49,6 @@ function student(overrides: Partial<StudentAccount> = {}): StudentAccount {
 
 function session(overrides: Partial<StudentAccount> = {}) {
   return {
-    tokenType: "Bearer",
-    accessToken: "issued-token",
     expiresAt: "2026-11-08T09:00:00",
     account: student(overrides),
   };
@@ -185,7 +182,6 @@ describe("register page", () => {
       className: "软件工程 1 班",
       phone: "13800138000",
     });
-    expect(getToken()).toBe("issued-token");
     expect(navigateToMock).toHaveBeenCalledWith("/");
   });
 
@@ -203,6 +199,5 @@ describe("register page", () => {
       (wrapper.get("#register-student-number").element as HTMLInputElement)
         .value,
     ).toBe("00260001");
-    expect(getToken()).toBeNull();
   });
 });

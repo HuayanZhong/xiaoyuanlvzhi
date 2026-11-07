@@ -61,7 +61,8 @@ describe("App", () => {
     await flushPromises();
 
     expect(wrapper.find(".app-shell").exists()).toBe(true);
-    expect(wrapper.find(".ui-bottom-nav").exists()).toBe(true);
+    expect(wrapper.find(".app-header").exists()).toBe(true);
+    expect(wrapper.find(".ui-bottom-nav").exists()).toBe(false);
     expect(wrapper.text()).toContain("你好，张三");
   });
 });

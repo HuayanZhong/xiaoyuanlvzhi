@@ -4,7 +4,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { loginWithEmail, type StudentAccount } from "~/utils/auth-api";
 import { ApiError } from "~/utils/api";
 import { resetAuthForTests } from "~/composables/useAuth";
-import { getToken } from "~/utils/token";
 import LoginPage from "../../../app/pages/login.vue";
 
 vi.mock("~/utils/auth-api", () => ({
@@ -45,8 +44,6 @@ function student(overrides: Partial<StudentAccount> = {}): StudentAccount {
 
 function session(overrides: Partial<StudentAccount> = {}) {
   return {
-    tokenType: "Bearer",
-    accessToken: "issued-token",
     expiresAt: "2026-11-08T09:00:00",
     account: student(overrides),
   };
@@ -79,7 +76,7 @@ describe("login page", () => {
     expect(loginMock).not.toHaveBeenCalled();
   });
 
-  it("logs in, stores the token and returns to the requested path", async () => {
+  it("logs in, establishes the account state and returns to the requested path", async () => {
     loginMock.mockResolvedValue(session());
     const wrapper = await mountSuspended(LoginPage, {
       route: "/login?returnTo=%2Fme",
@@ -90,7 +87,6 @@ describe("login page", () => {
     await submit(wrapper);
 
     expect(loginMock).toHaveBeenCalledWith("student@qq.com", "password123");
-    expect(getToken()).toBe("issued-token");
     expect(navigateToMock).toHaveBeenCalledWith("/me");
   });
 
@@ -106,7 +102,6 @@ describe("login page", () => {
 
     expect(wrapper.text()).toContain("邮箱或密码错误");
     expect(wrapper.text()).not.toContain("登录已过期");
-    expect(getToken()).toBeNull();
   });
 
   it("disables the button while the request is pending", async () => {

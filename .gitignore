@@ -35,3 +35,7 @@ yarn-error.log*
 # Local design workflow artifacts
 .screenshots/
 .superpowers/
+
+output/
+.playwright-cli/
+.codex/

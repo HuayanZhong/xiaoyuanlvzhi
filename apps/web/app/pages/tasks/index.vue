@@ -13,6 +13,7 @@ import {
   remainingQuota,
   taskStatusMeta,
 } from "~/utils/task-status";
+import { ECO_ACTION_IMAGE } from "~/utils/plant-media";
 
 const FILTERS = [
   { key: "all", label: "全部" },
@@ -102,8 +103,8 @@ function load() {
   <section class="tasks-page">
     <UiPageHeader
       eyebrow="环保任务"
-      title="任务"
-      subtitle="报名后提交完成凭证，审核通过按任务奖励发放积分。"
+      title="今天，做一点绿色的事"
+      subtitle="选择一项真实可完成的行动。提交凭证后，审核通过即获得环保积分。"
       :meta="`${allTasks.length} 项任务`"
     />
 
@@ -134,16 +135,24 @@ function load() {
       description="切换筛选，或稍后再来看看新的环保任务。"
     />
 
-    <ul v-else class="tasks-page__list">
+    <TransitionGroup v-else name="task-list" tag="ul" class="tasks-page__list">
       <li
-        v-for="task in tasks"
+        v-for="(task, index) in tasks"
         :key="task.id"
         class="tasks-page__card"
-        :class="{ 'tasks-page__card--covered': task.coverFileId }"
+        :class="{
+          'tasks-page__card--covered': task.coverFileId,
+          'tasks-page__card--featured': index === 0,
+        }"
+        data-cursor-hover
       >
-        <span class="tape" aria-hidden="true"></span>
+        <div v-if="index === 0" class="tasks-page__visual" aria-hidden="true">
+          <img :src="ECO_ACTION_IMAGE" alt="" />
+          <span>今日行动</span>
+        </div>
+
         <UiFigure
-          v-if="task.coverFileId"
+          v-else-if="task.coverFileId"
           class="tasks-page__cover"
           :file-id="task.coverFileId"
           :alt="`${task.title}封面`"
@@ -152,11 +161,16 @@ function load() {
 
         <div class="tasks-page__body">
           <div class="tasks-page__head">
-            <h2 class="tasks-page__title">
-              <NuxtLink :to="`/tasks/${task.id}`" class="tasks-page__link">
-                {{ task.title }}
-              </NuxtLink>
-            </h2>
+            <div>
+              <p class="tasks-page__index">
+                {{ String(index + 1).padStart(2, "0") }}
+              </p>
+              <h2 class="tasks-page__title">
+                <NuxtLink :to="`/tasks/${task.id}`" class="tasks-page__link">
+                  {{ task.title }}
+                </NuxtLink>
+              </h2>
+            </div>
             <UiStatusChip :tone="taskStatusMeta(task.status).tone">
               {{ taskStatusMeta(task.status).label }}
             </UiStatusChip>
@@ -185,12 +199,13 @@ function load() {
 
           <div class="tasks-page__foot">
             <NuxtLink :to="`/tasks/${task.id}`" class="tasks-page__action">
-              查看任务
+              查看行动
+              <span aria-hidden="true">↗</span>
             </NuxtLink>
           </div>
         </div>
       </li>
-    </ul>
+    </TransitionGroup>
   </section>
 </template>
 
@@ -198,24 +213,24 @@ function load() {
 .tasks-page {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
-  padding-bottom: var(--space-5);
+  gap: 2.5rem;
+  padding-bottom: 2rem;
 }
 
 .tasks-page__filters {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
-  padding-bottom: var(--space-3);
+  gap: 0.5rem;
+  padding-bottom: 1.5rem;
   border-bottom: var(--border-line);
 }
 
 .tasks-page__filter {
   min-height: var(--touch-target);
-  padding: 0 var(--space-4);
-  background: var(--color-surface);
-  border: var(--border-strong);
-  border-radius: var(--radius-chip);
+  padding: 0 1rem;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-control);
   color: var(--color-subtle);
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-semibold);
@@ -226,9 +241,8 @@ function load() {
 }
 
 .tasks-page__filter--active {
-  background: var(--color-leaf);
-  border-color: var(--color-leaf);
-  color: var(--color-on-leaf);
+  background: var(--color-deep-pine);
+  color: var(--color-on-deep-pine);
 }
 
 .tasks-page__error {
@@ -237,7 +251,7 @@ function load() {
 
 .tasks-page__list {
   display: grid;
-  gap: var(--space-5);
+  gap: 1rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -246,12 +260,61 @@ function load() {
 .tasks-page__card {
   position: relative;
   display: grid;
-  gap: var(--space-4);
-  padding: var(--space-5) var(--space-4) var(--space-4);
+  grid-template-columns: 8rem minmax(0, 1fr);
+  gap: 1.5rem;
+  overflow: hidden;
+  min-height: 9rem;
+  padding: 1.25rem;
   background: var(--color-surface);
   border: var(--border-line);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-paper);
+  box-shadow: none;
+  transition:
+    border-color var(--motion-color),
+    box-shadow var(--motion-color),
+    transform var(--motion-color);
+}
+
+.tasks-page__card:hover {
+  border-color: var(--color-leaf);
+  box-shadow: 0 18px 44px -42px var(--color-shadow-strong);
+}
+
+.tasks-page__card--featured {
+  grid-template-columns: 5fr 7fr;
+  min-height: 26rem;
+  padding: 0;
+  background: var(--color-deep-pine);
+  color: var(--color-on-deep-pine);
+}
+
+.tasks-page__visual {
+  position: relative;
+  min-height: 26rem;
+  overflow: hidden;
+}
+
+.tasks-page__visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--motion-image);
+}
+
+.tasks-page__card--featured:hover .tasks-page__visual img {
+  transform: scale(1.025);
+}
+
+.tasks-page__visual span {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  padding: 0.35rem 0.6rem;
+  background: var(--color-citron);
+  border-radius: var(--radius-sticker);
+  color: var(--palette-ink);
+  font-size: var(--font-size-label);
+  font-weight: 600;
 }
 
 .tasks-page__cover {
@@ -261,8 +324,20 @@ function load() {
 .tasks-page__body {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: 1.5rem;
   min-width: 0;
+}
+
+.tasks-page__card:not(.tasks-page__card--covered):not(
+    .tasks-page__card--featured
+  )
+  .tasks-page__body {
+  grid-column: 1 / -1;
+}
+
+.tasks-page__card--featured .tasks-page__body {
+  justify-content: center;
+  padding: 2.5rem;
 }
 
 .tasks-page__head {
@@ -275,11 +350,22 @@ function load() {
 
 .tasks-page__title {
   margin: 0;
-  font-family: var(--font-kai);
+  font-family: var(--font-display);
   font-size: var(--font-size-title);
-  font-weight: var(--font-weight-regular);
+  font-weight: 600;
   letter-spacing: var(--tracking-display);
   line-height: var(--line-height-title);
+}
+
+.tasks-page__index {
+  margin: 0 0 0.5rem;
+  color: var(--color-subtle);
+  font-family: var(--font-number);
+  font-size: var(--font-size-small);
+}
+
+.tasks-page__card--featured .tasks-page__index {
+  color: color-mix(in srgb, var(--color-on-leaf) 58%, transparent);
 }
 
 .tasks-page__link {
@@ -290,6 +376,25 @@ function load() {
 
 .tasks-page__link:hover {
   color: var(--color-leaf);
+}
+
+.tasks-page__card--featured .tasks-page__link {
+  color: var(--color-on-deep-pine);
+  font-size: var(--font-size-number-large);
+  line-height: 1.2;
+}
+
+.tasks-page__card--featured :deep(.ui-tag-row) {
+  border-bottom-color: color-mix(
+    in srgb,
+    var(--color-on-deep-pine) 16%,
+    transparent
+  );
+}
+
+.tasks-page__card--featured :deep(.ui-tag-row__label),
+.tasks-page__card--featured :deep(.ui-tag-row__value) {
+  color: color-mix(in srgb, var(--color-on-deep-pine) 76%, transparent);
 }
 
 .tasks-page__rows {
@@ -311,18 +416,45 @@ function load() {
   color: var(--color-leaf);
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-semibold);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration: none;
 }
 
-@media (min-width: 48rem) {
-  .tasks-page__card--covered {
-    grid-template-columns: 9rem minmax(0, 1fr);
-    align-items: start;
+.tasks-page__action span {
+  transition: transform var(--motion-hover);
+}
+
+.tasks-page__action:hover span {
+  transform: translate(3px, -3px);
+}
+
+.tasks-page__cover {
+  width: 8rem;
+}
+
+.task-list-enter-active,
+.task-list-leave-active {
+  transition:
+    opacity var(--motion-enter),
+    transform var(--motion-enter);
+}
+
+.task-list-enter-from,
+.task-list-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.task-list-move {
+  transition: transform var(--motion-enter);
+}
+
+@media (max-width: 81rem) {
+  .tasks-page__card--featured {
+    min-height: 23rem;
   }
 
-  .tasks-page__cover {
-    width: 9rem;
+  .tasks-page__visual {
+    min-height: 23rem;
   }
 }
 </style>

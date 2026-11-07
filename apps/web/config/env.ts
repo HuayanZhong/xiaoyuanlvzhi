@@ -1,4 +1,4 @@
-import { envIntString, envOptionalString, parseEnv, z } from "@repo/env";
+import { envIntString, parseEnv, z } from "@repo/env";
 
 const DEFAULT_SPRING_API_ORIGIN = "http://localhost:8080";
 
@@ -13,7 +13,6 @@ const SpringApiOriginSchema = z
 
 const WebEnvSchema = z.object({
   WEB_PORT: envIntString().default(4000),
-  API_BASE_URL: envOptionalString(),
   SPRING_API_ORIGIN: SpringApiOriginSchema,
 });
 

@@ -60,7 +60,7 @@ async function clickDialogButton(
   wrapper: Awaited<ReturnType<typeof mountPage>>,
   label: string,
 ) {
-  const dialog = wrapper.get('[role="dialog"]');
+  const dialog = wrapper.get('[role="alertdialog"]');
   const button = dialog.findAll("button").find((item) => item.text() === label);
 
   expect(button).toBeDefined();

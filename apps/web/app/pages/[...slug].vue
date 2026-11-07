@@ -8,7 +8,6 @@ const label = computed(() => (isAuthenticated.value ? "返回首页" : "前往�
 <template>
   <section class="not-found">
     <div class="not-found__card">
-      <span class="tape" aria-hidden="true"></span>
       <p class="not-found__code">404</p>
       <h1 class="not-found__title">页面不存在</h1>
       <p class="not-found__description">你访问的页面可能已被移动或删除。</p>

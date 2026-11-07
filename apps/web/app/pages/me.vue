@@ -1,11 +1,14 @@
 <script setup lang="ts">
+import { LogOut } from "lucide-vue-next";
 import { resolveActionError } from "~/utils/action-errors";
 import { resolveRequestError } from "~/utils/auth-errors";
 import { loadNotificationSnapshot } from "~/utils/notification-api";
 import { clearHomeProfileCache } from "~/utils/profile-cache";
 import { getStudentProfile, updateStudentProfile } from "~/utils/profile-api";
+import { SwitchRoot, SwitchThumb } from "reka-ui";
 
 const { logout } = useAuth();
+const cursor = useSuperMouseCursor();
 
 const {
   data,
@@ -213,9 +216,9 @@ async function confirmLogout() {
 <template>
   <section class="me-page">
     <UiPageHeader
-      eyebrow="我的账号"
+      eyebrow="我的档案"
       :title="pageTitle"
-      subtitle="账号资料与登录状态"
+      subtitle="你的植物、行动与账号信息都在这里。"
       :meta="
         profile?.studentNumber ? `编号 ${profile.studentNumber}` : undefined
       "
@@ -231,8 +234,15 @@ async function confirmLogout() {
     <template v-else-if="profile">
       <div class="me-page__sheet">
         <aside class="me-page__identity">
-          <span class="tape" aria-hidden="true"></span>
-          <p class="me-page__identity-label">学生</p>
+          <div class="me-page__identity-head">
+            <div class="me-page__avatar" aria-hidden="true">
+              {{ displayName.slice(0, 1) }}
+            </div>
+            <div class="me-page__identity-heading">
+              <p class="me-page__identity-label">学生档案</p>
+              <p class="me-page__identity-name">{{ displayName }}</p>
+            </div>
+          </div>
           <dl class="me-page__identity-meta">
             <div>
               <dt>学号</dt>
@@ -247,7 +257,7 @@ async function confirmLogout() {
         </aside>
 
         <div class="me-page__record">
-          <FolioSection title="登记资料">
+          <FolioSection class="me-page__folio" title="登记资料">
             <Ledger>
               <TagRow
                 v-for="row in recordRows"
@@ -315,7 +325,7 @@ async function confirmLogout() {
             </UiButton>
           </FolioSection>
 
-          <FolioSection title="积分与领养">
+          <FolioSection class="me-page__folio" title="积分与领养">
             <Ledger>
               <template v-for="row in dataRows" :key="row.label">
                 <NuxtLink v-if="row.to" :to="row.to" class="me-page__row-link">
@@ -345,7 +355,7 @@ async function confirmLogout() {
             </NuxtLink>
           </FolioSection>
 
-          <FolioSection title="账号服务">
+          <FolioSection class="me-page__folio" title="账号服务">
             <Ledger>
               <NuxtLink to="/notifications" class="me-page__row-link">
                 <TagRow label="通知" :value="notificationValue" />
@@ -354,6 +364,29 @@ async function confirmLogout() {
                 <TagRow label="问题反馈" value="提交问题并查看回复" />
               </NuxtLink>
             </Ledger>
+          </FolioSection>
+
+          <FolioSection class="me-page__folio" title="偏好设置">
+            <div class="me-page__preference">
+              <div class="me-page__preference-copy">
+                <p>鼠标指针效果</p>
+                <span id="cursor-effect-help" class="me-page__preference-help">
+                  在精细指针且未开启系统减弱动效时显示品牌指针。
+                </span>
+              </div>
+              <SwitchRoot
+                class="cursor-switch"
+                :model-value="cursor.preference.value"
+                aria-label="鼠标指针效果"
+                aria-describedby="cursor-effect-help"
+                @update:model-value="cursor.setPreference"
+              >
+                <span class="cursor-switch__label" aria-hidden="true">
+                  {{ cursor.preference.value ? "开" : "关" }}
+                </span>
+                <SwitchThumb class="cursor-switch__thumb" />
+              </SwitchRoot>
+            </div>
           </FolioSection>
 
           <UiEmptyState
@@ -366,7 +399,12 @@ async function confirmLogout() {
             <p class="me-page__actions-note">
               退出后需要重新登录才能查看个人资料。
             </p>
-            <UiButton variant="danger" @click="confirming = true">
+            <UiButton
+              class="me-page__logout-button"
+              variant="danger"
+              @click="confirming = true"
+            >
+              <LogOut :size="16" :stroke-width="1.8" aria-hidden="true" />
               退出登录
             </UiButton>
           </div>
@@ -391,7 +429,7 @@ async function confirmLogout() {
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
-  padding-bottom: var(--space-5);
+  padding-bottom: 2rem;
 }
 
 .me-page__error-text {
@@ -400,33 +438,83 @@ async function confirmLogout() {
 
 .me-page__sheet {
   display: grid;
-  gap: var(--space-6);
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 1.5rem;
   align-items: start;
 }
 
 .me-page__identity {
+  grid-column: span 4;
   position: relative;
-  padding: var(--space-5);
-  background: var(--color-surface);
-  border: var(--border-line);
+  overflow: hidden;
+  padding: var(--space-6);
+  background: var(--color-deep-pine);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-paper);
+  box-shadow: none;
+  color: var(--color-on-deep-pine);
+}
+
+.me-page__identity::after {
+  position: absolute;
+  right: -4rem;
+  bottom: -5rem;
+  width: 12rem;
+  height: 12rem;
+  border: 1px solid color-mix(in srgb, var(--color-on-forest) 14%, transparent);
+  border-radius: 50%;
+  content: "";
+}
+
+.me-page__identity-head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.me-page__avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  background: var(--color-sticker);
+  border-radius: 50%;
+  color: var(--color-on-sticker);
+  font-family: var(--font-display);
+  font-size: var(--font-size-title);
+}
+
+.me-page__identity-heading {
+  min-width: 0;
 }
 
 .me-page__identity-label {
   margin: 0;
-  color: var(--color-subtle);
+  color: color-mix(in srgb, var(--color-on-forest) 58%, transparent);
   font-size: var(--font-size-label);
   letter-spacing: var(--tracking-label);
 }
 
+.me-page__identity-name {
+  margin: var(--space-1) 0 0;
+  color: var(--color-on-deep-pine);
+  font-family: var(--font-display);
+  font-size: var(--font-size-title);
+  overflow-wrap: anywhere;
+}
+
 .me-page__identity-meta {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  margin: var(--space-4) 0 var(--space-4);
-  padding-top: var(--space-3);
-  border-top: var(--border-line);
+  margin: var(--space-5) 0;
+  padding-top: var(--space-4);
+  border-top: 1px solid
+    color-mix(in srgb, var(--color-on-forest) 16%, transparent);
 }
 
 .me-page__identity-meta div {
@@ -437,22 +525,50 @@ async function confirmLogout() {
 }
 
 .me-page__identity-meta dt {
-  color: var(--color-subtle);
+  color: color-mix(in srgb, var(--color-on-forest) 58%, transparent);
   font-size: var(--font-size-label);
   letter-spacing: var(--tracking-label);
 }
 
 .me-page__identity-meta dd {
   margin: 0;
-  color: var(--color-ink);
+  color: var(--color-on-deep-pine);
   font-size: var(--font-size-small);
 }
 
+.me-page__identity :deep(.ui-status-chip) {
+  position: relative;
+  z-index: 1;
+  background: color-mix(in srgb, var(--color-on-forest) 10%, transparent);
+  color: var(--color-on-deep-pine);
+}
+
+.me-page__identity :deep(.ui-status-chip::before) {
+  background: var(--color-sticker);
+}
+
 .me-page__record {
+  grid-column: span 8;
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
   min-width: 0;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.me-page__folio {
+  padding: 0 0 2rem;
+  margin-bottom: 2rem;
+  border-bottom: var(--border-line);
+}
+
+.me-page__folio:last-of-type {
+  border-bottom: 0;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0;
 }
 
 .me-page__row-link {
@@ -482,8 +598,9 @@ async function confirmLogout() {
   flex-direction: column;
   gap: var(--space-3);
   margin-top: var(--space-4);
-  padding-top: var(--space-4);
-  border-top: var(--border-line);
+  padding: var(--space-4);
+  background: var(--color-surface-muted);
+  border-radius: var(--radius-card);
 }
 
 .me-page__edit-actions {
@@ -502,24 +619,261 @@ async function confirmLogout() {
 .me-page__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-4);
+  gap: var(--space-3);
   align-items: center;
   justify-content: space-between;
-  padding-top: var(--space-4);
-  border-top: var(--border-line);
+  margin: 1rem 0 0;
+  padding: 1rem 1.25rem;
+  background: var(--color-blush-wash);
+  border: 1px solid color-mix(in srgb, var(--color-clay) 52%, var(--color-line));
+  border-radius: var(--radius-card);
 }
 
 .me-page__actions-note {
   max-width: 26rem;
   margin: 0;
+  color: var(--color-ink);
+  font-size: var(--font-size-small);
+}
+
+.me-page__logout-button {
+  flex: none;
+  min-height: 2.75rem;
+  padding-inline: 1.15rem 1.3rem;
+  background: color-mix(
+    in srgb,
+    var(--color-surface-raised) 88%,
+    var(--color-blush-wash)
+  );
+  border-color: color-mix(in srgb, var(--color-clay) 62%, var(--color-line));
+  border-radius: var(--radius-chip);
+  color: var(--palette-blush);
+  box-shadow: 0 8px 20px -15px var(--color-shadow-strong);
+  transform-origin: center;
+  transition:
+    transform 420ms cubic-bezier(0.22, 1.35, 0.36, 1),
+    background-color var(--motion-color),
+    border-color var(--motion-color),
+    box-shadow var(--motion-hover);
+  will-change: transform;
+}
+
+.me-page__logout-button:not(:disabled):hover {
+  background: var(--color-surface-raised);
+  border-color: var(--color-clay);
+  box-shadow: 0 12px 24px -18px var(--color-shadow-strong);
+  animation: me-logout-jelly 620ms cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+
+.me-page__logout-button:not(:disabled):active {
+  animation: none;
+  transform: scale(0.93, 0.88);
+  transition-duration: 120ms;
+}
+
+.me-page__logout-button :deep(.ui-button__content) {
+  gap: 0.45rem;
+}
+
+.me-page__logout-button :deep(svg) {
+  flex: none;
+}
+
+@keyframes me-logout-jelly {
+  0% {
+    transform: scale(1);
+  }
+
+  22% {
+    transform: scale(1.045, 0.94) translateY(1px);
+  }
+
+  43% {
+    transform: scale(0.975, 1.03) translateY(-1px);
+  }
+
+  64% {
+    transform: scale(1.018, 0.988);
+  }
+
+  82% {
+    transform: scale(0.995, 1.006);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.me-page__identity {
+  position: sticky;
+  top: calc(var(--masthead-height) + 1rem);
+}
+
+.me-page__preference {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2rem;
+  align-items: start;
+}
+
+.me-page__preference-copy p,
+.me-page__preference-help {
+  margin: 0;
+}
+
+.me-page__preference-copy p {
+  color: var(--color-ink);
+  font-size: var(--font-size-body);
+  font-weight: 600;
+  line-height: 2rem;
+}
+
+.me-page__preference-help {
+  display: block;
+  max-width: 34rem;
+  margin-top: 0.35rem;
   color: var(--color-subtle);
   font-size: var(--font-size-small);
 }
 
-@media (min-width: 48rem) {
-  .me-page__sheet {
-    grid-template-columns: minmax(16rem, 4fr) minmax(0, 8fr);
-    gap: var(--space-8);
+.cursor-switch {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  width: 3.75rem;
+  height: 2rem;
+  padding: 0.25rem;
+  background: color-mix(
+    in srgb,
+    var(--color-surface-muted) 78%,
+    var(--color-surface-raised)
+  );
+  border: 1px solid
+    color-mix(in srgb, var(--color-line-strong) 72%, transparent);
+  border-radius: var(--radius-chip);
+  box-shadow: inset 0 1px 2px var(--color-shadow);
+  transition:
+    background-color var(--motion-color),
+    border-color var(--motion-color),
+    transform 360ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow var(--motion-color);
+}
+
+.cursor-switch[data-state="checked"] {
+  background: var(--color-deep-pine);
+  border-color: var(--color-deep-pine);
+}
+
+.cursor-switch .cursor-switch__label {
+  position: absolute;
+  top: 50%;
+  max-width: none;
+  margin: 0;
+  color: var(--color-subtle);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  pointer-events: none;
+  transform: translateY(-50%);
+  transition:
+    color var(--motion-color),
+    opacity var(--motion-color);
+}
+
+.cursor-switch[data-state="unchecked"] .cursor-switch__label {
+  right: 0.625rem;
+}
+
+.cursor-switch[data-state="checked"] .cursor-switch__label {
+  left: 0.625rem;
+  color: color-mix(in srgb, var(--color-on-deep-pine) 72%, transparent);
+}
+
+.cursor-switch:hover:not(:disabled) {
+  border-color: var(--color-line-strong);
+  transform: scale(1.02, 0.98);
+}
+
+.cursor-switch:active:not(:disabled) {
+  transform: scale(0.96, 0.92);
+}
+
+.cursor-switch:active:not(:disabled) .cursor-switch__thumb {
+  transform: scale(1.12, 0.88);
+}
+
+.cursor-switch:active:not(:disabled)
+  .cursor-switch__thumb[data-state="checked"] {
+  transform: translateX(1.625rem) scale(1.12, 0.88);
+}
+
+.cursor-switch:disabled {
+  opacity: 0.45;
+}
+
+.cursor-switch:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.cursor-switch__thumb {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0;
+  background: var(--color-surface-raised);
+  border: 1px solid
+    color-mix(in srgb, var(--color-line-strong) 42%, transparent);
+  border-radius: 50%;
+  box-shadow:
+    0 2px 6px var(--color-shadow-strong),
+    inset 0 1px 0 color-mix(in srgb, white 72%, transparent);
+  transform: none;
+  transition:
+    transform 520ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color var(--motion-color),
+    border-color var(--motion-color),
+    box-shadow var(--motion-color);
+}
+
+.cursor-switch__thumb[data-state="checked"] {
+  background: var(--color-citron);
+  border-color: transparent;
+  box-shadow:
+    0 3px 8px color-mix(in srgb, var(--color-deep-pine) 32%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 58%, transparent);
+  transform: translateX(1.625rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .me-page__logout-button {
+    transform: none !important;
+  }
+
+  .me-page__logout-button:not(:disabled):hover {
+    animation: none;
+  }
+
+  .cursor-switch,
+  .cursor-switch__thumb {
+    transition-duration: 0.01ms !important;
+  }
+
+  .cursor-switch:hover:not(:disabled),
+  .cursor-switch:active:not(:disabled) {
+    transform: none;
+  }
+
+  .cursor-switch:active .cursor-switch__thumb {
+    transform: none;
+  }
+
+  .cursor-switch:active .cursor-switch__thumb[data-state="checked"] {
+    transform: translateX(1.625rem);
   }
 }
 </style>

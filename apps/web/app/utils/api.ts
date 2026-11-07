@@ -1,12 +1,5 @@
-import { createHttpClient, type KyInstance } from "@repo/http-client";
-import { getToken } from "./token";
-
-/** Spring 的统一响应信封。 */
-export type SpringEnvelope<T> = {
-  success: boolean;
-  data: T | null;
-  error: { code: string; message: string } | null;
-};
+import type { $Fetch } from "nitropack";
+import type { SpringEnvelope } from "~~/shared/utils/api";
 
 /** 适配层对页面暴露的稳定错误对象。 */
 export class ApiError extends Error {
@@ -22,51 +15,31 @@ export class ApiError extends Error {
 }
 
 export type ApiRequestOptions = {
-  method?: "GET" | "POST" | "PUT" | "DELETE";
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;
-  /** 显式 token 只用于注销等一次性请求；`undefined` 读取当前登录态，`null` 表示匿名。 */
-  token?: string | null;
   signal?: AbortSignal;
-  retry?: number;
-  /** 注销等无返回数据的操作传 `false`；默认要求成功响应带 data。 */
+  /** 注销等无返回数据的操作传 `false`。 */
+  expectData?: boolean;
+};
+
+export type FormRequestOptions = {
+  signal?: AbortSignal;
   expectData?: boolean;
 };
 
 export type ApiClientOptions = {
-  baseUrl: string;
-  client?: KyInstance;
-  fetch?: typeof globalThis.fetch;
-  getToken?: () => string | null;
+  fetch: $Fetch;
   onUnauthorized?: () => void;
-};
-
-export type BlobRequestOptions = {
-  /** 与 `request` 一致：`undefined` 读取当前登录态，`null` 表示匿名。 */
-  token?: string | null;
-  signal?: AbortSignal;
-};
-
-export type FormRequestOptions = {
-  /** 与 `request` 一致：`undefined` 读取当前登录态，`null` 表示匿名。 */
-  token?: string | null;
-  signal?: AbortSignal;
-  retry?: number;
-  expectData?: boolean;
 };
 
 export type ApiClient = {
   request<T>(path: string, options?: ApiRequestOptions): Promise<T>;
-  /**
-   * 以 multipart/form-data 提交表单。不设置 Content-Type，由浏览器补 boundary；
-   * 上传默认不重试，避免重复创建文件。
-   */
   requestForm<T>(
     path: string,
     form: FormData,
     options?: FormRequestOptions,
   ): Promise<T>;
-  /** 读取二进制资源；不解析 Spring 的 JSON 信封。 */
-  requestBlob(path: string, options?: BlobRequestOptions): Promise<Blob>;
+  requestBlob(path: string, options?: { signal?: AbortSignal }): Promise<Blob>;
 };
 
 const AUTH_ACTION_PREFIXES = [
@@ -77,19 +50,12 @@ const AUTH_ACTION_PREFIXES = [
 ];
 
 /**
- * 创建学生端 API 适配层。
+ * 以 Nuxt `$fetch` 为唯一传输层，统一解析 Spring 响应信封。
  *
- * `@repo/http-client` 只负责传输；Spring 信封、Bearer 注入和 401 事件
- * 都留在这里。请求路径必须相对 base URL，避免绕过 `/api/v1/`。
+ * 所有路径都保持相对同源 `/api/v1/`，SSR 由 `useRequestFetch` 把当前请求
+ * 带入 Nitro，浏览器则由同一 Cookie 驱动服务端认证。
  */
 export function createApiClient(options: ApiClientOptions): ApiClient {
-  const client =
-    options.client ??
-    createHttpClient({
-      baseUrl: options.baseUrl,
-      ...(options.fetch ? { fetch: options.fetch } : {}),
-    });
-  const readToken = options.getToken ?? getToken;
   const onUnauthorized = options.onUnauthorized ?? (() => {});
 
   return {
@@ -99,28 +65,17 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
       const {
         method = "GET",
         body,
-        token,
         signal,
-        retry,
         expectData = true,
       } = requestOptions;
-      const headers = new Headers();
-      const accessToken = token === undefined ? readToken() : token;
-
-      if (accessToken) {
-        headers.set("Authorization", `Bearer ${accessToken}`);
-      }
-
-      let response: Response;
+      let response;
 
       try {
-        response = await client(path, {
+        response = await options.fetch.raw<SpringEnvelope<T>>(`/${path}`, {
           method,
-          headers,
+          body: body as BodyInit | Record<string, unknown> | undefined,
           signal,
-          retry: retry ?? (isAuthAction(path) ? 0 : undefined),
-          throwHttpErrors: false,
-          ...(body === undefined ? {} : { json: body }),
+          ignoreResponseError: true,
         });
       } catch (error) {
         throw transportError(error);
@@ -130,7 +85,8 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
         onUnauthorized();
       }
 
-      return unwrapResponse<T>(response, expectData);
+      // oxlint-disable-next-line eslint/no-underscore-dangle -- ofetch raw response
+      return unwrapEnvelope<T>(response._data, response.status, expectData);
     },
 
     async requestForm<T>(
@@ -140,24 +96,14 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     ) {
       assertRelativePath(path);
 
-      const { token, signal, retry = 0, expectData = true } = formOptions;
-      const headers = new Headers();
-      const accessToken = token === undefined ? readToken() : token;
-
-      if (accessToken) {
-        headers.set("Authorization", `Bearer ${accessToken}`);
-      }
-
-      let response: Response;
+      let response;
 
       try {
-        response = await client(path, {
+        response = await options.fetch.raw<SpringEnvelope<T>>(`/${path}`, {
           method: "POST",
-          headers,
           body: form,
-          signal,
-          retry,
-          throwHttpErrors: false,
+          signal: formOptions.signal,
+          ignoreResponseError: true,
         });
       } catch (error) {
         throw transportError(error);
@@ -167,28 +113,27 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
         onUnauthorized();
       }
 
-      return unwrapResponse<T>(response, expectData);
+      // oxlint-disable-next-line eslint/no-underscore-dangle -- ofetch raw response
+      const data = response._data;
+
+      return unwrapEnvelope<T>(
+        data,
+        response.status,
+        formOptions.expectData ?? true,
+      );
     },
 
-    async requestBlob(path, blobOptions = {}) {
+    async requestBlob(path: string, blobOptions = {}) {
       assertRelativePath(path);
 
-      const headers = new Headers();
-      const accessToken =
-        blobOptions.token === undefined ? readToken() : blobOptions.token;
-
-      if (accessToken) {
-        headers.set("Authorization", `Bearer ${accessToken}`);
-      }
-
-      let response: Response;
+      let response;
 
       try {
-        response = await client(path, {
+        response = await options.fetch.raw<Blob>(`/${path}`, {
           method: "GET",
-          headers,
+          responseType: "blob",
           signal: blobOptions.signal,
-          throwHttpErrors: false,
+          ignoreResponseError: true,
         });
       } catch (error) {
         throw transportError(error);
@@ -198,28 +143,90 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
         onUnauthorized();
       }
 
-      if (!response.ok) {
+      // oxlint-disable-next-line eslint/no-underscore-dangle -- ofetch raw response
+      if (!response.ok || !(response._data instanceof Blob)) {
         throw statusError(response.status);
       }
 
-      try {
-        return await response.blob();
-      } catch {
-        throw new ApiError(
-          "INVALID_RESPONSE",
-          "图片读取失败，请稍后重试",
-          response.status,
-        );
-      }
+      // oxlint-disable-next-line eslint/no-underscore-dangle -- ofetch raw response
+      return response._data;
     },
   };
+}
+
+function wrapEnvelopeData<T>(value: unknown): {
+  envelope: SpringEnvelope<T> | null;
+  status: number;
+} {
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "success" in value &&
+    typeof value.success === "boolean"
+  ) {
+    return { envelope: value as SpringEnvelope<T>, status: 200 };
+  }
+
+  return { envelope: null, status: 200 };
+}
+
+function unwrapEnvelope<T>(
+  value: unknown,
+  status: number,
+  expectData: boolean,
+): T {
+  const envelope = parseEnvelope<T>(value);
+  const effectiveStatus = status || wrapEnvelopeData<T>(value).status;
+
+  if (effectiveStatus >= 200 && effectiveStatus < 300) {
+    if (!envelope) {
+      throw new ApiError(
+        "INVALID_RESPONSE",
+        "服务返回了无法识别的响应",
+        effectiveStatus,
+      );
+    }
+
+    if (!envelope.success) {
+      throw businessError(envelope, effectiveStatus);
+    }
+
+    if (envelope.data === null && expectData) {
+      throw new ApiError(
+        "EMPTY_RESPONSE",
+        "服务未返回数据，请稍后重试",
+        effectiveStatus,
+      );
+    }
+
+    return envelope.data as T;
+  }
+
+  if (envelope && !envelope.success && envelope.error) {
+    throw businessError(envelope, effectiveStatus);
+  }
+
+  throw statusError(effectiveStatus);
+}
+
+function parseEnvelope<T>(value: unknown): SpringEnvelope<T> | null {
+  if (
+    typeof value !== "object" ||
+    value === null ||
+    !("success" in value) ||
+    typeof value.success !== "boolean"
+  ) {
+    return null;
+  }
+
+  return value as SpringEnvelope<T>;
 }
 
 function assertRelativePath(path: string): void {
   if (path.startsWith("/") || /^[a-z][a-z0-9+.-]*:/i.test(path)) {
     throw new ApiError(
       "INVALID_REQUEST_PATH",
-      "API 请求路径必须相对于配置的 base URL",
+      "API 请求路径必须相对于 /api/v1/",
     );
   }
 }
@@ -228,87 +235,13 @@ function isAuthAction(path: string): boolean {
   return AUTH_ACTION_PREFIXES.some((prefix) => path.startsWith(prefix));
 }
 
-async function unwrapResponse<T>(
-  response: Response,
-  expectData: boolean,
-): Promise<T> {
-  const envelope = await readEnvelope(response);
-
-  if (response.ok) {
-    if (!envelope) {
-      throw new ApiError(
-        "INVALID_RESPONSE",
-        "服务返回了无法识别的响应",
-        response.status,
-      );
-    }
-
-    if (!envelope.success) {
-      throw businessError(envelope, response.status);
-    }
-
-    if (envelope.data === null && expectData) {
-      throw new ApiError(
-        "EMPTY_RESPONSE",
-        "服务未返回数据，请稍后重试",
-        response.status,
-      );
-    }
-
-    return envelope.data as T;
-  }
-
-  if (envelope && !envelope.success && envelope.error) {
-    throw new ApiError(
-      envelope.error.code,
-      envelope.error.message,
-      response.status,
-    );
-  }
-
-  throw statusError(response.status);
-}
-
-async function readEnvelope(
-  response: Response,
-): Promise<SpringEnvelope<unknown> | null> {
-  const text = await response.text();
-
-  if (!text) {
-    return null;
-  }
-
-  try {
-    const value: unknown = JSON.parse(text);
-
-    if (isEnvelope(value)) {
-      return value;
-    }
-
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-function isEnvelope(value: unknown): value is SpringEnvelope<unknown> {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "success" in value &&
-    typeof (value as { success: unknown }).success === "boolean"
-  );
-}
-
-function businessError(
-  envelope: SpringEnvelope<unknown>,
+function businessError<T>(
+  envelope: SpringEnvelope<T>,
   status: number,
 ): ApiError {
-  const error = envelope.error;
-
   return new ApiError(
-    error?.code ?? "UNKNOWN_ERROR",
-    error?.message ?? "请求失败，请稍后重试",
+    envelope.error?.code ?? "UNKNOWN_ERROR",
+    envelope.error?.message ?? "请求失败，请稍后重试",
     status,
   );
 }
@@ -320,6 +253,14 @@ function statusError(status: number): ApiError {
 
   if (status === 403) {
     return new ApiError("FORBIDDEN", "没有权限执行此操作", status);
+  }
+
+  if (status === 502) {
+    return new ApiError(
+      "UPSTREAM_UNAVAILABLE",
+      "服务暂时不可用，请稍后重试",
+      status,
+    );
   }
 
   if (status >= 500) {
@@ -336,3 +277,5 @@ function transportError(error: unknown): ApiError {
 
   return new ApiError("NETWORK_ERROR", "无法连接后端服务，请稍后重试");
 }
+
+export type { SpringEnvelope };

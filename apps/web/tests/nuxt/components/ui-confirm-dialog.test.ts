@@ -8,7 +8,7 @@ describe("UiConfirmDialog", () => {
       props: { open: true, title: "退出登录", message: "确定退出吗？" },
     });
 
-    const dialog = wrapper.get('[role="dialog"]');
+    const dialog = wrapper.get('[role="alertdialog"]');
     expect(dialog.attributes("aria-modal")).toBe("true");
     expect(dialog.text()).toContain("退出登录");
     expect(dialog.text()).toContain("确定退出吗？");
@@ -43,7 +43,9 @@ describe("UiConfirmDialog", () => {
       props: { open: true, title: "退出登录" },
     });
 
-    await wrapper.get('[role="dialog"]').trigger("keydown", { key: "Escape" });
+    await wrapper
+      .get('[role="alertdialog"]')
+      .trigger("keydown", { key: "Escape" });
 
     expect(wrapper.emitted("cancel")).toHaveLength(1);
   });

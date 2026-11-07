@@ -11,34 +11,100 @@ withDefaults(
 
 <template>
   <div class="ui-loading" role="status" aria-live="polite">
-    <span class="ui-loading__spinner" aria-hidden="true" />
-    <span>{{ text }}</span>
+    <span class="ui-loading__sr">{{ text }}</span>
+    <span class="ui-loading__title" aria-hidden="true" />
+    <span class="ui-loading__copy" aria-hidden="true" />
+    <span class="ui-loading__block" aria-hidden="true" />
+    <div class="ui-loading__rows" aria-hidden="true">
+      <span />
+      <span />
+      <span />
+    </div>
   </div>
 </template>
 
 <style scoped>
 .ui-loading {
+  position: relative;
   display: flex;
-  gap: var(--space-2);
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-6) var(--space-4);
-  color: var(--color-subtle);
-  font-size: var(--font-size-small);
+  flex-direction: column;
+  gap: 1rem;
+  overflow: hidden;
+  min-height: 22rem;
+  padding: 2rem;
+  background: var(--color-surface);
+  border: var(--border-line);
+  border-radius: var(--radius-card);
 }
 
-.ui-loading__spinner {
-  width: var(--space-4);
-  height: var(--space-4);
-  border: 2px solid currentcolor;
-  border-right-color: transparent;
-  border-radius: var(--radius-chip);
-  animation: ui-loading-spin var(--motion-spin);
+.ui-loading::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    color-mix(in srgb, var(--palette-white) 50%, transparent) 48%,
+    transparent 76%
+  );
+  content: "";
+  animation: loading-sheen 1.4s ease-in-out infinite;
 }
 
-@keyframes ui-loading-spin {
+.ui-loading__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.ui-loading__title,
+.ui-loading__copy,
+.ui-loading__block,
+.ui-loading__rows span {
+  display: block;
+  background: var(--color-surface-muted);
+  border-radius: 0.25rem;
+}
+
+.ui-loading__title {
+  width: min(42%, 20rem);
+  height: 3.5rem;
+}
+
+.ui-loading__copy {
+  width: min(58%, 30rem);
+  height: 1rem;
+}
+
+.ui-loading__block {
+  flex: 1;
+  min-height: 10rem;
+  margin-top: 0.5rem;
+}
+
+.ui-loading__rows {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.ui-loading__rows span {
+  height: 2.75rem;
+}
+
+@keyframes loading-sheen {
+  from {
+    transform: translateX(-100%);
+  }
+
   to {
-    transform: rotate(360deg);
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-loading::after {
+    display: none;
   }
 }
 </style>

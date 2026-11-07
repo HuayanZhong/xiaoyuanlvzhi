@@ -20,9 +20,11 @@ describe("ThemeToggle", () => {
     const wrapper = await mountSuspended(ThemeToggle);
     const button = wrapper.get("button");
 
-    expect(button.attributes("aria-label")).toBe("切换暗夜模式");
+    expect(button.attributes("aria-label")).toBe("切换至暗夜模式");
     expect(button.attributes("aria-pressed")).toBe("false");
-    expect(button.text()).toContain("暗夜");
+    expect(button.findAll("svg")).toHaveLength(2);
+    expect(button.find(".theme-toggle__icon--sun").exists()).toBe(true);
+    expect(button.find(".theme-toggle__icon--moon").exists()).toBe(true);
 
     await button.trigger("click");
 

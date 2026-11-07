@@ -81,8 +81,33 @@ describe("plants page", () => {
     expect(wrapper.text()).toContain("容易");
     expect(wrapper.text()).toContain("3");
     expect(wrapper.text()).toContain("SP-001");
-    expect(wrapper.text()).toContain("暂无封面");
+    expect(wrapper.text()).toContain("散射光");
+    expect(wrapper.text()).toContain("保持湿润");
+    expect(wrapper.text()).toContain("每 7 天");
+    expect(wrapper.get(".plants-page__visual img").attributes("src")).toContain(
+      "/images/",
+    );
     expect(wrapper.text()).toContain("我的申请");
+  });
+
+  it("uses the dense five-column gallery for five species", async () => {
+    speciesMock.mockResolvedValue(
+      Array.from({ length: 5 }, (_, index) =>
+        species({ id: index + 1, name: `品种 ${index + 1}` }),
+      ),
+    );
+    const wrapper = await mountPage();
+    await flushPromises();
+
+    const items = wrapper.findAll(".plants-page__item");
+
+    expect(items).toHaveLength(5);
+    expect(wrapper.get(".plants-page__grid").classes()).toContain(
+      "plants-page__grid--dense",
+    );
+    expect(
+      items.some((item) => item.classes().some((name) => name.includes("--"))),
+    ).toBe(false);
   });
 
   it("writes filters back to the URL", async () => {
@@ -99,6 +124,47 @@ describe("plants page", () => {
       { path: "/plants", query: { keyword: "绿萝", location: "图书馆" } },
       { replace: true },
     );
+  });
+
+  it("applies difficulty and availability filters from the catalog toolbar", async () => {
+    speciesMock.mockResolvedValue([
+      species({ id: 1, name: "绿萝", difficulty: "EASY" }),
+      species({ id: 2, name: "龟背竹", difficulty: "HARD" }),
+    ]);
+    const wrapper = await mountPage();
+    await flushPromises();
+
+    const challenge = wrapper
+      .findAll(".plants-page__filter-chip")
+      .find((item) => item.text().startsWith("挑战"));
+    await challenge!.trigger("click");
+    await flushPromises();
+
+    expect(navigateToMock).toHaveBeenLastCalledWith(
+      { path: "/plants", query: { difficulty: "HARD" } },
+      { replace: true },
+    );
+
+    await wrapper.get(".plants-page__stock-toggle").trigger("click");
+    await flushPromises();
+
+    expect(navigateToMock).toHaveBeenLastCalledWith(
+      { path: "/plants", query: { difficulty: "HARD", available: "1" } },
+      { replace: true },
+    );
+  });
+
+  it("filters the catalog locally from URL difficulty", async () => {
+    speciesMock.mockResolvedValue([
+      species({ id: 1, name: "绿萝", difficulty: "EASY" }),
+      species({ id: 2, name: "龟背竹", difficulty: "HARD" }),
+    ]);
+    const wrapper = await mountPage("/plants?difficulty=EASY");
+    await flushPromises();
+
+    expect(wrapper.findAll(".plants-page__item")).toHaveLength(1);
+    expect(wrapper.text()).toContain("绿萝");
+    expect(wrapper.text()).not.toContain("龟背竹");
   });
 
   it("explains an empty catalog and links home", async () => {

@@ -10,7 +10,7 @@ describe("student navigation", () => {
     expect(STUDENT_NAV.map((item) => item.label)).toEqual([
       "首页",
       "绿植",
-      "任务",
+      "行动",
       "积分",
       "我的",
     ]);

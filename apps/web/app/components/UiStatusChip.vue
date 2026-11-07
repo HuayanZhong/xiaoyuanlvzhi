@@ -17,12 +17,13 @@ withDefaults(defineProps<{ tone?: StatusTone }>(), {
   display: inline-flex;
   gap: var(--space-1);
   align-items: center;
-  padding: 0.125rem var(--space-2);
-  background: var(--color-ink-wash);
-  border-radius: var(--radius-chip);
+  padding: 0.25rem 0.5rem;
+  background: var(--color-surface-muted);
+  border: var(--border-line);
+  border-radius: var(--radius-sticker);
   color: var(--color-ink);
   font-size: var(--font-size-label);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 600;
   line-height: var(--line-height-small);
   white-space: nowrap;
 }
@@ -37,6 +38,7 @@ withDefaults(defineProps<{ tone?: StatusTone }>(), {
 
 .ui-status-chip--alive {
   background: var(--color-leaf-wash);
+  border-color: transparent;
 }
 
 .ui-status-chip--alive::before {
@@ -44,11 +46,12 @@ withDefaults(defineProps<{ tone?: StatusTone }>(), {
 }
 
 .ui-status-chip--pending::before {
-  background: var(--color-sticker);
+  background: var(--color-citron);
 }
 
 .ui-status-chip--danger {
   background: var(--color-blush-wash);
+  border-color: transparent;
   color: var(--color-blush);
 }
 

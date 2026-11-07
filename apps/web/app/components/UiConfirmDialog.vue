@@ -1,5 +1,14 @@
 <script setup lang="ts">
-const props = withDefaults(
+import {
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogOverlay,
+  AlertDialogRoot,
+  AlertDialogTitle,
+} from "reka-ui";
+
+withDefaults(
   defineProps<{
     open: boolean;
     title: string;
@@ -20,127 +29,116 @@ const emit = defineEmits<{
   cancel: [];
 }>();
 
-const titleId = useId();
-const confirmButton = ref<{ focus: () => void } | null>(null);
-
-watch(
-  () => props.open,
-  async (open) => {
-    if (open) {
-      await nextTick();
-      confirmButton.value?.focus();
-    }
-  },
-);
+function handleOpenChange(open: boolean) {
+  if (!open) {
+    emit("cancel");
+  }
+}
 </script>
 
 <template>
-  <div
-    v-if="open"
-    class="ui-confirm"
-    role="dialog"
-    aria-modal="true"
-    tabindex="-1"
-    :aria-labelledby="titleId"
-    @keydown.esc="emit('cancel')"
-  >
-    <div class="ui-confirm__panel">
-      <span class="tape" aria-hidden="true"></span>
-      <p class="ui-confirm__eyebrow">确认操作</p>
-      <h2 :id="titleId" class="ui-confirm__title">{{ title }}</h2>
-      <p v-if="message" class="ui-confirm__message">{{ message }}</p>
-      <div v-if="$slots.default" class="ui-confirm__body">
+  <AlertDialogRoot :open="open" @update:open="handleOpenChange">
+    <AlertDialogOverlay class="confirm-dialog__overlay" />
+    <AlertDialogContent
+      class="confirm-dialog ui-confirm"
+      data-supermouse-ignore
+      aria-modal="true"
+      @keydown.esc.stop.prevent="emit('cancel')"
+    >
+      <p class="confirm-dialog__eyebrow">CONFIRM / 操作确认</p>
+      <AlertDialogTitle class="confirm-dialog__title ui-confirm__title">
+        {{ title }}
+      </AlertDialogTitle>
+      <AlertDialogDescription v-if="message" class="confirm-dialog__message">
+        {{ message }}
+      </AlertDialogDescription>
+      <div v-if="$slots.default" class="confirm-dialog__body ui-confirm__body">
         <slot />
       </div>
-      <div class="ui-confirm__actions">
-        <UiButton variant="secondary" :disabled="busy" @click="emit('cancel')">
-          {{ cancelText }}
-        </UiButton>
-        <UiButton ref="confirmButton" :loading="busy" @click="emit('confirm')">
+
+      <div class="confirm-dialog__actions">
+        <AlertDialogCancel as-child>
+          <UiButton variant="secondary" :disabled="busy">
+            {{ cancelText }}
+          </UiButton>
+        </AlertDialogCancel>
+        <UiButton :loading="busy" @click="emit('confirm')">
           {{ confirmText }}
         </UiButton>
       </div>
-    </div>
-  </div>
+    </AlertDialogContent>
+  </AlertDialogRoot>
 </template>
 
 <style scoped>
-.ui-confirm {
+.confirm-dialog__overlay {
   position: fixed;
   inset: 0;
-  z-index: 20;
-  display: grid;
-  place-items: center;
-  padding: var(--space-4);
+  z-index: 9000;
   background: var(--color-overlay);
+  backdrop-filter: blur(5px);
+  animation: confirm-fade-in 180ms ease-out;
 }
 
-.ui-confirm__panel {
-  position: relative;
-  width: min(100%, 24rem);
-  padding: var(--space-6) var(--space-5) var(--space-5);
+.confirm-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 9001;
+  width: min(calc(100vw - 4rem), 28rem);
+  padding: 2rem;
   background: var(--color-surface);
   border: var(--border-line);
-  border-radius: var(--radius-card);
+  border-radius: var(--radius-panel);
   box-shadow: var(--shadow-overlay);
-  animation: ui-confirm-in var(--motion-enter);
+  transform: translate(-50%, -50%);
+  animation: confirm-dialog-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.ui-confirm__eyebrow {
-  margin: 0 0 var(--space-2);
-  color: var(--color-subtle);
+.confirm-dialog__eyebrow {
+  margin: 0 0 0.75rem;
+  color: var(--color-leaf);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-label);
+  font-weight: 600;
+  letter-spacing: 0.1em;
 }
 
-.ui-confirm__title {
+.confirm-dialog__title {
   margin: 0;
   color: var(--color-ink);
-  font-family: var(--font-kai);
-  font-size: var(--font-size-title);
-  font-weight: var(--font-weight-regular);
-  letter-spacing: var(--tracking-display);
-  line-height: var(--line-height-title);
+  font-family: var(--font-display);
+  font-size: var(--font-size-subheading);
+  font-weight: 600;
+  line-height: 1.25;
 }
 
-.ui-confirm__message {
-  margin: var(--space-3) 0 0;
+.confirm-dialog__message,
+.confirm-dialog__body {
+  margin: 0.75rem 0 0;
   color: var(--color-subtle);
   font-size: var(--font-size-small);
   line-height: var(--line-height-body);
 }
 
-.ui-confirm__body {
-  margin-top: var(--space-3);
-  color: var(--color-subtle);
-  font-size: var(--font-size-small);
-}
-
-.ui-confirm__actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-2);
-  margin-top: var(--space-5);
-  padding-top: var(--space-4);
+.confirm-dialog__actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1.25rem;
   border-top: var(--border-line);
 }
 
-@keyframes ui-confirm-in {
+@keyframes confirm-fade-in {
   from {
     opacity: 0;
-    transform: translateY(4px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 
-@media (min-width: 48rem) {
-  .ui-confirm__actions {
-    grid-template-columns: auto auto;
-    justify-content: end;
+@keyframes confirm-dialog-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.97);
   }
 }
 </style>

@@ -39,9 +39,11 @@ defineProps<{
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-4);
-  background: var(--color-surface);
-  border: var(--border-dashed);
+  padding: 1rem 0;
+  background: transparent;
+  border: 0;
+  border-top: var(--border-line);
+  border-bottom: var(--border-line);
   border-radius: var(--radius-card);
 }
 
@@ -53,7 +55,8 @@ defineProps<{
 }
 
 .ui-streak__title {
-  font-family: var(--font-kai);
+  font-family: var(--font-sans);
+  font-weight: 600;
   font-size: var(--font-size-body);
 }
 
@@ -78,15 +81,15 @@ defineProps<{
   aspect-ratio: 1;
   color: var(--color-subtle);
   font-size: var(--font-size-label);
-  border: var(--border-line);
-  border-radius: var(--radius-sticker);
+  border: 1px solid transparent;
+  border-radius: 50%;
 }
 
 .ui-streak__cell--done {
   color: var(--color-leaf);
-  background: var(--color-leaf-wash);
-  border-color: var(--color-tape-green);
-  animation: ui-streak-stamp var(--motion-sticker);
+  background: var(--color-citron);
+  border-color: var(--color-citron);
+  animation: ui-streak-in var(--motion-hover);
 }
 
 .ui-streak__cell--today {
@@ -95,17 +98,10 @@ defineProps<{
   font-weight: var(--font-weight-semibold);
 }
 
-@keyframes ui-streak-stamp {
-  0% {
-    scale: 1.2;
-    rotate: -6deg;
+@keyframes ui-streak-in {
+  from {
     opacity: 0.4;
-  }
-
-  100% {
-    scale: 1;
-    rotate: 0deg;
-    opacity: 1;
+    transform: translateY(-3px) scale(0.92);
   }
 }
 </style>

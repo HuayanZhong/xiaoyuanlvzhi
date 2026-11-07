@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_API_BASE_URL,
+  API_PREFIX,
   resolveApiBaseUrl,
+  resolveSpringApiV1Target,
   resolveSpringApiTarget,
 } from "../../../../shared/utils/api";
 
@@ -20,6 +22,16 @@ describe("web API base", () => {
     expect(
       resolveSpringApiTarget("http://localhost:8080", "v1/auth/login"),
     ).toBe("http://localhost:8080/api/v1/auth/login");
+  });
+
+  it("maps the v1 Nitro wildcard without duplicating the prefix", () => {
+    expect(API_PREFIX).toBe("/api/v1");
+    expect(resolveSpringApiV1Target("http://localhost:8080/", "/auth/me")).toBe(
+      "http://localhost:8080/api/v1/auth/me",
+    );
+    expect(resolveSpringApiV1Target("http://localhost:8080", "")).toBe(
+      "http://localhost:8080/api/v1",
+    );
   });
 
   it("normalizes slashes and an empty catch-all", () => {

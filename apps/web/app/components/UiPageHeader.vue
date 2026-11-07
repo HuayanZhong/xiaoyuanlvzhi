@@ -12,7 +12,6 @@ defineProps<{
     <div class="ui-page-header__body">
       <p v-if="eyebrow" class="ui-page-header__eyebrow">{{ eyebrow }}</p>
       <h1 class="ui-page-header__title">{{ title }}</h1>
-      <span class="squig" aria-hidden="true" />
       <p v-if="subtitle" class="ui-page-header__subtitle">{{ subtitle }}</p>
     </div>
 
@@ -31,38 +30,48 @@ defineProps<{
 .ui-page-header {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: 1.5rem;
   align-items: flex-start;
-  padding: 0 0 var(--space-5);
+  padding: 4.5rem 0 3.75rem;
+  border-bottom: var(--border-line);
 }
 
 .ui-page-header__body {
+  position: relative;
   min-width: 0;
 }
 
 .ui-page-header__eyebrow {
-  margin: 0 0 var(--space-2);
-  color: var(--color-subtle);
+  margin: 0 0 0.875rem;
+  color: var(--color-leaf);
+  font-family: var(--font-journal);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-label);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-journal);
 }
 
 .ui-page-header__title {
+  max-width: 13ch;
   margin: 0;
   color: var(--color-ink);
-  font-family: var(--font-kai);
+  font-family: var(--font-display);
   font-size: var(--font-size-display);
-  font-weight: var(--font-weight-regular);
+  font-weight: var(--font-weight-display);
   letter-spacing: var(--tracking-display);
-  line-height: var(--line-height-display);
+  line-height: 1.04;
   overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.ui-page-header .squig {
+  display: none;
 }
 
 .ui-page-header__subtitle {
-  max-width: var(--layout-reading-width);
-  margin: var(--space-2) 0 0;
+  max-width: 38rem;
+  margin: 1rem 0 0;
   color: var(--color-subtle);
-  font-size: var(--font-size-small);
+  font-size: var(--font-size-body);
   line-height: var(--line-height-body);
 }
 
@@ -76,23 +85,38 @@ defineProps<{
 .ui-page-header__meta {
   margin: 0;
   color: var(--color-subtle);
+  font-family: var(--font-journal);
   font-size: var(--font-size-label);
-  letter-spacing: var(--tracking-label);
+  letter-spacing: var(--tracking-journal);
 }
 
 @media (min-width: 48rem) {
   .ui-page-header {
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(10rem, auto);
     align-items: flex-end;
-    justify-content: space-between;
-    gap: var(--space-6);
+    gap: 3rem;
+  }
+
+  .ui-page-header__body {
+    padding-left: 1.75rem;
+  }
+
+  .ui-page-header__body::before {
+    position: absolute;
+    top: 0.3rem;
+    bottom: 0.35rem;
+    left: 0;
+    width: 1px;
+    background: color-mix(in srgb, var(--color-line-strong) 56%, transparent);
+    content: "";
   }
 
   .ui-page-header__aside {
     flex-direction: column;
     flex: none;
     align-items: flex-end;
-    padding-bottom: var(--space-1);
+    padding-bottom: 0.3rem;
   }
 
   .ui-page-header__meta {

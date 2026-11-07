@@ -262,8 +262,9 @@ async function submit() {
 <template>
   <section class="register-page">
     <header class="auth-page__head">
-      <h2 class="auth-page__heading">注册</h2>
-      <p class="auth-page__sub">使用 QQ 邮箱验证后创建学生账号</p>
+      <p class="register-page__eyebrow">CREATE YOUR JOURNAL</p>
+      <h2 class="auth-page__heading">创建植物档案</h2>
+      <p class="auth-page__sub">使用 QQ 邮箱完成验证，几步即可开始。</p>
     </header>
 
     <UiAlert v-if="formError" tone="error">{{ formError }}</UiAlert>
@@ -383,7 +384,16 @@ async function submit() {
 .register-page {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: 1.25rem;
+}
+
+.register-page__eyebrow {
+  margin: 0;
+  color: var(--color-leaf);
+  font-family: var(--font-journal);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-journal);
 }
 
 .auth-page__head {
@@ -394,11 +404,11 @@ async function submit() {
 
 .auth-page__heading {
   margin: 0;
-  font-family: var(--font-kai);
-  font-size: var(--font-size-title);
-  font-weight: var(--font-weight-regular);
+  font-family: var(--font-display);
+  font-size: var(--font-size-auth-heading);
+  font-weight: var(--font-weight-display);
   letter-spacing: var(--tracking-display);
-  line-height: var(--line-height-title);
+  line-height: 1.04;
 }
 
 .auth-page__sub {
@@ -427,9 +437,9 @@ async function submit() {
 .register-page__legend {
   padding: 0;
   color: var(--color-ink);
-  font-family: var(--font-kai);
+  font-family: var(--font-display);
   font-size: var(--font-size-title);
-  font-weight: var(--font-weight-regular);
+  font-weight: var(--font-weight-display);
   letter-spacing: var(--tracking-display);
 }
 
@@ -450,7 +460,7 @@ async function submit() {
   align-items: center;
   min-height: var(--touch-target);
   padding: 0 var(--space-1);
-  color: var(--color-ink);
+  color: var(--color-leaf);
   font-weight: var(--font-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 3px;

@@ -182,7 +182,6 @@ function load() {
           :key="reward.id"
           class="rewards-page__card"
         >
-          <span class="tape" aria-hidden="true"></span>
           <UiFigure
             v-if="coverId(reward)"
             class="rewards-page__cover"

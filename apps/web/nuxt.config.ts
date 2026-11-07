@@ -1,21 +1,22 @@
 import { env } from "./config/env";
-import { resolveApiBaseUrl } from "./shared/utils/api";
 
 export default defineNuxtConfig({
   compatibilityDate: "2026-10-27",
+  devtools: { enabled: false },
+  modules: ["motion-v/nuxt"],
   devServer: {
     port: env.WEB_PORT,
   },
   app: {
     pageTransition: { name: "page" },
     head: {
-      title: "校园绿植 · 学生端",
+      title: "一株 · 植物成长档案",
       htmlAttrs: { lang: "zh-CN" },
       meta: [
         {
           name: "description",
           content:
-            "校园绿植领养与环保激励系统学生端：领养绿植、养护打卡、参与环保任务、积累积分并兑换奖励。",
+            "一株：领养绿植、记录养护、参与环保行动，让每一次照料都有迹可循。",
         },
       ],
       script: [
@@ -23,20 +24,33 @@ export default defineNuxtConfig({
           key: "theme-init",
           tagPosition: "head",
           innerHTML:
-            '(function(){try{var stored=localStorage.getItem("student-theme");var theme=stored==="dark"||stored==="light"?stored:(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.dataset.theme=theme;}catch(e){}})();',
+            '(function(){try{var stored=localStorage.getItem("student-theme");var theme=stored==="dark"||stored==="light"?stored:"light";document.documentElement.dataset.theme=theme;}catch(e){document.documentElement.dataset.theme="light";}})();',
         },
       ],
     },
   },
   css: [
+    "~/assets/css/fonts.css",
+    "@fontsource-variable/noto-serif-sc/index.css",
+    "@fontsource-variable/noto-sans-sc/index.css",
+    "@fontsource-variable/fraunces/index.css",
     "~/assets/css/tokens.css",
     "~/assets/css/base.css",
     "~/assets/css/forms.css",
   ],
   runtimeConfig: {
     springApiOrigin: env.SPRING_API_ORIGIN,
-    public: {
-      apiBaseUrl: resolveApiBaseUrl(env.API_BASE_URL),
+    sessionCookieSecure: process.env.NODE_ENV === "production",
+  },
+  vite: {
+    optimizeDeps: {
+      include: [
+        "@supermousejs/core",
+        "@supermousejs/dot",
+        "@supermousejs/ring",
+        "lucide-vue-next",
+        "reka-ui",
+      ],
     },
   },
 });

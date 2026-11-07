@@ -1,156 +1,213 @@
 :root {
   color-scheme: light;
 
-  /* Palette: raw values only live here. Cream paper, leaf green, one blush. */
-  --palette-paper: #fbf7ee;
-  --palette-surface: #ffffff;
-  --palette-ink: #3b3830;
-  --palette-subtle: #6f6a5e;
-  --palette-leaf: #4f7a36;
-  --palette-leaf-wash: #edf3e0;
-  --palette-soil: #8a6b52;
-  --palette-sticker: #f2c14e;
-  --palette-blush: #b34a33;
-  --palette-blush-wash: #fbeadf;
-  --palette-line: #e5dcc8;
-  --palette-line-strong: #978867;
-  --palette-ink-wash: #f1ebdc;
-  --palette-on-leaf: #ffffff;
-  --palette-on-sticker: #6b4d0e;
-  --palette-overlay: rgb(59 56 48 / 40%);
-  --palette-shadow-paper: rgb(59 56 48 / 8%);
-  --palette-shadow-overlay: rgb(59 56 48 / 18%);
-  --palette-tape-yellow: #f2c14e;
-  --palette-tape-green: #b9ce9a;
-  --palette-tape-coral: #efa48f;
+  --palette-paper: #f2f4ee;
+  --palette-paper-deep: #e9ede5;
+  --palette-surface: #fcfdf9;
+  --palette-surface-raised: #ffffff;
+  --palette-surface-muted: #e6ebe3;
+  --palette-ink: #102019;
+  --palette-subtle: #5e7464;
+  --palette-leaf: #173d2b;
+  --palette-leaf-soft: #2b5a40;
+  --palette-leaf-wash: #dfe8df;
+  --palette-sage: #cfdccb;
+  --palette-citron: #d8e77c;
+  --palette-clay: #c8664b;
+  --palette-blush: #a94e36;
+  --palette-soil: #78685a;
+  --palette-sticker: #d8e77c;
+  --palette-on-sticker: #102019;
+  --palette-clay-wash: #f4e4df;
+  --palette-line: #d7ddd4;
+  --palette-line-strong: #87968b;
+  --palette-white: #ffffff;
+  --palette-on-leaf: #f9fbf5;
+  --palette-overlay: rgb(12 24 17 / 62%);
+  --palette-shadow: rgb(16 32 25 / 7%);
+  --palette-shadow-strong: rgb(8 20 13 / 24%);
 
-  /* Semantic colors: components consume these. */
   --color-paper: var(--palette-paper);
+  --color-paper-deep: var(--palette-paper-deep);
   --color-surface: var(--palette-surface);
+  --color-surface-raised: var(--palette-surface-raised);
+  --color-surface-muted: var(--palette-surface-muted);
   --color-ink: var(--palette-ink);
   --color-subtle: var(--palette-subtle);
   --color-leaf: var(--palette-leaf);
+  --color-leaf-soft: var(--palette-leaf-soft);
+  --color-deep-pine: #173d2b;
+  --color-deep-pine-soft: #234b35;
+  --color-on-deep-pine: #f9fbf5;
   --color-leaf-wash: var(--palette-leaf-wash);
+  --color-sage: var(--palette-sage);
   --color-soil: var(--palette-soil);
-  --color-sticker: var(--palette-sticker);
-  --color-blush: var(--palette-blush);
-  --color-blush-wash: var(--palette-blush-wash);
+  --color-citron: var(--palette-citron);
+  --color-clay: var(--palette-clay);
+  --color-clay-wash: var(--palette-clay-wash);
   --color-line: var(--palette-line);
   --color-line-strong: var(--palette-line-strong);
-  --color-ink-wash: var(--palette-ink-wash);
   --color-on-leaf: var(--palette-on-leaf);
-  --color-on-sticker: var(--palette-on-sticker);
   --color-overlay: var(--palette-overlay);
-  --color-focus: var(--color-leaf);
-  --color-tape-yellow: var(--palette-tape-yellow);
-  --color-tape-green: var(--palette-tape-green);
-  --color-tape-coral: var(--palette-tape-coral);
+  --color-focus: var(--palette-leaf);
+  --color-focus-halo: rgb(23 61 43 / 16%);
+  --color-shadow: var(--palette-shadow);
+  --color-shadow-strong: var(--palette-shadow-strong);
 
-  /* Paper texture: dots only on the page layer, never on card surfaces. */
-  --texture-paper: radial-gradient(
-    circle,
-    var(--color-line) 1px,
-    transparent 1.2px
-  );
-  --texture-paper-size: 22px 22px;
+  /* 兼容仍由业务页面使用的语义别名。 */
+  --color-on-sage: var(--color-ink);
+  --color-on-forest: var(--palette-on-leaf);
+  --color-forest: var(--palette-leaf);
+  --color-forest-soft: var(--palette-leaf-soft);
+  --color-ink-wash: var(--palette-surface-muted);
+  --color-blush: var(--palette-clay);
+  --color-blush-wash: var(--palette-clay-wash);
+  --color-gold: var(--palette-citron);
+  --color-sticker: var(--palette-citron);
+  --color-on-sticker: var(--palette-ink);
 
-  /* Space: 4px base. */
+  --texture-page: linear-gradient(180deg, #f6f7f3 0%, var(--color-paper) 54%);
+  --texture-paper: var(--color-surface);
+  --texture-paper-size: auto;
+
+  --font-display:
+    "LXGW WenKai", "Noto Serif SC Variable", "Songti SC", "STSong", serif;
+  --font-serif:
+    "Noto Serif SC Variable", "Songti SC", "STSong", "SimSun", serif;
+  --font-sans:
+    "Noto Sans SC Variable", "PingFang SC", "Microsoft YaHei UI",
+    "Microsoft YaHei", sans-serif;
+  --font-number: "Fraunces Variable", "Iowan Old Style", serif;
+  --font-journal:
+    "Fraunces Variable", "Noto Sans SC Variable", "PingFang SC", sans-serif;
+  --font-kai: var(--font-display);
+
+  --font-size-auth-title: 4.25rem;
+  --font-size-auth-heading: 3rem;
+  --font-size-hero: 4.25rem;
+  --font-size-display: 3.5rem;
+  --font-size-section: 2.25rem;
+  --font-size-feature: 2.75rem;
+  --font-size-subheading: 2rem;
+  --font-size-logo: 1.75rem;
+  --font-size-item: 1.25rem;
+  --font-size-caption: 0.6875rem;
+  --font-size-metric: 5rem;
+  --font-size-number-xl: 6rem;
+  --font-size-number-large: 2.25rem;
+  --font-size-title: 1.5rem;
+  --font-size-body: 1rem;
+  --font-size-small: 0.875rem;
+  --font-size-label: 0.75rem;
+  --font-size-reading: 3.25rem;
+  --font-size-balance: 6rem;
+  --line-height-display: 1.12;
+  --line-height-title: 1.35;
+  --line-height-body: 1.75;
+  --line-height-small: 1.55;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-display: 500;
+  --tracking-display: 0;
+  --tracking-label: 0.08em;
+  --tracking-journal: 0.1em;
+
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
   --space-4: 1rem;
   --space-5: 1.5rem;
   --space-6: 2rem;
-  --space-7: 3rem;
-  --space-8: 4rem;
-  --space-9: 6rem;
-  --space-gutter: clamp(1rem, 4vw, 2.5rem);
+  --space-7: 2.5rem;
+  --space-8: 3.5rem;
+  --space-9: 5rem;
+  --space-10: 6rem;
+  --space-gutter: 3.5rem;
+  --space-section: 6rem;
 
-  /* Radius: paper cards, controls and pills. */
   --radius-none: 0;
-  --radius-card: 1rem;
-  --radius-control: 0.75rem;
+  --radius-card: 0.5rem;
+  --radius-panel: 0.75rem;
+  --radius-control: 0.375rem;
   --radius-chip: 999px;
-  --radius-sticker: 0.625rem;
+  --radius-sticker: 0.25rem;
 
-  /* Type: Kaiti for titles, system sans for everything else. */
-  --font-kai:
-    "Kaiti SC", "STKaiti", "KaiTi", "楷体", "Songti SC", "SimSun", serif;
-  --font-sans:
-    system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei",
-    sans-serif;
-  --font-size-display: clamp(1.75rem, 3vw, 2.25rem);
-  --font-size-title: 1.25rem;
-  --font-size-body: 0.9375rem;
-  --font-size-small: 0.8125rem;
-  --font-size-label: 0.75rem;
-  --font-size-reading: clamp(1.5rem, 2.5vw, 2rem);
-  --line-height-display: 1.25;
-  --line-height-title: 1.3;
-  --line-height-body: 1.7;
-  --line-height-small: 1.6;
-  --font-weight-regular: 400;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
-  --tracking-display: 0.01em;
-  --tracking-label: 0.04em;
-
-  /* Borders: solid lines separate, dashed lines invite writing. */
   --border-line: 1px solid var(--color-line);
   --border-strong: 1px solid var(--color-line-strong);
-  --border-dashed: 1.5px dashed var(--color-line-strong);
-  --border-blush: 1px solid var(--color-blush);
-  --border-blush-strong: 2px solid var(--color-blush);
+  --border-dashed: 1px dashed var(--color-line-strong);
   --border-focus: 2px solid var(--color-focus);
 
-  /* Elevation: paper cards sit flat, overlays lift. */
   --shadow-none: none;
-  --shadow-paper: 0 2px 0 var(--palette-shadow-paper);
-  --shadow-overlay: 0 8px 24px var(--palette-shadow-overlay);
+  --shadow-paper: 0 1px 0 var(--color-shadow);
+  --shadow-panel:
+    0 1px 0 var(--color-shadow), 0 22px 60px -48px var(--color-shadow-strong);
+  --shadow-overlay: 0 28px 80px -28px var(--color-shadow-strong);
 
-  /* Motion: explain state changes only. */
-  --motion-press: 120ms ease-out;
-  --motion-color: 160ms ease-out;
-  --motion-enter: 160ms ease-out;
-  --motion-exit: 120ms ease-out;
-  --motion-sticker: 240ms cubic-bezier(0.2, 0.8, 0.3, 1.2);
+  --motion-press: 120ms cubic-bezier(0.2, 0, 0, 1);
+  --motion-color: 160ms cubic-bezier(0.2, 0, 0, 1);
+  --motion-hover: 180ms cubic-bezier(0.2, 0, 0, 1);
+  --motion-enter: 320ms cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-exit: 140ms cubic-bezier(0.4, 0, 1, 1);
+  --motion-page: 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-image: 420ms cubic-bezier(0.16, 1, 0.3, 1);
   --motion-spin: 700ms linear infinite;
-  --motion-zero: 0ms;
 
-  /* Layout: desktop sheet with mobile fallback. */
-  --layout-max-width: 70rem;
-  --layout-reading-width: 42rem;
-  --masthead-height: 4rem;
-  --masthead-height-compact: 3.5rem;
-  --nav-height: 4rem;
-  --touch-target: 2.75rem;
+  --layout-min-width: 73.75rem;
+  --layout-max-width: 83rem;
+  --layout-reading-width: 40rem;
+  --masthead-height: 4.5rem;
   --control-height: 3rem;
-  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-area-top: env(safe-area-inset-top, 0px);
+  --touch-target: 2.75rem;
+
+  --cursor-dot: var(--color-leaf);
+  --cursor-ring: var(--color-leaf);
 }
 
-/* Dark theme: night-light journal. Same semantic names, new palette. */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --palette-paper: #26241e;
-  --palette-surface: #2e2b24;
-  --palette-ink: #eae4d4;
-  --palette-subtle: #a39d8d;
-  --palette-leaf: #9cc06f;
-  --palette-leaf-wash: #333a28;
-  --palette-soil: #b39a7e;
-  --palette-sticker: #e3b84e;
-  --palette-blush: #e08a72;
-  --palette-blush-wash: #3a2b24;
-  --palette-line: #3e3a30;
-  --palette-line-strong: #8a8270;
-  --palette-ink-wash: #34312a;
-  --palette-on-leaf: #1f2a18;
-  --palette-on-sticker: #3a2c10;
-  --palette-overlay: rgb(0 0 0 / 62%);
-  --palette-shadow-paper: rgb(0 0 0 / 30%);
-  --palette-shadow-overlay: rgb(0 0 0 / 52%);
-  --palette-tape-yellow: #c9a03f;
-  --palette-tape-green: #8fa873;
-  --palette-tape-coral: #c97f6d;
+
+  --palette-paper: #0b120e;
+  --palette-paper-deep: #070d09;
+  --palette-surface: #131e17;
+  --palette-surface-raised: #19261e;
+  --palette-surface-muted: #1e2d23;
+  --palette-ink: #f4f6ef;
+  --palette-subtle: #bac5bc;
+  --palette-leaf: #d8e77c;
+  --palette-leaf-soft: #a8c26d;
+  --palette-leaf-wash: #28372a;
+  --palette-sage: #26372a;
+  --palette-citron: #e2ee91;
+  --palette-clay: #df8b72;
+  --palette-blush: #df8b72;
+  --palette-soil: #c1ad94;
+  --palette-sticker: #e2ee91;
+  --palette-on-sticker: #142018;
+  --palette-clay-wash: #3b251f;
+  --palette-line: #34443a;
+  --palette-line-strong: #87998b;
+  --palette-white: #f7f8f3;
+  --palette-on-leaf: #142018;
+  --palette-overlay: rgb(0 0 0 / 72%);
+  --palette-shadow: rgb(0 0 0 / 24%);
+  --palette-shadow-strong: rgb(0 0 0 / 52%);
+
+  --texture-page: linear-gradient(180deg, #101812 0%, var(--color-paper) 58%);
+  --color-focus-halo: rgb(216 231 124 / 18%);
+  --cursor-dot: var(--color-citron);
+  --cursor-ring: var(--color-citron);
+  --color-deep-pine: #0b2116;
+  --color-deep-pine-soft: #12301f;
+}
+
+@media (max-width: 81rem) {
+  :root {
+    --space-gutter: 2.5rem;
+    --space-section: 5rem;
+    --font-size-hero: 3.75rem;
+    --font-size-display: 3.25rem;
+    --font-size-auth-title: 3.75rem;
+  }
 }

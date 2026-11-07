@@ -209,6 +209,16 @@ describe("home overview", () => {
     expect(tasks.map((item) => item.id)).toEqual([1, 5, 6]);
   });
 
+  it("hides task records that contain validation-only wording", () => {
+    const tasks = selectJoinableTasks([
+      task({ id: 1, title: "首页验收任务 1102" }),
+      task({ id: 2, title: "旧书漂流计划" }),
+      task({ id: 3, title: "普通任务", details: "e2e 测试数据" }),
+    ]);
+
+    expect(tasks.map((item) => item.id)).toEqual([2]);
+  });
+
   it("selects at most three due plants", () => {
     const plants = selectDuePlants([
       plant({ plantId: 1 }),

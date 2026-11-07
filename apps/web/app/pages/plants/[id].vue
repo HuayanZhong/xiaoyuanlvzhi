@@ -7,6 +7,7 @@ import {
 } from "~/utils/adoption-api";
 import { getSpecies, type PlantSpecies } from "~/utils/plant-api";
 import { difficultyLabel, speciesCode } from "~/utils/plant-display";
+import { fallbackPlantImage } from "~/utils/plant-media";
 
 const route = useRoute();
 const speciesId = computed(() => readId(route.params.id));
@@ -153,8 +154,10 @@ function load() {
       <div class="plant-detail__sheet">
         <UiFigure
           :file-id="species.coverFileId"
+          :fallback-src="fallbackPlantImage(species.name, species.id)"
           :alt="`${species.name}封面`"
           ratio="wide"
+          priority
           :caption="`编号 ${speciesCode(species.id)}`"
         />
 

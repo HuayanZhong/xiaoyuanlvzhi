@@ -201,7 +201,7 @@ describe("rewards page", () => {
 
     await clickButton(wrapper, "兑换");
 
-    const dialog = wrapper.get('[role="dialog"]');
+    const dialog = wrapper.get('[role="alertdialog"]');
     expect(dialog.text()).toContain("环保帆布袋");
     expect(dialog.text()).toContain("扣除积分");
     expect(dialog.text()).toContain("50 分");

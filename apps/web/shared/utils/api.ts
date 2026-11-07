@@ -1,5 +1,15 @@
+/** 学生端唯一允许使用的同源 API 前缀。 */
+export const API_PREFIX = "/api/v1";
+
 /** 学生端 API base 的默认值，与 Spring 的 `/api/v1` 对齐。 */
-export const DEFAULT_API_BASE_URL = "/api/v1/";
+export const DEFAULT_API_BASE_URL = `${API_PREFIX}/`;
+
+/** Spring 的统一响应信封。 */
+export type SpringEnvelope<T> = {
+  success: boolean;
+  data: T | null;
+  error: { code: string; message: string } | null;
+};
 
 /**
  * 解析 web 的 API base URL；未配置或为空白时回退到默认值。
@@ -23,11 +33,29 @@ export function resolveSpringApiTarget(
   path: string,
   search = "",
 ): string {
+  return resolveSpringTarget(origin, "/api", path, search);
+}
+
+/** 解析 `/api/v1/*` Nitro 路由对应的 Spring 目标地址。 */
+export function resolveSpringApiV1Target(
+  origin: string,
+  path: string,
+  search = "",
+): string {
+  return resolveSpringTarget(origin, API_PREFIX, path, search);
+}
+
+function resolveSpringTarget(
+  origin: string,
+  prefix: string,
+  path: string,
+  search: string,
+): string {
   const targetOrigin = origin.replace(/\/+$/, "");
   const targetPath = path.replace(/^\/+/, "");
   const target = targetPath
-    ? `${targetOrigin}/api/${targetPath}`
-    : `${targetOrigin}/api`;
+    ? `${targetOrigin}${prefix}/${targetPath}`
+    : `${targetOrigin}${prefix}`;
 
   if (!search) {
     return target;

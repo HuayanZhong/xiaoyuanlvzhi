@@ -28,11 +28,11 @@ defineProps<{
 <style scoped>
 .ui-tag-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-3);
+  gap: var(--space-3);
   align-items: baseline;
   min-width: 0;
-  padding: var(--space-3) 0;
+  min-height: 3.25rem;
+  padding: 0.875rem 0;
   border-bottom: var(--border-line);
 }
 
@@ -41,7 +41,7 @@ defineProps<{
   color: var(--color-subtle);
   font-size: var(--font-size-label);
   font-weight: var(--font-weight-semibold);
-  letter-spacing: var(--tracking-label);
+  letter-spacing: 0.04em;
   white-space: nowrap;
 }
 
@@ -49,12 +49,15 @@ defineProps<{
   flex: 1;
   min-width: 0;
   color: var(--color-ink);
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-small);
+  transition: color var(--motion-color);
   overflow-wrap: anywhere;
   text-align: right;
 }
 
 .ui-tag-row__value--mono {
+  font-family: var(--font-number);
+  font-size: var(--font-size-body);
   font-variant-numeric: tabular-nums;
 }
 
@@ -71,12 +74,5 @@ defineProps<{
   font-size: var(--font-size-label);
   letter-spacing: var(--tracking-label);
   white-space: nowrap;
-}
-
-@media (max-width: 47.99rem) {
-  .ui-tag-row__meta {
-    flex-basis: 100%;
-    justify-content: flex-end;
-  }
 }
 </style>

@@ -26,6 +26,7 @@ defineExpose({
 <template>
   <button
     ref="button"
+    data-cursor-hover
     :type="type"
     :class="[
       'ui-button',
@@ -36,25 +37,27 @@ defineExpose({
     :aria-busy="loading || undefined"
   >
     <span v-if="loading" class="ui-button__spinner" aria-hidden="true" />
-    <slot />
+    <span class="ui-button__content"><slot /></span>
   </button>
 </template>
 
 <style scoped>
 .ui-button {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
   min-height: var(--control-height);
-  padding: 0 var(--space-5);
+  overflow: hidden;
+  padding: 0 1.4rem;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: var(--radius-chip);
+  border-radius: var(--radius-control);
   color: var(--color-ink);
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-small);
   font-weight: var(--font-weight-semibold);
-  letter-spacing: var(--tracking-display);
+  letter-spacing: 0;
   line-height: var(--line-height-title);
   transition:
     background-color var(--motion-color),
@@ -63,37 +66,59 @@ defineExpose({
     transform var(--motion-press);
 }
 
+.ui-button::before {
+  position: absolute;
+  inset: 0;
+  background: var(--color-citron);
+  content: "";
+  transform: translateX(-102%);
+  transition: transform var(--motion-hover);
+}
+
+.ui-button__content {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 .ui-button:not(:disabled):active {
-  transform: scale(0.98);
+  transform: scale(0.975);
 }
 
 .ui-button--primary {
   background: var(--color-leaf);
   border-color: var(--color-leaf);
   color: var(--color-on-leaf);
+  box-shadow: none;
 }
 
 .ui-button--primary:not(:disabled):hover {
-  background: color-mix(in srgb, var(--color-leaf) 85%, var(--color-ink));
-  border-color: color-mix(in srgb, var(--color-leaf) 85%, var(--color-ink));
+  border-color: var(--color-citron);
+  color: var(--palette-ink);
+}
+
+.ui-button--primary:not(:disabled):hover::before {
+  transform: translateX(0);
 }
 
 .ui-button--secondary {
-  background: var(--color-surface);
+  background: transparent;
   border: var(--border-strong);
   color: var(--color-ink);
 }
 
 .ui-button--secondary:not(:disabled):hover {
-  background: var(--color-ink-wash);
-  border-color: var(--color-ink);
+  background: var(--color-surface);
+  border-color: var(--color-leaf);
+  color: var(--color-leaf);
 }
 
 .ui-button--ghost {
-  padding-inline: var(--space-2);
+  padding-inline: var(--space-3);
   color: var(--color-leaf);
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  text-decoration: none;
 }
 
 .ui-button--ghost:not(:disabled):hover {
@@ -103,6 +128,7 @@ defineExpose({
 .ui-button--danger {
   border: 1px solid var(--color-blush);
   color: var(--color-blush);
+  background: var(--color-surface);
 }
 
 .ui-button--danger:not(:disabled):hover {
@@ -122,6 +148,8 @@ defineExpose({
 }
 
 .ui-button__spinner {
+  position: relative;
+  z-index: 1;
   width: var(--space-4);
   height: var(--space-4);
   border: 2px solid currentcolor;

@@ -7,7 +7,6 @@ describe("web env", () => {
     const env = parseWebEnv({});
 
     expect(env.WEB_PORT).toBe(4000);
-    expect(env.API_BASE_URL).toBeUndefined();
     expect(env.SPRING_API_ORIGIN).toBe("http://localhost:8080");
   });
 

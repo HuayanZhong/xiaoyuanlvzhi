@@ -159,9 +159,16 @@ describe("me page", () => {
 
   it("logs out after confirmation and returns to the login page", async () => {
     profileMock.mockResolvedValue(profile());
-    logoutMock.mockResolvedValue(null);
+    logoutMock.mockResolvedValue({ revokeFailed: false });
     const wrapper = await mountSuspended(MePage);
     await flushPromises();
+
+    const logoutButton = wrapper
+      .findAll("button")
+      .find((item) => item.text() === "退出登录");
+
+    expect(logoutButton?.classes()).toContain("me-page__logout-button");
+    expect(logoutButton?.find("svg").exists()).toBe(true);
 
     await openConfirm(wrapper);
     expect(wrapper.text()).toContain("退出后需要重新登录才能查看个人资料");
@@ -172,7 +179,7 @@ describe("me page", () => {
     expect(navigateToMock).toHaveBeenCalledWith("/login");
   });
 
-  it("warns when the server token could not be revoked", async () => {
+  it("warns when the server session could not be revoked", async () => {
     profileMock.mockResolvedValue(profile());
     logoutMock.mockRejectedValue(
       new ApiError("NETWORK_ERROR", "无法连接后端服务，请稍后重试"),
@@ -204,6 +211,36 @@ describe("me page", () => {
     expect(links).toContain("/notifications");
     expect(links).toContain("/feedback");
     expect(wrapper.text()).toContain("2 条未读");
+  });
+
+  it("connects the cursor switch to its visible explanation", async () => {
+    profileMock.mockResolvedValue(profile());
+    const wrapper = await mountSuspended(MePage);
+    await flushPromises();
+
+    const control = wrapper.get('[role="switch"]');
+    const description = wrapper.get("#cursor-effect-help");
+
+    expect(control.attributes("aria-label")).toBe("鼠标指针效果");
+    expect(control.attributes("aria-describedby")).toBe(
+      description.attributes("id"),
+    );
+    expect(description.text()).toContain("精细指针");
+    const initialChecked = control.attributes("aria-checked") === "true";
+
+    expect(control.text()).toBe(initialChecked ? "开" : "关");
+
+    await control.trigger("click");
+    await flushPromises();
+
+    const toggled = wrapper.get('[role="switch"]');
+
+    expect(toggled.attributes("aria-checked")).toBe(
+      initialChecked ? "false" : "true",
+    );
+    expect(toggled.text()).toBe(initialChecked ? "关" : "开");
+
+    await toggled.trigger("click");
   });
 
   it("keeps the profile visible when notifications fail", async () => {

@@ -80,7 +80,6 @@ describe("points page", () => {
     expect(wrapper.text()).toContain("分");
     expect(wrapper.text()).toContain("环保任务");
     expect(wrapper.text()).toContain("+10");
-    expect(wrapper.text()).toContain("记录 7");
     expect(wrapper.text()).toContain("变动后余额 392 分");
     expect(wrapper.text()).toContain("兑换扣减");
     expect(wrapper.text()).toContain("-50");
