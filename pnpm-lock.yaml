@@ -296,10 +296,7 @@ importers:
       '@supermousejs/core':
         specifier: 2.4.3
         version: 2.4.3
-      '@supermousejs/dot':
-        specifier: 2.4.3
-        version: 2.4.3(@supermousejs/core@2.4.3)
-      '@supermousejs/ring':
+      '@supermousejs/pointer':
         specifier: 2.4.3
         version: 2.4.3(@supermousejs/core@2.4.3)
       lucide-vue-next:
@@ -2349,13 +2346,8 @@ packages:
   '@supermousejs/core@2.4.3':
     resolution: {integrity: sha512-7cSvSGbpxD8M1XymJFnJgC0CA24rIvud/O3RUTuhhWxvG1ECsbpQIMqg3QoY2IhUzhqhF7+NKhLPD1EBpFPFgg==}
 
-  '@supermousejs/dot@2.4.3':
-    resolution: {integrity: sha512-5UCyTPJMZHzypQG/8OE2488SLjOqWOG01p3gwaESL3m0Jflvfn5DOR1UnrmqdJ5C/7IBijNlNcyuthZJcxYXPQ==}
-    peerDependencies:
-      '@supermousejs/core': 2.4.3
-
-  '@supermousejs/ring@2.4.3':
-    resolution: {integrity: sha512-CcXA6kyxdpsFStFw9cQ3OtYYyvTNmOOMDJPaRiFFIz3bcPTFTt186u1zV6OnAbKHoDBy6aaY5JZlVu/Ftq/8/A==}
+  '@supermousejs/pointer@2.4.3':
+    resolution: {integrity: sha512-1GDd4iYpn7soVm6eyGsgbNq/1FUo6HXmUKgnTXhU5MqDF4issfhL//nV7mR/L5aopPb4MO1pqlQqVRdeEzSJMg==}
     peerDependencies:
       '@supermousejs/core': 2.4.3
 
@@ -7387,12 +7379,7 @@ snapshots:
 
   '@supermousejs/core@2.4.3': {}
 
-  '@supermousejs/dot@2.4.3(@supermousejs/core@2.4.3)':
-    dependencies:
-      '@supermousejs/core': 2.4.3
-      '@supermousejs/utils': 2.4.3(@supermousejs/core@2.4.3)
-
-  '@supermousejs/ring@2.4.3(@supermousejs/core@2.4.3)':
+  '@supermousejs/pointer@2.4.3(@supermousejs/core@2.4.3)':
     dependencies:
       '@supermousejs/core': 2.4.3
       '@supermousejs/utils': 2.4.3(@supermousejs/core@2.4.3)

@@ -161,8 +161,8 @@
   --control-height: 3rem;
   --touch-target: 2.75rem;
 
-  --cursor-dot: var(--color-leaf);
-  --cursor-ring: var(--color-leaf);
+  --cursor-pointer-fill: #f2f5f8;
+  --cursor-pointer-stroke: #111920;
 }
 
 :root[data-theme="dark"] {
@@ -196,8 +196,6 @@
 
   --texture-page: linear-gradient(180deg, #101812 0%, var(--color-paper) 58%);
   --color-focus-halo: rgb(216 231 124 / 18%);
-  --cursor-dot: var(--color-citron);
-  --cursor-ring: var(--color-citron);
   --color-deep-pine: #0b2116;
   --color-deep-pine-soft: #12301f;
 }

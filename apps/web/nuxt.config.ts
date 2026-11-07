@@ -46,8 +46,7 @@ export default defineNuxtConfig({
     optimizeDeps: {
       include: [
         "@supermousejs/core",
-        "@supermousejs/dot",
-        "@supermousejs/ring",
+        "@supermousejs/pointer",
         "lucide-vue-next",
         "reka-ui",
       ],
